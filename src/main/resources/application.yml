@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: olympus
+
+  datasource:
+    # On utilise les variables d'environnement définies dans le docker-compose, ou on fallback sur localhost pour le dev depuis l'IDE
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/olympus_db}
+    username: ${SPRING_DATASOURCE_USERNAME:olympus_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:olympus_password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update # Met à jour le schéma automatiquement en dev. En prod, utiliser 'validate' avec Flyway.
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Flyway configuration (Désactivé par défaut si ddl-auto est à update, mais prêt pour la prod)
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+
+# Logging
+logging:
+  level:
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE # Affiche les paramètres des requêtes SQL
