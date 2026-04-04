@@ -1,0 +1,24 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.OlympusFront" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/primary_container</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="android:windowBackground">@color/surface</item>
+
+        <!-- Typography -->
+        <item name="fontFamily">@font/manrope</item>
+    </style>
+
+    <style name="Theme.OlympusFront" parent="Base.Theme.OlympusFront" />
+
+    <!-- Custom Styles -->
+    <style name="TextAppearance.Olympus.Display" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="fontFamily">@font/newsreader</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.Olympus.Headline" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="fontFamily">@font/newsreader</item>
+    </style>
+</resources>

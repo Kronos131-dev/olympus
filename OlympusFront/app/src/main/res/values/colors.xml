@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Design System Colors -->
+    <color name="surface">#121414</color>
+    <color name="surface_container_low">#1A1C1C</color>
+    <color name="surface_container_lowest">#0C0F0F</color>
+    <color name="secondary">#E9C349</color>
+    <color name="secondary_container">#AF8D11</color>
+    <color name="on_secondary">#3C2F00</color>
+    <color name="primary_container">#5D3FD3</color>
+    <color name="surface_variant">#333535</color>
+    <color name="outline_variant">#484554</color>
+    <color name="marble_white">#E2E2E2</color>
+</resources>
