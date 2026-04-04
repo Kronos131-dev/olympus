@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Hero Statue Image with Gradient Overlay -->
+        <FrameLayout
+            android:id="@+id/hero_container"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_launcher_background" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:letterSpacing="0.1"
+                    android:text="@string/profile_status"
+                    android:textColor="@color/secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/newsreader"
+                    android:text="@string/profile_name"
+                    android:textColor="@color/marble_white"
+                    android:textSize="48sp"
+                    android:textStyle="bold|italic" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope"
+                            android:text="@string/label_objective"
+                            android:textColor="@color/secondary"
+                            android:textSize="10sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/newsreader"
+                            android:text="@string/value_objective"
+                            android:textColor="@color/marble_white"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope"
+                            android:text="@string/label_activity"
+                            android:textColor="@color/secondary"
+                            android:textSize="10sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/newsreader"
+                            android:text="@string/value_activity"
+                            android:textColor="@color/marble_white"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/edit_biometrics_button"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:backgroundTint="@color/secondary_container"
+                        android:fontFamily="@font/newsreader"
+                        android:text="@string/edit_biometrics"
+                        android:textColor="@color/on_secondary"
+                        android:textSize="12sp"
+                        app:cornerRadius="0dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_meal_shortcut"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:backgroundTint="@color/surface_container_low"
+                        android:fontFamily="@font/newsreader"
+                        android:text="@string/add_meal"
+                        android:textColor="@color/secondary"
+                        android:textSize="12sp"
+                        app:cornerRadius="0dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Biometrics Blocks -->
+        <LinearLayout
+            android:id="@+id/biometrics_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/hero_container">
+
+            <!-- Height -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@color/surface_container_lowest"
+                android:padding="24dp">
+                <ImageView
+                    android:id="@+id/icon_height"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_sort_by_size"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/secondary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="@string/label_height"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp"
+                    app:layout_constraintBottom_toTopOf="@id/height_value_container"
+                    app:layout_constraintStart_toStartOf="parent" />
+                <LinearLayout
+                    android:id="@+id/height_value_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/newsreader"
+                        android:text="@string/value_height"
+                        android:textColor="@color/marble_white"
+                        android:textSize="42sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/manrope"
+                        android:text="@string/unit_cm"
+                        android:textColor="@color/secondary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Weight -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@color/surface_container_low"
+                android:padding="24dp">
+                <ImageView
+                    android:id="@+id/icon_weight"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_save"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/secondary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="@string/label_weight"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp"
+                    app:layout_constraintBottom_toTopOf="@id/weight_value_container"
+                    app:layout_constraintStart_toStartOf="parent" />
+                <LinearLayout
+                    android:id="@+id/weight_value_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/newsreader"
+                        android:text="@string/value_weight"
+                        android:textColor="@color/marble_white"
+                        android:textSize="42sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/manrope"
+                        android:text="@string/unit_kg"
+                        android:textColor="@color/secondary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Body Fat -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@color/surface_container_lowest"
+                android:padding="24dp">
+                <TextView
+                    android:id="@+id/icon_bf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/newsreader"
+                    android:text="@string/unit_percent"
+                    android:textColor="@color/secondary"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="@string/label_bodyfat"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp"
+                    app:layout_constraintBottom_toTopOf="@id/bf_value_container"
+                    app:layout_constraintStart_toStartOf="parent" />
+                <LinearLayout
+                    android:id="@+id/bf_value_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/newsreader"
+                        android:text="@string/value_bodyfat"
+                        android:textColor="@color/marble_white"
+                        android:textSize="42sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/manrope"
+                        android:text="@string/unit_percent"
+                        android:textColor="@color/secondary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+        <!-- Conquest Logs Section -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            app:layout_constraintTop_toBottomOf="@id/biometrics_container">
+
+            <TextView
+                android:id="@+id/logs_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/newsreader"
+                android:text="@string/conquest_logs"
+                android:textColor="@color/marble_white"
+                android:textSize="32sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/view_campaigns"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope"
+                android:text="@string/view_all_campaigns"
+                android:textColor="@color/outline_variant"
+                android:textSize="10sp"
+                android:letterSpacing="0.05"
+                app:layout_constraintBottom_toBottomOf="@id/logs_title"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Progress Cards -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/logs_title">
+
+                <!-- Protein Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/surface_container_low"
+                    app:cardCornerRadius="0dp"
+                    app:strokeWidth="0dp">
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="20dp">
+                        <ProgressBar
+                            android:id="@+id/prog_protein"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:progress="75"
+                            android:progressDrawable="@drawable/ring_progress"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope"
+                            android:text="75%"
+                            android:textColor="@color/marble_white"
+                            android:textSize="12sp"
+                            app:layout_constraintBottom_toBottomOf="@id/prog_protein"
+                            app:layout_constraintEnd_toEndOf="@id/prog_protein"
+                            app:layout_constraintStart_toStartOf="@id/prog_protein"
+                            app:layout_constraintTop_toTopOf="@id/prog_protein" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:orientation="vertical"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/prog_protein"
+                            app:layout_constraintTop_toTopOf="parent">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/manrope"
+                                android:text="@string/label_daily_protein"
+                                android:textColor="@color/secondary"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/newsreader"
+                                android:text="@string/value_daily_protein"
+                                android:textColor="@color/marble_white"
+                                android:textSize="18sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:fontFamily="@font/manrope"
+                                android:text="@string/desc_protein"
+                                android:textColor="@color/outline_variant"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Growth Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/surface_container_low"
+                    app:cardCornerRadius="0dp"
+                    app:strokeWidth="0dp">
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="20dp">
+                        <ProgressBar
+                            android:id="@+id/prog_growth"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:progress="56"
+                            android:progressDrawable="@drawable/ring_progress"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/manrope"
+                            android:text="56%"
+                            android:textColor="@color/marble_white"
+                            android:textSize="12sp"
+                            app:layout_constraintBottom_toBottomOf="@id/prog_growth"
+                            app:layout_constraintEnd_toEndOf="@id/prog_growth"
+                            app:layout_constraintStart_toStartOf="@id/prog_growth"
+                            app:layout_constraintTop_toTopOf="@id/prog_growth" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:orientation="vertical"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/prog_protein"
+                            app:layout_constraintTop_toTopOf="parent">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/manrope"
+                                android:text="@string/label_volume_growth"
+                                android:textColor="@color/secondary"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/newsreader"
+                                android:text="@string/value_volume_growth"
+                                android:textColor="@color/marble_white"
+                                android:textSize="18sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:fontFamily="@font/manrope"
+                                android:text="@string/desc_volume"
+                                android:textColor="@color/outline_variant"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
