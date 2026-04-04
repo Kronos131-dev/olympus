@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+
+  olympus-api:
+    build: .
+    container_name: olympus-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://olympus-db:5432/olympus_db
+      - SPRING_DATASOURCE_USERNAME=olympus_user
+      - SPRING_DATASOURCE_PASSWORD=olympus_password
+    depends_on:
+      - olympus-db
+    restart: always
+
+  olympus-db:
+    image: postgres:16-alpine
+    container_name: olympus-db
+    environment:
+      POSTGRES_USER: olympus_user
+      POSTGRES_PASSWORD: olympus_password
+      POSTGRES_DB: olympus_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  olympus-pgadmin:
+    image: dpage/pgadmin4
+    container_name: olympus-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@olympus.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - olympus-db
+    restart: unless-stopped
+
+volumes:
+  db_data:
