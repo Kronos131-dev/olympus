@@ -28,4 +28,11 @@ public class FoodItemController {
         List<FoodItemResponse> responses = foodItemService.searchFoodItemsByName(query);
         return ResponseEntity.ok(responses);
     }
+
+    // Endpoint pour la recherche textuelle dédiée à CIQUAL
+    @GetMapping("/search/ciqual")
+    public ResponseEntity<List<FoodItemResponse>> searchCiqual(@RequestParam String query) {
+        List<FoodItemResponse> responses = foodItemService.searchCiqualFoods(query);
+        return ResponseEntity.ok(responses);
+    }
 }
