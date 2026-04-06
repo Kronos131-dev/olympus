@@ -9,6 +9,7 @@ import com.kronos.olympus.service.integration.OpenFoodFactsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import com.kronos.olympus.model.enums.FoodSource;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,6 +76,21 @@ public class FoodItemService {
         List<FoodItem> savedResults = foodItemRepository.saveAll(externalResults);
         
         return savedResults.stream()
+                .map(foodItemMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<FoodItemResponse> searchCiqualFoods(String query) {
+        log.info("Recherche textuelle CIQUAL pour : {}", query);
+
+        if (query == null || query.trim().length() < 2) {
+            return List.of(); // On ne cherche rien si on a tapé moins de 2 lettres
+        }
+
+        // On cherche, on limite à 50 résultats, et on mappe vers le DTO de réponse
+        return foodItemRepository.findByNameContainingIgnoreCaseAndSource(query.trim(), FoodSource.CIQUAL)
+                .stream()
+                .limit(50)
                 .map(foodItemMapper::toResponse)
                 .collect(Collectors.toList());
     }
