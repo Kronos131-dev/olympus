@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="24dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/surface_container_low"
+        app:cardCornerRadius="0dp"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/meal_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/newsreader"
+                android:text="Meal Name"
+                android:textColor="@color/marble_white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/meal_calories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/newsreader"
+                android:text="✦ 0 CAL"
+                android:textColor="@color/secondary"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+
+            <!-- Protéines -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="@string/label_protein"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp" />
+                <TextView
+                    android:id="@+id/meal_protein"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/manrope"
+                    android:text="0g"
+                    android:textColor="@color/marble_white"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+            <ProgressBar
+                android:id="@+id/progress_protein"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="4dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@color/primary_container" />
+
+            <!-- Glucides -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="@string/label_carbs"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp" />
+                <TextView
+                    android:id="@+id/meal_carbs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/manrope"
+                    android:text="0g"
+                    android:textColor="@color/marble_white"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+            <ProgressBar
+                android:id="@+id/progress_carbs"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="4dp"
+                android:max="200"
+                android:progress="0"
+                android:progressTint="@color/secondary" />
+
+            <!-- Lipides -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="@string/label_fats"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp" />
+                <TextView
+                    android:id="@+id/meal_fats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/manrope"
+                    android:text="0g"
+                    android:textColor="@color/marble_white"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+            <ProgressBar
+                android:id="@+id/progress_fats"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="4dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="#D81B60" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_consume"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/newsreader"
+                android:text="@string/consume"
+                android:textColor="@color/secondary"
+                android:textStyle="bold"
+                app:cornerRadius="0dp"
+                app:strokeColor="@color/outline_variant" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
