@@ -88,6 +88,79 @@
                 android:layout_marginTop="48dp"
                 android:fontFamily="@font/newsreader"
                 android:letterSpacing="0.1"
+                android:text="IDENTIFIANT DE LÉGION"
+                android:textColor="@color/secondary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/outline_variant"
+                android:alpha="0.2" />
+
+            <!-- Email -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/manrope"
+                android:letterSpacing="0.1"
+                android:text="EMAIL"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_email"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container_lowest"
+                android:fontFamily="@font/newsreader"
+                android:hint="email@imperium.com"
+                android:inputType="textEmailAddress"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/marble_white"
+                android:textColorHint="@color/outline_variant"
+                android:textSize="24sp"
+                android:textStyle="italic" />
+
+            <!-- Mot de passe -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/manrope"
+                android:letterSpacing="0.1"
+                android:text="MOT DE PASSE"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_password"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container_lowest"
+                android:fontFamily="@font/newsreader"
+                android:hint="••••••••"
+                android:inputType="textPassword"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/marble_white"
+                android:textColorHint="@color/outline_variant"
+                android:textSize="24sp"
+                android:textStyle="italic" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:fontFamily="@font/newsreader"
+                android:letterSpacing="0.1"
                 android:text="LE GABARIT"
                 android:textColor="@color/secondary"
                 android:textSize="20sp"
@@ -147,7 +220,7 @@
                 android:background="@color/surface_container_lowest"
                 android:fontFamily="@font/newsreader"
                 android:hint="85"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:paddingHorizontal="16dp"
                 android:textColor="@color/marble_white"
                 android:textColorHint="@color/outline_variant"
@@ -231,6 +304,7 @@
 
             <!-- Option cards -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ideal_card_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -278,6 +352,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ideal_card_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"

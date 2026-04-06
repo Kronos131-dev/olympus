@@ -53,7 +53,7 @@
                 android:layout_height="match_parent"
                 android:indeterminate="false"
                 android:max="2500"
-                android:progress="1840"
+                android:progress="0"
                 android:progressDrawable="@drawable/ring_progress" />
 
             <LinearLayout
@@ -76,12 +76,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/newsreader"
-                    android:text="@string/calories_value"
+                    android:text="0"
                     android:textColor="@color/marble_white"
                     android:textSize="48sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/calories_target_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope"
@@ -110,10 +111,12 @@
                 android:orientation="vertical">
 
                 <ProgressBar
+                    android:id="@+id/protein_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="80dp"
                     android:layout_height="4dp"
-                    android:progress="78"
+                    android:progress="0"
+                    android:max="100"
                     android:progressTint="@color/primary_container" />
 
                 <TextView
@@ -126,10 +129,11 @@
                     android:textSize="10sp" />
 
                 <TextView
+                    android:id="@+id/protein_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/newsreader"
-                    android:text="@string/protein_value"
+                    android:text="0g"
                     android:textColor="@color/marble_white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -144,10 +148,12 @@
                 android:orientation="vertical">
 
                 <ProgressBar
+                    android:id="@+id/carbs_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="80dp"
                     android:layout_height="4dp"
-                    android:progress="60"
+                    android:progress="0"
+                    android:max="100"
                     android:progressTint="@color/secondary" />
 
                 <TextView
@@ -160,10 +166,11 @@
                     android:textSize="10sp" />
 
                 <TextView
+                    android:id="@+id/carbs_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/newsreader"
-                    android:text="@string/carbs_value"
+                    android:text="0g"
                     android:textColor="@color/marble_white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -178,10 +185,12 @@
                 android:orientation="vertical">
 
                 <ProgressBar
+                    android:id="@+id/fats_progress"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="80dp"
                     android:layout_height="4dp"
-                    android:progress="65"
+                    android:progress="0"
+                    android:max="100"
                     android:progressTint="#D81B60" />
 
                 <TextView
@@ -194,10 +203,11 @@
                     android:textSize="10sp" />
 
                 <TextView
+                    android:id="@+id/fats_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/newsreader"
-                    android:text="@string/fats_value"
+                    android:text="0g"
                     android:textColor="@color/marble_white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -269,146 +279,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/secondary_buttons" />
 
-        <LinearLayout
+        <!-- We replace the static layout with a RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_recent_logs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/recent_provisions_title">
-
-            <!-- Provision Item 1 -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/item_pheasant"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/surface_container_low"
-                app:cardCornerRadius="0dp"
-                app:strokeWidth="0dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/item_icon_1"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_today"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/primary_container" />
-
-                    <TextView
-                        android:id="@+id/item_name_1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:fontFamily="@font/newsreader"
-                        android:text="Gilded Pheasant\nBreast"
-                        android:textColor="@color/marble_white"
-                        android:textSize="18sp"
-                        app:layout_constraintEnd_toStartOf="@id/item_kcal_1"
-                        app:layout_constraintStart_toEndOf="@id/item_icon_1"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/item_time_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="@font/manrope"
-                        android:text="LUNCH • 1:15PM"
-                        android:textColor="@color/outline_variant"
-                        android:textSize="10sp"
-                        app:layout_constraintStart_toStartOf="@id/item_name_1"
-                        app:layout_constraintTop_toBottomOf="@id/item_name_1" />
-
-                    <TextView
-                        android:id="@+id/item_kcal_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/newsreader"
-                        android:gravity="end"
-                        android:text="640\nKCAL"
-                        android:textColor="@color/secondary"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Provision Item 2 -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/item_elixir"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/surface_container_low"
-                app:cardCornerRadius="0dp"
-                app:strokeWidth="0dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/item_icon_2"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_view"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/primary_container" />
-
-                    <TextView
-                        android:id="@+id/item_name_2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:fontFamily="@font/newsreader"
-                        android:text="Legionnaire's\nElixir"
-                        android:textColor="@color/marble_white"
-                        android:textSize="18sp"
-                        app:layout_constraintEnd_toStartOf="@id/item_kcal_2"
-                        app:layout_constraintStart_toEndOf="@id/item_icon_2"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/item_time_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="@font/manrope"
-                        android:text="MORNING • 8:30 AM"
-                        android:textColor="@color/outline_variant"
-                        android:textSize="10sp"
-                        app:layout_constraintStart_toStartOf="@id/item_name_2"
-                        app:layout_constraintTop_toBottomOf="@id/item_name_2" />
-
-                    <TextView
-                        android:id="@+id/item_kcal_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/newsreader"
-                        android:gravity="end"
-                        android:text="120\nKCAL"
-                        android:textColor="@color/secondary"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
+            app:layout_constraintTop_toBottomOf="@id/recent_provisions_title" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
