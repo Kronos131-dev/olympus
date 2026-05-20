@@ -3,7 +3,6 @@ package com.kronos.olympus.dto.request;
 import com.kronos.olympus.model.enums.ActivityLevel;
 import com.kronos.olympus.model.enums.Gender;
 import com.kronos.olympus.model.enums.Goal;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -13,14 +12,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
 
-    @NotBlank(message = "L'email est obligatoire")
-    @Email(message = "L'email doit être valide")
+    // Utilisé comme Pseudo, on retire l'annotation @Email
+    @NotBlank(message = "Le pseudo est obligatoire")
     private String email;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
@@ -37,6 +38,9 @@ public class RegisterRequest {
     @NotNull(message = "Le poids est obligatoire")
     @Positive(message = "Le poids doit être positif")
     private Double weightKg;
+
+    @NotNull(message = "La date de naissance est obligatoire")
+    private LocalDate birthDate;
 
     @NotNull(message = "Le niveau d'activité est obligatoire")
     private ActivityLevel activityLevel;

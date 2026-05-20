@@ -1,8 +1,9 @@
 package com.kronos.olympusfront.network.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MealPresetResponse {
+public class MealPresetResponse implements Serializable {
     private Long id;
     private String name;
     private List<MealIngredientResponse> ingredients;

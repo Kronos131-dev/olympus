@@ -3,7 +3,9 @@ package com.kronos.olympus.service;
 import com.kronos.olympus.dto.request.AuthRequest;
 import com.kronos.olympus.dto.request.RegisterRequest;
 import com.kronos.olympus.dto.response.AuthResponse;
+import com.kronos.olympus.dto.response.UserResponse;
 import com.kronos.olympus.mapper.UserMapper;
+import com.kronos.olympus.model.RefreshToken;
 import com.kronos.olympus.model.User;
 import com.kronos.olympus.model.UserMetrics;
 import com.kronos.olympus.model.enums.Role;
@@ -29,13 +31,14 @@ public class AuthService {
     private final UserMetricsRepository userMetricsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Cet email est déjà utilisé");
+            throw new IllegalArgumentException("Ce pseudo est déjà utilisé");
         }
 
         // Création de l'utilisateur
@@ -45,24 +48,23 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
+        // On utilise la méthode du UserMapper pour avoir le calcul précis du Kcal cible
+        UserResponse responseDto = userMapper.toResponse(savedUser);
+        int initialCalorieGoal = responseDto.getTargetKcal() != null ? responseDto.getTargetKcal().intValue() : 2500;
+
         // Initialisation de la première métrique de poids
         UserMetrics initialMetrics = UserMetrics.builder()
                 .user(savedUser)
                 .weightKg(request.getWeightKg())
-                .calorieGoal(calculateInitialCalorieGoal(request)) // Calcul très basique pour l'exemple
+                .calorieGoal(initialCalorieGoal)
                 .recordedDate(LocalDate.now())
                 .build();
         userMetricsRepository.save(initialMetrics);
 
-        UserDetails userDetails = new UserDetailsImpl(savedUser);
-        String jwtToken = jwtService.generateToken(userDetails);
-
-        return AuthResponse.builder()
-                .token(jwtToken)
-                .user(userMapper.toResponse(savedUser))
-                .build();
+        return buildAuthResponse(savedUser, responseDto);
     }
 
+    @Transactional
     public AuthResponse login(AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -74,40 +76,46 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable après authentification"));
 
+        return buildAuthResponse(user, userMapper.toResponse(user));
+    }
+
+    /**
+     * Échange un refresh token valide contre un nouveau couple access/refresh (rotation).
+     */
+    @Transactional
+    public AuthResponse refresh(String refreshToken) {
+        RefreshToken rotated = refreshTokenService.verifyAndRotate(refreshToken);
+        User user = rotated.getUser();
+
         UserDetails userDetails = new UserDetailsImpl(user);
-        String jwtToken = jwtService.generateToken(userDetails);
+        String accessToken = jwtService.generateToken(userDetails);
 
         return AuthResponse.builder()
-                .token(jwtToken)
+                .token(accessToken)
+                .refreshToken(rotated.getToken())
+                .expiresIn(jwtService.getJwtExpiration() / 1000)
                 .user(userMapper.toResponse(user))
                 .build();
     }
 
-    // Méthode simplifiée pour calculer les calories cibles selon l'objectif et le niveau d'activité
-    private Integer calculateInitialCalorieGoal(RegisterRequest request) {
-        double bmr;
-        // Formule de Mifflin-St Jeor
-        if (request.getGender() == com.kronos.olympus.model.enums.Gender.MALE) {
-            bmr = 10 * request.getWeightKg() + 6.25 * request.getHeightCm() - 5 * 25 + 5; // 25 = âge moyen pris pour l'exemple
-        } else {
-            bmr = 10 * request.getWeightKg() + 6.25 * request.getHeightCm() - 5 * 25 - 161;
-        }
+    /**
+     * Révoque le refresh token (et toute sa famille) lors de la déconnexion. Idempotent.
+     */
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokenService.revokeByToken(refreshToken);
+    }
 
-        double activityMultiplier = switch (request.getActivityLevel()) {
-            case SEDENTARY -> 1.2;
-            case LIGHT -> 1.375;
-            case MODERATE -> 1.55;
-            case INTENSE -> 1.725;
-        };
+    private AuthResponse buildAuthResponse(User user, UserResponse responseDto) {
+        UserDetails userDetails = new UserDetailsImpl(user);
+        String accessToken = jwtService.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        double maintenanceCalories = bmr * activityMultiplier;
-
-        double targetCalories = switch (request.getGoal()) {
-            case LOSE_WEIGHT -> maintenanceCalories - 500;
-            case MAINTAIN -> maintenanceCalories;
-            case GAIN_MUSCLE -> maintenanceCalories + 300;
-        };
-
-        return (int) targetCalories;
+        return AuthResponse.builder()
+                .token(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .expiresIn(jwtService.getJwtExpiration() / 1000)
+                .user(responseDto)
+                .build();
     }
 }

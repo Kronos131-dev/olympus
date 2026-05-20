@@ -9,6 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"mealPreset", "foodItem"})
+@ToString(exclude = {"mealPreset", "foodItem"})
 public class MealIngredient {
 
     @Id

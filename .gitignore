@@ -1,33 +1,83 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# ===========================================================================
+# Olympus — .gitignore unique pour le monorepo
+# Backend : olympus-back (Java / Maven / Spring Boot)
+# Frontend : OlympusFront (Android / Gradle)
+# ===========================================================================
 
-### STS ###
-.apt_generated
+# --- Build / sorties de compilation ---
+target/
+build/
+out/
+bin/
+*.class
+
+# --- Maven ---
+.mvn/wrapper/maven-wrapper.jar
+release.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# --- Gradle ---
+.gradle/
+gradle-app.setting
+.gradletasknamecache
+
+# --- Android ---
+local.properties
+*.apk
+*.aab
+*.ap_
+*.aar
+*.dex
+captures/
+.externalNativeBuild/
+.cxx/
+output.json
+# Clés de signature — ne JAMAIS committer
+*.jks
+*.keystore
+
+# --- IDE : IntelliJ IDEA / Android Studio ---
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# --- IDE : Eclipse / STS ---
+.apt_generated/
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
-.sts4-cache
+.sts4-cache/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# --- IDE : VS Code ---
+.vscode/
 
-### NetBeans ###
+# --- IDE : NetBeans ---
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Secrets / configuration locale (overrides non versionnés) ---
+.env
+.env.local
+application-local.yml
+application-local.properties
+
+# --- Divers ---
+HELP.md
+.claude/

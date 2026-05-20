@@ -9,6 +9,7 @@ public class FoodItemResponse {
     private Double carbs100g;
     private Double fats100g;
     private String source;
+    private Double estimatedWeightGrams; // Nouvel attribut
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -26,4 +27,6 @@ public class FoodItemResponse {
     public void setFats100g(Double fats100g) { this.fats100g = fats100g; }
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
+    public Double getEstimatedWeightGrams() { return estimatedWeightGrams; }
+    public void setEstimatedWeightGrams(Double estimatedWeightGrams) { this.estimatedWeightGrams = estimatedWeightGrams; }
 }

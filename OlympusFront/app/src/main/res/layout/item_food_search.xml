@@ -67,6 +67,7 @@
                 android:background="@color/surface_container_lowest"
                 android:hint="Quantité (g)"
                 android:inputType="numberDecimal"
+                android:imeOptions="actionDone"
                 android:paddingHorizontal="16dp"
                 android:textColor="@color/marble_white"
                 android:textColorHint="@color/outline_variant"

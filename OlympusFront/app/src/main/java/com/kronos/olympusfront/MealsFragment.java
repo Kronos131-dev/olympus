@@ -10,14 +10,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.gson.Gson;
 import com.kronos.olympusfront.databinding.FragmentMealsBinding;
 import com.kronos.olympusfront.network.RetrofitClient;
 import com.kronos.olympusfront.network.dto.DailyLogResponse;
 import com.kronos.olympusfront.network.dto.LogEntryRequest;
 import com.kronos.olympusfront.network.dto.MealPresetResponse;
+import com.kronos.olympusfront.network.dto.UserResponse;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,13 +57,42 @@ public class MealsFragment extends Fragment implements MealsAdapter.OnMealClickL
             Intent intent = new Intent(getActivity(), CreateMealActivity.class);
             startActivity(intent);
         });
+
+        binding.planningButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), MealPlanActivity.class);
+            startActivity(intent);
+        });
     }
     
     @Override
     public void onResume() {
         super.onResume();
-        // Fetch presets every time we come back to this tab
-        fetchMealPresets();
+        // Fetch user profile first to get targets for progress bars
+        fetchProfileAndPresets();
+    }
+
+    private void fetchProfileAndPresets() {
+        RetrofitClient.getApiService().getProfile().enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UserResponse user = response.body();
+                    int kcal = user.getTargetKcal() != null ? user.getTargetKcal().intValue() : 2500;
+                    int prot = user.getTargetProteins() != null ? user.getTargetProteins().intValue() : 180;
+                    int carbs = user.getTargetCarbs() != null ? user.getTargetCarbs().intValue() : 350;
+                    int fats = user.getTargetFats() != null ? user.getTargetFats().intValue() : 85;
+                    
+                    adapter.setTargets(kcal, prot, carbs, fats);
+                }
+                // Fetch presets whether profile succeeds or fails
+                fetchMealPresets();
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                fetchMealPresets();
+            }
+        });
     }
 
     private void fetchMealPresets() {
@@ -120,6 +152,45 @@ public class MealsFragment extends Fragment implements MealsAdapter.OnMealClickL
                 }
             }
         });
+    }
+
+    @Override
+    public void onEditClick(MealPresetResponse meal) {
+        if (getContext() != null) {
+            Intent intent = new Intent(getActivity(), CreateMealActivity.class);
+            // On passe l'objet meal entier en JSON via l'intent pour le récupérer dans l'activité d'édition
+            intent.putExtra("EXTRA_MEAL_PRESET", new Gson().toJson(meal));
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onDeleteClick(MealPresetResponse meal) {
+        if (getContext() == null) return;
+
+        new AlertDialog.Builder(getContext(), R.style.OlympusAlertDialogTheme)
+            .setTitle("Supprimer ce repas ?")
+            .setMessage("Voulez-vous vraiment supprimer le repas '" + meal.getName() + "' ?")
+            .setPositiveButton("Supprimer", (dialog, which) -> {
+                RetrofitClient.getApiService().deleteMealPreset(meal.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getContext(), "Repas supprimé", Toast.LENGTH_SHORT).show();
+                            fetchProfileAndPresets(); // Rafraîchir la liste
+                        } else {
+                            Toast.makeText(getContext(), "Erreur lors de la suppression", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(getContext(), "Erreur réseau", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            })
+            .setNegativeButton("Annuler", null)
+            .show();
     }
 
     @Override

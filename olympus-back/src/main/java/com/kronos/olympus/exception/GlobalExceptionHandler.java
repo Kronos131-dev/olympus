@@ -46,6 +46,14 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(TokenRefreshException.class)
+    public ProblemDetail handleTokenRefreshException(TokenRefreshException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problemDetail.setTitle("Authentification requise");
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler(ExternalApiException.class)
     public ProblemDetail handleExternalApiException(ExternalApiException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());

@@ -19,5 +19,15 @@ public class DailyLogResponse {
     private Double totalProteins;
     private Double totalCarbs;
     private Double totalFats;
+    
+    // Nouveaux champs pour tracker l'activité
+    private Integer stepCount;
+    private Integer workoutDurationMinutes;
+    private Integer manualKcalBurned;
+    private Double extraKcalBurned;
+
+    // True si la journée a déjà été initialisée (par un plan ou manuellement)
+    private Boolean planApplied;
+
     private List<LogEntryResponse> entries;
 }

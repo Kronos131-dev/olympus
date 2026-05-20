@@ -50,9 +50,17 @@ public class AnalyticsService {
         
         double totalWeightSum = 0;
         int daysWithWeight = 0;
+        
+        double totalCalorieDeficit = 0; // Somme de (Calories dépensées - Calories mangées)
 
         // 3. Boucler sur chaque jour de la période pour construire les points du graphique
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        
+        // Pour gérer les jours où l'utilisateur n'a pas de métriques enregistrées, on garde en mémoire la dernière métrique connue
+        UserMetrics lastKnownMetric = null;
+        if (!metrics.isEmpty()) {
+            lastKnownMetric = metrics.get(0); // Approximation
+        }
         
         for (int i = 0; i <= daysBetween; i++) {
             LocalDate currentDate = startDate.plusDays(i);
@@ -60,8 +68,12 @@ public class AnalyticsService {
             DailyLog logForDay = logsByDate.get(currentDate);
             UserMetrics metricForDay = metricsByDate.get(currentDate);
             
-            Double weight = null;
             if (metricForDay != null) {
+                lastKnownMetric = metricForDay;
+            }
+            
+            Double weight = null;
+            if (metricForDay != null && metricForDay.getWeightKg() != null) {
                 weight = metricForDay.getWeightKg();
                 totalWeightSum += weight;
                 daysWithWeight++;
@@ -71,36 +83,64 @@ public class AnalyticsService {
             Double proteins = null;
             Double carbs = null;
             Double fats = null;
+            Double extraKcalBurned = 0.0;
             
-            if (logForDay != null && logForDay.getTotalKcal() > 0) {
-                kcal = logForDay.getTotalKcal();
-                proteins = logForDay.getTotalProteins();
-                carbs = logForDay.getTotalCarbs();
-                fats = logForDay.getTotalFats();
+            if (logForDay != null) {
+                if (logForDay.getTotalKcal() > 0) {
+                    kcal = logForDay.getTotalKcal();
+                    proteins = logForDay.getTotalProteins();
+                    carbs = logForDay.getTotalCarbs();
+                    fats = logForDay.getTotalFats();
+                    
+                    totalKcalSum += kcal;
+                    daysWithLogs++;
+                }
+                extraKcalBurned = logForDay.getExtraKcalBurned() != null ? logForDay.getExtraKcalBurned() : 0.0;
+            }
+
+            Double targetKcalForDay = null;
+            if (lastKnownMetric != null && lastKnownMetric.getCalorieGoal() != null) {
+                targetKcalForDay = lastKnownMetric.getCalorieGoal().doubleValue();
                 
-                totalKcalSum += kcal;
-                daysWithLogs++;
+                // Si on a les deux (target et mangé), on peut calculer le déficit de ce jour
+                if (kcal != null) {
+                    // Déficit = Ce que j'ai le droit de manger (Base + Sport) - Ce que j'ai mangé
+                    double dailyDeficit = (targetKcalForDay + extraKcalBurned) - kcal;
+                    totalCalorieDeficit += dailyDeficit;
+                }
             }
 
             dailyData.add(AnalyticsResponse.DailyMetricPoint.builder()
                     .date(currentDate)
                     .weightKg(weight)
+                    .targetKcal(targetKcalForDay != null ? targetKcalForDay + extraKcalBurned : null) // La ligne cible est = TDEE + Sport
                     .totalKcal(kcal)
                     .totalProteins(proteins)
                     .totalCarbs(carbs)
                     .totalFats(fats)
+                    .extraKcalBurned(extraKcalBurned)
                     .build());
         }
 
-        // 4. Calculer les moyennes
+        // 4. Calculer les moyennes et l'estimation de graisse perdue
         Double averageKcal = daysWithLogs > 0 ? round(totalKcalSum / daysWithLogs) : null;
         Double averageWeight = daysWithWeight > 0 ? round(totalWeightSum / daysWithWeight) : null;
+        
+        // 1 gramme de graisse corporelle = environ 7.7 kcal
+        Double estimatedFatLossGrams = 0.0;
+        if (totalCalorieDeficit > 0) {
+            estimatedFatLossGrams = round(totalCalorieDeficit / 7.7);
+        } else if (totalCalorieDeficit < 0) {
+            // S'il est en surplus (prise de masse ou trop mangé), on l'indique en négatif ou 0. On peut l'appeler weight gained
+            estimatedFatLossGrams = round(totalCalorieDeficit / 7.7); // C'est une estimation brute
+        }
 
         return AnalyticsResponse.builder()
                 .startDate(startDate)
                 .endDate(endDate)
                 .averageKcal(averageKcal)
                 .averageWeight(averageWeight)
+                .estimatedFatLossGrams(estimatedFatLossGrams)
                 .dailyData(dailyData)
                 .build();
     }

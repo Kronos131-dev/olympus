@@ -1,6 +1,7 @@
 package com.kronos.olympus.controller;
 
 import com.kronos.olympus.dto.request.LogEntryRequest;
+import com.kronos.olympus.dto.request.UpdateActivityRequest;
 import com.kronos.olympus.dto.response.DailyLogResponse;
 import com.kronos.olympus.security.UserDetailsImpl;
 import com.kronos.olympus.service.DailyLogService;
@@ -47,6 +48,16 @@ public class DailyLogController {
             @PathVariable Long entryId) {
         
         DailyLogResponse response = dailyLogService.removeLogEntry(userDetails.getUser(), entryId);
+        return ResponseEntity.ok(response);
+    }
+
+    // Mettre à jour l'activité physique du jour (Pas et Entraînement)
+    @PutMapping("/activity")
+    public ResponseEntity<DailyLogResponse> updateActivity(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Valid @RequestBody UpdateActivityRequest request) {
+        
+        DailyLogResponse response = dailyLogService.updateActivity(userDetails.getUser(), request);
         return ResponseEntity.ok(response);
     }
 }

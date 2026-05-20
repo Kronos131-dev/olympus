@@ -47,6 +47,15 @@ dependencies {
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
+    // ViewPager2 (navigation horizontale par swipe)
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+    
+    // MPAndroidChart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Barcode scanning (ZXing)
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

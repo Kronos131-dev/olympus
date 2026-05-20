@@ -50,6 +50,17 @@ public class MealPresetController {
         return ResponseEntity.ok(response);
     }
 
+    // Mettre à jour un repas pré-enregistré existant
+    @PutMapping("/{id}")
+    public ResponseEntity<MealPresetResponse> updateMealPreset(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable Long id,
+            @Valid @RequestBody MealPresetRequest request) {
+        
+        MealPresetResponse response = mealPresetService.updateMealPreset(userDetails.getUser(), id, request);
+        return ResponseEntity.ok(response);
+    }
+
     // Supprimer un repas pré-enregistré
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMealPreset(

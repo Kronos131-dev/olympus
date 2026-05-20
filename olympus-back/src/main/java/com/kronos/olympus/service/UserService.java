@@ -41,9 +41,19 @@ public class UserService {
         boolean weightChanged = false;
         boolean needsNewMetrics = false;
 
-        if (request.getWeightKg() != null && !request.getWeightKg().equals(user.getCurrentWeightKg())) {
-            user.setCurrentWeightKg(request.getWeightKg());
+        if (request.getCurrentWeightKg() != null && !request.getCurrentWeightKg().equals(user.getCurrentWeightKg())) {
+            user.setCurrentWeightKg(request.getCurrentWeightKg());
             weightChanged = true;
+            needsNewMetrics = true;
+        }
+
+        if (request.getHeightCm() != null && !request.getHeightCm().equals(user.getHeightCm())) {
+            user.setHeightCm(request.getHeightCm());
+            needsNewMetrics = true;
+        }
+
+        if (request.getBirthDate() != null && !request.getBirthDate().equals(user.getBirthDate())) {
+            user.setBirthDate(request.getBirthDate());
             needsNewMetrics = true;
         }
 
@@ -56,11 +66,25 @@ public class UserService {
             user.setGoal(request.getGoal());
             needsNewMetrics = true;
         }
+        
+        if (request.getAiProvider() != null) {
+            user.setAiProvider(request.getAiProvider());
+        }
+
+        if (request.getAutoCalculateTargets() != null) {
+            user.setAutoCalculateTargets(request.getAutoCalculateTargets());
+            
+            if (!request.getAutoCalculateTargets()) {
+                if (request.getManualTargetKcal() != null) user.setManualTargetKcal(request.getManualTargetKcal());
+                if (request.getManualTargetProteins() != null) user.setManualTargetProteins(request.getManualTargetProteins());
+                if (request.getManualTargetCarbs() != null) user.setManualTargetCarbs(request.getManualTargetCarbs());
+                if (request.getManualTargetFats() != null) user.setManualTargetFats(request.getManualTargetFats());
+            }
+            needsNewMetrics = true;
+        }
 
         User updatedUser = userRepository.save(user);
 
-        // Si le poids, l'activité ou l'objectif a changé, on recalcule les calories cibles
-        // et on enregistre un nouveau point de donnée dans l'historique UserMetrics
         if (needsNewMetrics) {
             recordNewMetrics(updatedUser, weightChanged);
         }
@@ -69,7 +93,9 @@ public class UserService {
     }
 
     private void recordNewMetrics(User user, boolean weightChanged) {
-        Integer newCalorieGoal = calculateCalorieGoal(user);
+        // Utilisera les mêmes cibles que celles envoyées dans UserResponse par le mapper
+        UserResponse response = userMapper.toResponse(user);
+        Integer newCalorieGoal = response.getTargetKcal() != null ? response.getTargetKcal().intValue() : 2000;
         
         // On vérifie s'il existe déjà une métrique pour aujourd'hui
         LocalDate today = LocalDate.now();
@@ -94,32 +120,5 @@ public class UserService {
             userMetricsRepository.save(newMetric);
             log.info("Nouvelle métrique enregistrée dans l'historique: Poids {} kg, Objectif {} kcal", user.getCurrentWeightKg(), newCalorieGoal);
         }
-    }
-
-    private Integer calculateCalorieGoal(User user) {
-        double bmr;
-        // Formule de Mifflin-St Jeor
-        if (user.getGender() == com.kronos.olympus.model.enums.Gender.MALE) {
-            bmr = 10 * user.getCurrentWeightKg() + 6.25 * user.getHeightCm() - 5 * 25 + 5; // On hardcode l'âge à 25 pour l'exemple comme dans AuthService
-        } else {
-            bmr = 10 * user.getCurrentWeightKg() + 6.25 * user.getHeightCm() - 5 * 25 - 161;
-        }
-
-        double activityMultiplier = switch (user.getActivityLevel()) {
-            case SEDENTARY -> 1.2;
-            case LIGHT -> 1.375;
-            case MODERATE -> 1.55;
-            case INTENSE -> 1.725;
-        };
-
-        double maintenanceCalories = bmr * activityMultiplier;
-
-        double targetCalories = switch (user.getGoal()) {
-            case LOSE_WEIGHT -> maintenanceCalories - 500;
-            case MAINTAIN -> maintenanceCalories;
-            case GAIN_MUSCLE -> maintenanceCalories + 300;
-        };
-
-        return (int) targetCalories;
     }
 }

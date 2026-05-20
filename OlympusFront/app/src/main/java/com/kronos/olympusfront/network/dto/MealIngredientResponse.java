@@ -1,6 +1,8 @@
 package com.kronos.olympusfront.network.dto;
 
-public class MealIngredientResponse {
+import java.io.Serializable;
+
+public class MealIngredientResponse implements Serializable {
     private Long id;
     private FoodItemResponse foodItem;
     private Double quantityGrams;

@@ -5,9 +5,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.kronos.olympusfront.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -20,65 +23,66 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Navigation setup
-        binding.navHome.setOnClickListener(v -> loadFragment(new HomeFragment(), "HOME"));
-        binding.navMeals.setOnClickListener(v -> loadFragment(new MealsFragment(), "MEALS"));
-        binding.navStats.setOnClickListener(v -> loadFragment(new StatsFragment(), "STATS"));
-        binding.navProfile.setOnClickListener(v -> loadFragment(new ProfileFragment(), "PROFILE"));
+        // ViewPager2 : 5 pages swipables
+        binding.viewPager.setAdapter(new MainPagerAdapter(this));
+        binding.viewPager.setOffscreenPageLimit(1);
 
-        // Set App Icon in Top Bar
-        binding.profileButton.setImageResource(R.mipmap.ic_olympus);
-        binding.profileButton.setBackground(null);
+        // Clics sur la barre du bas -> page correspondante
+        binding.navChat.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_CHAT, true));
+        binding.navHome.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_HOME, true));
+        binding.navMeals.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_MEALS, true));
+        binding.navStats.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_STATS, true));
+        binding.navProfile.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_PROFILE, true));
 
-        // Load default fragment
+        // Synchronisation barre du bas <-> swipe
+        binding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                updateNavigationUI(position);
+            }
+        });
+
+        // Page par défaut : Accueil
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment(), "HOME");
+            binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_HOME, false);
         }
+        updateNavigationUI(binding.viewPager.getCurrentItem());
     }
 
-    private void loadFragment(Fragment fragment, String tag) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(binding.navHostFragment.getId(), fragment, tag)
-                .commit();
-        updateNavigationUI(tag);
-    }
-
-    private void updateNavigationUI(String tag) {
-        // Colors
+    private void updateNavigationUI(int position) {
         int inactiveColor = ContextCompat.getColor(this, R.color.marble_white);
         int activeColor = ContextCompat.getColor(this, R.color.on_secondary);
         int activeBg = ContextCompat.getColor(this, R.color.secondary_container);
         int inactiveBg = ContextCompat.getColor(this, android.R.color.transparent);
 
-        resetNavItem(binding.navHome, binding.navHomeIcon, binding.navHomeText, inactiveColor, inactiveBg);
-        resetNavItem(binding.navMeals, binding.navMealsIcon, binding.navMealsText, inactiveColor, inactiveBg);
-        resetNavItem(binding.navStats, binding.navStatsIcon, binding.navStatsText, inactiveColor, inactiveBg);
-        resetNavItem(binding.navProfile, binding.navProfileIcon, binding.navProfileText, inactiveColor, inactiveBg);
+        styleNavItem(binding.navChat, binding.navChatIcon, binding.navChatText, inactiveColor, inactiveBg);
+        styleNavItem(binding.navHome, binding.navHomeIcon, binding.navHomeText, inactiveColor, inactiveBg);
+        styleNavItem(binding.navMeals, binding.navMealsIcon, binding.navMealsText, inactiveColor, inactiveBg);
+        styleNavItem(binding.navStats, binding.navStatsIcon, binding.navStatsText, inactiveColor, inactiveBg);
+        styleNavItem(binding.navProfile, binding.navProfileIcon, binding.navProfileText, inactiveColor, inactiveBg);
 
-        // Highlight selected
-        switch (tag) {
-            case "HOME":
-                setActiveNavItem(binding.navHome, binding.navHomeIcon, binding.navHomeText, activeColor, activeBg);
+        switch (position) {
+            case MainPagerAdapter.PAGE_CHAT:
+                styleNavItem(binding.navChat, binding.navChatIcon, binding.navChatText, activeColor, activeBg);
                 break;
-            case "MEALS":
-                setActiveNavItem(binding.navMeals, binding.navMealsIcon, binding.navMealsText, activeColor, activeBg);
+            case MainPagerAdapter.PAGE_MEALS:
+                styleNavItem(binding.navMeals, binding.navMealsIcon, binding.navMealsText, activeColor, activeBg);
                 break;
-            case "STATS":
-                setActiveNavItem(binding.navStats, binding.navStatsIcon, binding.navStatsText, activeColor, activeBg);
+            case MainPagerAdapter.PAGE_STATS:
+                styleNavItem(binding.navStats, binding.navStatsIcon, binding.navStatsText, activeColor, activeBg);
                 break;
-            case "PROFILE":
-                setActiveNavItem(binding.navProfile, binding.navProfileIcon, binding.navProfileText, activeColor, activeBg);
+            case MainPagerAdapter.PAGE_PROFILE:
+                styleNavItem(binding.navProfile, binding.navProfileIcon, binding.navProfileText, activeColor, activeBg);
+                break;
+            case MainPagerAdapter.PAGE_HOME:
+            default:
+                styleNavItem(binding.navHome, binding.navHomeIcon, binding.navHomeText, activeColor, activeBg);
                 break;
         }
     }
 
-    private void resetNavItem(View layout, ImageView icon, TextView text, int color, int bg) {
-        layout.setBackgroundColor(bg);
-        icon.setImageTintList(ColorStateList.valueOf(color));
-        text.setTextColor(color);
-    }
-
-    private void setActiveNavItem(View layout, ImageView icon, TextView text, int color, int bg) {
+    private void styleNavItem(@NonNull View layout, @NonNull ImageView icon, @NonNull TextView text,
+                              int color, int bg) {
         layout.setBackgroundColor(bg);
         icon.setImageTintList(ColorStateList.valueOf(color));
         text.setTextColor(color);
