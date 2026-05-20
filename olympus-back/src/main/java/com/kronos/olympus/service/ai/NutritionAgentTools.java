@@ -10,7 +10,10 @@ import com.kronos.olympus.dto.response.LogEntryResponse;
 import com.kronos.olympus.dto.response.MealPresetResponse;
 import com.kronos.olympus.dto.response.UserResponse;
 import com.kronos.olympus.mapper.UserMapper;
+import com.kronos.olympus.model.FoodItem;
 import com.kronos.olympus.model.User;
+import com.kronos.olympus.model.enums.FoodSource;
+import com.kronos.olympus.repository.FoodItemRepository;
 import com.kronos.olympus.service.DailyLogService;
 import com.kronos.olympus.service.FoodItemService;
 import com.kronos.olympus.service.MealPresetService;
@@ -22,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Construit l'ensemble des outils (function calling) que l'agent IA peut utiliser.
@@ -35,7 +39,20 @@ public class NutritionAgentTools {
     private final DailyLogService dailyLogService;
     private final MealPresetService mealPresetService;
     private final FoodItemService foodItemService;
+    private final FoodItemRepository foodItemRepository;
     private final UserMapper userMapper;
+
+    /**
+     * Recherche un aliment en privilégiant la base CIQUAL (officielle), puis Open Food Facts
+     * en secours. Renvoie une liste vide si rien n'est trouvé.
+     */
+    private List<FoodItemResponse> searchCiqualFirst(String query) {
+        List<FoodItemResponse> results = foodItemService.searchCiqualFoods(query);
+        if (results.isEmpty()) {
+            results = foodItemService.searchFoodItemsByName(query);
+        }
+        return results;
+    }
 
     public List<AgentTool> buildTools(User user) {
         List<AgentTool> tools = new ArrayList<>();
@@ -105,19 +122,17 @@ public class NutritionAgentTools {
 
         tools.add(new AgentTool(
                 "search_food_items",
-                "Recherche des aliments par nom dans la base de données (Open Food Facts et CIQUAL). Renvoie les identifiants et valeurs pour 100g.",
+                "Recherche des aliments par nom, en priorité dans la base officielle CIQUAL "
+                        + "puis dans Open Food Facts. Renvoie les identifiants et valeurs pour 100g.",
                 objectSchema(props(
-                        "query", strProp("Nom de l'aliment à rechercher."),
-                        "useCiqual", boolProp("Si vrai, recherche dans la base française CIQUAL.")
+                        "query", strProp("Nom de l'aliment à rechercher.")
                 ), List.of("query")),
                 args -> {
                     String query = args.path("query").asText("");
-                    boolean ciqual = args.path("useCiqual").asBoolean(false);
-                    List<FoodItemResponse> results = ciqual
-                            ? foodItemService.searchCiqualFoods(query)
-                            : foodItemService.searchFoodItemsByName(query);
+                    List<FoodItemResponse> results = searchCiqualFirst(query);
                     if (results.isEmpty()) {
-                        return "Aucun aliment trouvé pour '" + query + "'.";
+                        return "Aucun aliment trouvé pour '" + query + "' en base. "
+                                + "Tu peux estimer ses valeurs et utiliser log_estimated_food.";
                     }
                     StringBuilder sb = new StringBuilder("Résultats pour '" + query + "' :\n");
                     int limit = Math.min(results.size(), 10);
@@ -131,7 +146,9 @@ public class NutritionAgentTools {
 
         tools.add(new AgentTool(
                 "log_food",
-                "Ajoute un aliment au journal de l'utilisateur. Recherche l'aliment par son nom et enregistre la quantité indiquée.",
+                "Ajoute un aliment au journal de l'utilisateur. Recherche l'aliment par son nom "
+                        + "en priorité dans la base CIQUAL, puis Open Food Facts, et enregistre la quantité. "
+                        + "Si l'aliment est introuvable, utilise plutôt log_estimated_food.",
                 objectSchema(props(
                         "foodName", strProp("Nom de l'aliment à ajouter."),
                         "quantityGrams", numProp("Quantité consommée en grammes."),
@@ -145,13 +162,10 @@ public class NutritionAgentTools {
                     }
                     LocalDate date = resolveDate(args, "date");
 
-                    List<FoodItemResponse> results = foodItemService.searchFoodItemsByName(foodName);
+                    List<FoodItemResponse> results = searchCiqualFirst(foodName);
                     if (results.isEmpty()) {
-                        results = foodItemService.searchCiqualFoods(foodName);
-                    }
-                    if (results.isEmpty()) {
-                        return "Aucun aliment trouvé pour '" + foodName + "'. Demande une précision à l'utilisateur "
-                                + "ou propose de le créer.";
+                        return "Aucun aliment trouvé pour '" + foodName + "' en base CIQUAL/OFF. "
+                                + "Estime ses valeurs nutritionnelles pour 100g et utilise log_estimated_food.";
                     }
                     FoodItemResponse food = results.get(0);
                     LogEntryRequest req = LogEntryRequest.builder()
@@ -161,6 +175,49 @@ public class NutritionAgentTools {
                             .build();
                     DailyLogResponse log = dailyLogService.addLogEntry(user, req);
                     return "Ajouté : " + intOf(qty) + "g de '" + food.getName() + "' le " + date
+                            + ". Total du jour : " + intOf(log.getTotalKcal()) + " kcal.";
+                }));
+
+        tools.add(new AgentTool(
+                "log_estimated_food",
+                "Ajoute au journal un aliment ABSENT de la base de données, en utilisant des valeurs "
+                        + "nutritionnelles que TU estimes (pour 100g). À n'utiliser qu'après un échec de "
+                        + "recherche via log_food ou search_food_items.",
+                objectSchema(props(
+                        "name", strProp("Nom de l'aliment."),
+                        "quantityGrams", numProp("Quantité consommée en grammes."),
+                        "kcalPer100g", numProp("Calories estimées pour 100g."),
+                        "proteinsPer100g", numProp("Protéines estimées en grammes pour 100g."),
+                        "carbsPer100g", numProp("Glucides estimés en grammes pour 100g."),
+                        "fatsPer100g", numProp("Lipides estimés en grammes pour 100g."),
+                        "date", strProp("Date ISO yyyy-MM-dd. Par défaut : aujourd'hui.")
+                ), List.of("name", "quantityGrams", "kcalPer100g", "proteinsPer100g", "carbsPer100g", "fatsPer100g")),
+                args -> {
+                    String name = args.path("name").asText("");
+                    double qty = args.path("quantityGrams").asDouble(0);
+                    if (name.isBlank() || qty <= 0) {
+                        return "Le nom de l'aliment et une quantité positive sont requis.";
+                    }
+                    LocalDate date = resolveDate(args, "date");
+
+                    FoodItem food = FoodItem.builder()
+                            .name("IA : " + name)
+                            .kcal100g(Math.max(0, args.path("kcalPer100g").asDouble(0)))
+                            .proteins100g(Math.max(0, args.path("proteinsPer100g").asDouble(0)))
+                            .carbs100g(Math.max(0, args.path("carbsPer100g").asDouble(0)))
+                            .fats100g(Math.max(0, args.path("fatsPer100g").asDouble(0)))
+                            .source(FoodSource.AI)
+                            .barcode("AI-" + UUID.randomUUID().toString().substring(0, 8))
+                            .build();
+                    FoodItem saved = foodItemRepository.save(food);
+
+                    LogEntryRequest req = LogEntryRequest.builder()
+                            .targetDate(date)
+                            .foodItemId(saved.getId())
+                            .quantityGrams(qty)
+                            .build();
+                    DailyLogResponse log = dailyLogService.addLogEntry(user, req);
+                    return "Ajouté (estimation IA) : " + intOf(qty) + "g de '" + name + "' le " + date
                             + ". Total du jour : " + intOf(log.getTotalKcal()) + " kcal.";
                 }));
 
@@ -207,10 +264,7 @@ public class NutritionAgentTools {
                         if (ingName.isBlank() || q <= 0) {
                             continue;
                         }
-                        List<FoodItemResponse> found = foodItemService.searchFoodItemsByName(ingName);
-                        if (found.isEmpty()) {
-                            found = foodItemService.searchCiqualFoods(ingName);
-                        }
+                        List<FoodItemResponse> found = searchCiqualFirst(ingName);
                         if (found.isEmpty()) {
                             notFound.add(ingName);
                             continue;
@@ -299,13 +353,6 @@ public class NutritionAgentTools {
     private static Map<String, Object> numProp(String description) {
         Map<String, Object> p = new LinkedHashMap<>();
         p.put("type", "number");
-        p.put("description", description);
-        return p;
-    }
-
-    private static Map<String, Object> boolProp(String description) {
-        Map<String, Object> p = new LinkedHashMap<>();
-        p.put("type", "boolean");
         p.put("description", description);
         return p;
     }
