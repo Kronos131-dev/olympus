@@ -63,9 +63,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 binding.btnEntrerArene.setEnabled(true);
                 if (response.isSuccessful() && response.body() != null) {
-                    String token = response.body().getToken();
-                    tokenManager.saveToken(token);
-                    Log.d(TAG, "Login successful, token saved.");
+                    tokenManager.saveTokens(response.body().getToken(), response.body().getRefreshToken());
+                    Log.d(TAG, "Login successful, tokens saved.");
                     Toast.makeText(LoginActivity.this, "Connexion réussie", Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);

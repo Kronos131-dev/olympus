@@ -1,13 +1,25 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.OlympusFront" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.OlympusFront" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/primary_container</item>
         <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSurface">@color/surface</item>
         <item name="android:windowBackground">@color/surface</item>
+        <item name="android:textColorPrimary">@color/marble_white</item>
+        <item name="android:textColorSecondary">@color/outline_variant</item>
+        <item name="android:colorBackground">@color/surface</item>
 
         <!-- Typography -->
         <item name="fontFamily">@font/manrope</item>
+
+        <!-- AlertDialog Theme -->
+        <item name="alertDialogTheme">@style/OlympusAlertDialogTheme</item>
+        <item name="materialAlertDialogTheme">@style/OlympusAlertDialogTheme</item>
+
+        <!-- Spinner Theme -->
+        <item name="android:spinnerItemStyle">@style/OlympusSpinnerItem</item>
+        <item name="android:spinnerDropDownItemStyle">@style/OlympusSpinnerDropDownItem</item>
     </style>
 
     <style name="Theme.OlympusFront" parent="Base.Theme.OlympusFront" />
@@ -21,4 +33,35 @@
     <style name="TextAppearance.Olympus.Headline" parent="TextAppearance.Material3.HeadlineLarge">
         <item name="fontFamily">@font/newsreader</item>
     </style>
+
+    <!-- Dialog Theme -->
+    <style name="OlympusAlertDialogTheme" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+        <item name="colorSurface">@color/surface_container_low</item>
+        <item name="colorOnSurface">@color/marble_white</item>
+        <item name="colorPrimary">@color/secondary</item>
+        <item name="android:textColorPrimary">@color/marble_white</item>
+        <item name="android:textColorSecondary">@color/outline_variant</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Material3.Button.TextButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Material3.Button.TextButton</item>
+
+        <!-- Fix for EditText inside Dialog -->
+        <item name="editTextStyle">@style/OlympusDialogEditText</item>
+    </style>
+
+    <style name="OlympusDialogEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textColor">@color/marble_white</item>
+        <item name="android:textColorHint">@color/outline_variant</item>
+        <item name="backgroundTint">@color/secondary</item>
+    </style>
+
+    <style name="OlympusSpinnerItem" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">@color/marble_white</item>
+    </style>
+
+    <style name="OlympusSpinnerDropDownItem" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:textColor">@color/marble_white</item>
+        <item name="android:background">@color/surface_container_lowest</item>
+    </style>
+
 </resources>

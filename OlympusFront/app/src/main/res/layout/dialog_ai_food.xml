@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QU'AVEZ-VOUS MANGÉ ?"
+        android:textColor="@color/secondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/manrope" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_ai_description"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_weight="1"
+            android:background="@color/surface_container_lowest"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:padding="16dp"
+            android:hint="Ex: J'ai mangé un pavé de saumon de 150g avec 200g de riz basmati et une cuillère d'huile d'olive."
+            android:textColor="@color/marble_white"
+            android:textColorHint="@color/outline_variant" />
+
+        <ImageView
+            android:id="@+id/btn_mic"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_btn_speak_now"
+            android:tint="@color/secondary" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/ai_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        android:indeterminateTint="@color/secondary" />
+</LinearLayout>

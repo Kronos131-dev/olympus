@@ -15,6 +15,15 @@ import java.util.List;
 public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.LogViewHolder> {
 
     private List<LogEntryResponse> logs = new ArrayList<>();
+    private final OnLogDeleteListener listener;
+
+    public interface OnLogDeleteListener {
+        void onDeleteClick(LogEntryResponse log);
+    }
+
+    public LogsAdapter(OnLogDeleteListener listener) {
+        this.listener = listener;
+    }
 
     public void setLogs(List<LogEntryResponse> logs) {
         this.logs = logs;
@@ -65,9 +74,20 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.LogViewHolder>
                 details = quantity + "g";
             }
 
+            // Badge "planifié" pour les entrées issues d'un plan de repas
+            if (Boolean.TRUE.equals(log.getFromPlan())) {
+                details = details.isEmpty() ? "PLANIFIÉ" : details + " · PLANIFIÉ";
+            }
+
             binding.itemName.setText(name);
             binding.itemDetails.setText(details);
             binding.itemKcal.setText((int) kcal + "\nKCAL");
+
+            binding.btnDeleteLog.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeleteClick(log);
+                }
+            });
         }
     }
 }

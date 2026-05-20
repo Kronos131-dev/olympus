@@ -1,22 +1,24 @@
 package com.kronos.olympusfront.network.dto;
 
 public class RegisterRequest {
-    private String email;
+    private String email; // Sera utilisé comme Pseudo
     private String password;
     private String gender;
     private Double heightCm;
     private Double weightKg;
+    private String birthDate; // Format YYYY-MM-DD
     private String activityLevel;
     private String goal;
 
     public RegisterRequest() {}
 
-    public RegisterRequest(String email, String password, String gender, Double heightCm, Double weightKg, String activityLevel, String goal) {
+    public RegisterRequest(String email, String password, String gender, Double heightCm, Double weightKg, String birthDate, String activityLevel, String goal) {
         this.email = email;
         this.password = password;
         this.gender = gender;
         this.heightCm = heightCm;
         this.weightKg = weightKg;
+        this.birthDate = birthDate;
         this.activityLevel = activityLevel;
         this.goal = goal;
     }
@@ -32,6 +34,8 @@ public class RegisterRequest {
     public void setHeightCm(Double heightCm) { this.heightCm = heightCm; }
     public Double getWeightKg() { return weightKg; }
     public void setWeightKg(Double weightKg) { this.weightKg = weightKg; }
+    public String getBirthDate() { return birthDate; }
+    public void setBirthDate(String birthDate) { this.birthDate = birthDate; }
     public String getActivityLevel() { return activityLevel; }
     public void setActivityLevel(String activityLevel) { this.activityLevel = activityLevel; }
     public String getGoal() { return goal; }

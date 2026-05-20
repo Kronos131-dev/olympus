@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:fontFamily="@font/newsreader"
-                android:text="IMPERIUM"
+                android:text="OLYMPUS"
                 android:textColor="@color/secondary"
                 android:textSize="22sp"
                 android:textStyle="bold|italic" />
@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="56dp"
             android:fontFamily="@font/newsreader"
-            android:text="IDENTIFICATION"
+            android:text="CONNEXION"
             android:textColor="@color/marble_white"
             android:textSize="32sp"
             android:textStyle="bold|italic"
@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/manrope"
                 android:letterSpacing="0.1"
-                android:text="IDENTIFIANT DE LÉGION"
+                android:text="PSEUDO"
                 android:textColor="@color/secondary"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -99,8 +99,8 @@
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent"
                     android:fontFamily="@font/manrope"
-                    android:hint="email@imperium.com"
-                    android:inputType="textEmailAddress"
+                    android:hint="Pseudo"
+                    android:inputType="text"
                     android:textColor="@color/marble_white"
                     android:textColorHint="@color/outline_variant"
                     android:textSize="14sp"
@@ -111,7 +111,7 @@
                     android:id="@+id/iv_email_icon"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@android:drawable/ic_dialog_email"
+                    android:src="@drawable/ic_pseudo_icon"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -129,7 +129,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope"
                     android:letterSpacing="0.1"
-                    android:text="CODEX D'ACCÈS"
+                    android:text="MOT DE PASSE"
                     android:textColor="@color/secondary"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -183,10 +183,10 @@
                 android:layout_marginTop="48dp"
                 android:backgroundTint="@color/secondary_container"
                 android:fontFamily="@font/newsreader"
-                android:text="ENTRER DANS\nL'ARENE"
+                android:text="SE CONNECTER"
                 android:textColor="@color/on_secondary"
                 android:textSize="18sp"
-                android:textStyle="bold|italic"
+                android:textStyle="bold"
                 app:cornerRadius="0dp" />
 
             <!-- Footer Links -->
@@ -209,25 +209,12 @@
                 android:fontFamily="@font/manrope"
                 android:gravity="center"
                 android:letterSpacing="0.1"
-                android:text="PRÊTER SERMENT / CRÉER UN COMPTE"
+                android:text="CRÉER UN COMPTE"
                 android:textColor="@color/secondary"
                 android:textSize="11sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
-
-        <!-- Bottom Latin Phrase -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/newsreader"
-            android:letterSpacing="0.3"
-            android:text="VENI • VIDI • VICI"
-            android:textColor="@color/surface_variant"
-            android:textSize="10sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

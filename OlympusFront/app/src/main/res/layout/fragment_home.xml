@@ -36,15 +36,110 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/subtitle_conquest" />
 
+        <!-- Activity Section (Pas & Entraînement) -->
+        <LinearLayout
+            android:id="@+id/activity_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@color/surface_container_low"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/main_headline">
+
+            <!-- Steps -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_directions"
+                    app:tint="@color/secondary" />
+
+                <TextView
+                    android:id="@+id/tv_steps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/newsreader"
+                    android:text="0 PAS"
+                    android:textColor="@color/marble_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/outline_variant"
+                android:alpha="0.2" />
+
+            <!-- Workout -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_recent_history"
+                    app:tint="@color/secondary" />
+
+                <TextView
+                    android:id="@+id/tv_workout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/newsreader"
+                    android:text="0 MIN"
+                    android:textColor="@color/marble_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/btn_edit_activity"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:src="@android:drawable/ic_menu_edit"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/secondary" />
+        </LinearLayout>
+
+        <!-- Calories Burned Info -->
+        <TextView
+            android:id="@+id/tv_burned_kcal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/manrope"
+            android:text="🔥 0 KCAL BRÛLÉES"
+            android:textColor="#D81B60"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activity_container" />
+
+
         <!-- Hero Progress Ring -->
         <FrameLayout
             android:id="@+id/progress_container"
             android:layout_width="280dp"
             android:layout_height="280dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/main_headline">
+            app:layout_constraintTop_toBottomOf="@id/tv_burned_kcal">
 
             <ProgressBar
                 android:id="@+id/calories_progress"
@@ -86,7 +181,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/manrope"
-                    android:text="@string/target_kcal"
+                    android:text="/ 2500 KCAL"
                     android:textColor="@color/marble_white"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -137,6 +232,15 @@
                     android:textColor="@color/marble_white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/protein_target_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="/ 180g"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <!-- Carbs -->
@@ -174,6 +278,15 @@
                     android:textColor="@color/marble_white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/carbs_target_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="/ 220g"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <!-- Fats -->
@@ -211,6 +324,15 @@
                     android:textColor="@color/marble_white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/fats_target_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/manrope"
+                    android:text="/ 70g"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -237,29 +359,14 @@
             android:orientation="horizontal"
             app:layout_constraintTop_toBottomOf="@id/add_meal_button">
 
+            <!-- FUSION DES DEUX BOUTONS EN UN SEUL -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/scan_barcode_button"
+                android:id="@+id/add_food_button"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
                 android:fontFamily="@font/manrope"
-                android:text="@string/scan_barcode"
-                android:textColor="@color/secondary"
-                android:textSize="12sp"
-                app:cornerRadius="0dp"
-                app:strokeColor="@color/outline_variant" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/manual_entry_button"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/manrope"
-                android:text="@string/manual_entry"
+                android:text="AJOUTER UN ALIMENT"
                 android:textColor="@color/secondary"
                 android:textSize="12sp"
                 app:cornerRadius="0dp"

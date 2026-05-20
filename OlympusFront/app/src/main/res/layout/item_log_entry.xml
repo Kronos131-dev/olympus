@@ -28,8 +28,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:fontFamily="@font/newsreader"
-            android:text="Item Name"
+            android:text="Nom"
             android:textColor="@color/marble_white"
             android:textSize="18sp"
             app:layout_constraintEnd_toStartOf="@id/item_kcal"
@@ -42,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/manrope"
-            android:text="DETAILS"
+            android:text="DÉTAILS"
             android:textColor="@color/outline_variant"
             android:textSize="10sp"
             app:layout_constraintStart_toStartOf="@id/item_name"
@@ -52,14 +53,26 @@
             android:id="@+id/item_kcal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
             android:fontFamily="@font/newsreader"
             android:gravity="end"
             android:text="0\nKCAL"
             android:textColor="@color/secondary"
             android:textSize="18sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete_log"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
+            android:id="@+id/btn_delete_log"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="#D81B60"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

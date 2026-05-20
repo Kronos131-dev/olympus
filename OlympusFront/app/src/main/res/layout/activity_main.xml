@@ -53,9 +53,9 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Fragment Container for Content -->
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/nav_host_fragment"
+    <!-- Pages swipables (Chat / Home / Meals / Stats / Profile) -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
@@ -69,6 +69,33 @@
         android:background="@color/surface_container_low"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/nav_chat"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/nav_chat_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/sym_action_chat"
+                app:tint="@color/marble_white" />
+
+            <TextView
+                android:id="@+id/nav_chat_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope"
+                android:text="Oracle"
+                android:textColor="@color/marble_white"
+                android:textSize="10sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/nav_home"

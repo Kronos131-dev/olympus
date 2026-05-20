@@ -19,4 +19,5 @@ public class FoodItemResponse {
     private Double carbs100g;
     private Double fats100g;
     private FoodSource source;
+    private Double estimatedWeightGrams; // Utilisé par l'IA pour renvoyer le poids estimé
 }

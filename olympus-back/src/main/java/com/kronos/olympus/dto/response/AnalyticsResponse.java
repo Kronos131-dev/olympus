@@ -21,6 +21,9 @@ public class AnalyticsResponse {
     private Double averageKcal;
     private Double averageWeight;
     
+    // Total de graisse estimée perdue sur la période
+    private Double estimatedFatLossGrams;
+    
     // Détail journalier (Points pour tracer le graphique)
     private List<DailyMetricPoint> dailyData;
 
@@ -31,9 +34,16 @@ public class AnalyticsResponse {
     public static class DailyMetricPoint {
         private LocalDate date;
         private Double weightKg;      // Peut être nul s'il ne s'est pas pesé ce jour-là
+        
+        // Quotas journaliers de l'utilisateur ce jour-là (pour tracer la courbe limite)
+        private Double targetKcal;
+        
         private Double totalKcal;     // Peut être nul s'il n'a rien loggé
         private Double totalProteins;
         private Double totalCarbs;
         private Double totalFats;
+        
+        // Nouveau: pour récupérer le total dépensé dans la journée (et l'afficher dans les stats si besoin)
+        private Double extraKcalBurned;
     }
 }
