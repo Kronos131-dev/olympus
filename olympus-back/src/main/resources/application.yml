@@ -24,7 +24,7 @@ spring:
 
   ai:
     mistralai:
-      api-key: ${MISTRAL_API_KEY:REDACTED-ROTATED-MISTRAL-KEY}
+      api-key: ${MISTRAL_API_KEY}
       chat:
         options:
           model: mistral-small-latest
