@@ -1,16 +1,16 @@
 <resources>
-    <string name="app_name">Mons Olympus</string>
-    <string name="imperium">Mons Olympus</string>
-    <string name="daily_conquest">DAILY CONQUEST</string>
-    <string name="ledger_of_power">The Ledger of Power</string>
-    <string name="consumed">CONSUMED</string>
+    <string name="app_name">Olympus</string>
+    <string name="imperium">Olympus</string>
+    <string name="daily_conquest">RÉSUMÉ DU JOUR</string>
+    <string name="ledger_of_power">Journal Quotidien</string>
+    <string name="consumed">CONSOMMÉ</string>
     <string name="kcal_unit">KCAL</string>
     <string name="target_kcal">/ 2,500 KCAL</string>
     <string name="calories_value">1,840</string>
 
-    <string name="protein">PROTEIN</string>
-    <string name="carbs">CARBS</string>
-    <string name="fats">FATS</string>
+    <string name="protein">PROTÉINES</string>
+    <string name="carbs">GLUCIDES</string>
+    <string name="fats">LIPIDES</string>
 
     <string name="protein_value">142g</string>
     <string name="protein_target">/ 180</string>
@@ -20,10 +20,10 @@
     <string name="fats_target">/ 85</string>
 
     <string name="add_meal">AJOUTER UN REPAS</string>
-    <string name="scan_barcode">SCAN BARCODE</string>
-    <string name="manual_entry">MANUAL ENTRY</string>
+    <string name="scan_barcode">SCANNER CODE-BARRE</string>
+    <string name="manual_entry">SAISIE MANUELLE</string>
 
-    <string name="recent_provisions">Recent Provisions</string>
+    <string name="recent_provisions">Consommations Récentes</string>
 
     <string name="menu_home">ACCUEIL</string>
     <string name="menu_meals">REPAS</string>
@@ -32,7 +32,7 @@
 
     <!-- Meals Screen -->
     <string name="meals_title">MES REPAS\nENREGISTRÉS</string>
-    <string name="meals_subtitle">BIBLIOTHÈQUE DES FESTINS DE CONQUÊTE</string>
+    <string name="meals_subtitle">LISTE DES REPAS PRÉDÉFINIS</string>
     <string name="consume">CONSOMMER</string>
     <string name="new_meal">+ NOUVEAU REPAS</string>
     <string name="label_protein">PROTÉINES</string>
@@ -40,48 +40,48 @@
     <string name="label_fats">LIPIDES</string>
 
     <!-- Profile Screen -->
-    <string name="profile_status">CENTURION STATUS</string>
-    <string name="profile_name">LEGIONNAIRE\nALEX</string>
-    <string name="label_objective">CURRENT OBJECTIVE</string>
+    <string name="profile_status">STATUT DU PROFIL</string>
+    <string name="profile_name">Utilisateur</string>
+    <string name="label_objective">OBJECTIF ACTUEL</string>
     <string name="value_objective">Prise de masse</string>
-    <string name="label_activity">ACTIVITY LOAD</string>
-    <string name="value_activity">5/7 Intensity</string>
-    <string name="edit_biometrics">EDITER LES BIOMÉTRIQUES</string>
+    <string name="label_activity">NIVEAU D\'ACTIVITÉ</string>
+    <string name="value_activity">Intense</string>
+    <string name="edit_biometrics">MODIFIER LES INFOS</string>
 
-    <string name="label_height">HEIGHT</string>
+    <string name="label_height">TAILLE</string>
     <string name="value_height">188</string>
     <string name="unit_cm">CM</string>
 
-    <string name="label_weight">WEIGHT</string>
+    <string name="label_weight">POIDS</string>
     <string name="value_weight">92.4</string>
     <string name="unit_kg">KG</string>
 
-    <string name="label_bodyfat">BODY FAT</string>
+    <string name="label_bodyfat">MASSE GRASSE</string>
     <string name="value_bodyfat">14.2</string>
     <string name="unit_percent">%</string>
 
-    <string name="conquest_logs">Conquest Logs</string>
-    <string name="view_all_campaigns">VIEW ALL CAMPAIGNS</string>
+    <string name="conquest_logs">Historique</string>
+    <string name="view_all_campaigns">VOIR TOUT</string>
 
-    <string name="label_daily_protein">DAILY PROTEIN INTAKE</string>
+    <string name="label_daily_protein">PROTÉINES QUOTIDIENNES</string>
     <string name="value_daily_protein">165g / 220g</string>
-    <string name="desc_protein">Building the foundations of the empire.</string>
+    <string name="desc_protein">Construction musculaire.</string>
 
-    <string name="label_volume_growth">VOLUME GROWTH</string>
+    <string name="label_volume_growth">ÉVOLUTION</string>
     <string name="value_volume_growth">+4.2 KG / Mo</string>
-    <string name="desc_volume">Steady ascent to the pantheon.</string>
+    <string name="desc_volume">Progression constante.</string>
 
     <!-- Stats Screen -->
-    <string name="ascension">ASCENSION</string>
+    <string name="ascension">PROGRESSION</string>
     <string name="current_status">STATUT ACTUEL</string>
     <string name="current_weight">84.2</string>
-    <string name="stats_description">Votre progression vers l\'excellence physique est constante. Chaque gramme perdu est une victoire gravée dans le marbre.</string>
+    <string name="stats_description">Votre évolution physique au fil du temps.</string>
     <string name="label_enter_weight">ENTRER NOUVEAU POIDS</string>
     <string name="placeholder_weight">00.0</string>
     <string name="validate">VALIDER</string>
-    <string name="weight_flow">Weight Flow</string>
+    <string name="weight_flow">Évolution du Poids</string>
     <string name="weight_diff">-1.2 KG | 7j</string>
-    <string name="nutritional_trends">Nutritional Trends</string>
+    <string name="nutritional_trends">Tendances Nutritionnelles</string>
     <string name="max_force">Force Maximale</string>
     <string name="total_volume_label">VOLUME TOTAL SOULEVÉ</string>
     <string name="total_volume_value">12,450</string>
@@ -93,7 +93,7 @@
     <string name="deep_sleep">SOMMEIL PROFOND</string>
     <string name="recovery_value">7h 20</string>
     <string name="unit_minutes">MN</string>
-    <string name="ready_challenge">Prêt pour le\nprochain défi ?</string>
-    <string name="challenge_desc">Votre corps s\'adapte à la charge. Il est temps d\'augmenter l\'intensité pour continuer votre ascension vers la perfection physique.</string>
+    <string name="ready_challenge">Prêt pour le\nprochain entraînement ?</string>
+    <string name="challenge_desc">Restez constant pour atteindre vos objectifs.</string>
     <string name="start_session">DÉMARRER SÉANCE</string>
 </resources>

@@ -39,10 +39,18 @@ public class LogEntry {
     @Column(nullable = false)
     private LocalDateTime consumedAt;
 
+    // True si l'entrée provient de la matérialisation automatique d'un plan de repas
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean fromPlan = false;
+
     @PrePersist
     protected void onCreate() {
         if (this.consumedAt == null) {
             this.consumedAt = LocalDateTime.now();
+        }
+        if (this.fromPlan == null) {
+            this.fromPlan = false;
         }
     }
 }

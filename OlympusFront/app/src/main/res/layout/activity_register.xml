@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="@color/surface"
-        paddingHorizontal="16dp"
+        android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/newsreader"
             android:letterSpacing="0.2"
-            android:text="IMPERIUM"
+            android:text="OLYMPUS"
             android:textColor="@color/secondary"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/newsreader"
-                android:text="LE PACTE\nD'ACIER"
+                android:text="CRÉATION\nDE COMPTE"
                 android:textColor="@color/secondary"
                 android:textSize="48sp"
                 android:textStyle="bold" />
@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:fontFamily="@font/manrope"
-                android:text="Inscrivez vos attributs dans la pierre pour que la légion puisse forger votre destin.\nVotre ascension commence ici."
+                android:text="Renseignez vos informations pour générer votre profil métabolique et vos cibles nutritionnelles."
                 android:textColor="@color/marble_white"
                 android:textSize="14sp"
                 android:lineSpacingExtra="4dp" />
@@ -88,7 +88,7 @@
                 android:layout_marginTop="48dp"
                 android:fontFamily="@font/newsreader"
                 android:letterSpacing="0.1"
-                android:text="IDENTIFIANT DE LÉGION"
+                android:text="IDENTIFIANTS"
                 android:textColor="@color/secondary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -100,14 +100,14 @@
                 android:background="@color/outline_variant"
                 android:alpha="0.2" />
 
-            <!-- Email -->
+            <!-- Email -> Pseudo -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:fontFamily="@font/manrope"
                 android:letterSpacing="0.1"
-                android:text="EMAIL"
+                android:text="PSEUDO"
                 android:textColor="@color/secondary"
                 android:textSize="10sp"
                 android:textStyle="bold" />
@@ -119,8 +119,8 @@
                 android:layout_marginTop="8dp"
                 android:background="@color/surface_container_lowest"
                 android:fontFamily="@font/newsreader"
-                android:hint="email@imperium.com"
-                android:inputType="textEmailAddress"
+                android:hint="pseudo"
+                android:inputType="text"
                 android:paddingHorizontal="16dp"
                 android:textColor="@color/marble_white"
                 android:textColorHint="@color/outline_variant"
@@ -161,7 +161,7 @@
                 android:layout_marginTop="48dp"
                 android:fontFamily="@font/newsreader"
                 android:letterSpacing="0.1"
-                android:text="LE GABARIT"
+                android:text="BIOMÉTRIE"
                 android:textColor="@color/secondary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -172,6 +172,91 @@
                 android:layout_marginTop="8dp"
                 android:background="@color/outline_variant"
                 android:alpha="0.2" />
+
+            <!-- Date de naissance -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/manrope"
+                android:letterSpacing="0.1"
+                android:text="DATE DE NAISSANCE"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_birth_day"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1"
+                    android:background="@color/surface_container_lowest"
+                    android:fontFamily="@font/newsreader"
+                    android:hint="JJ"
+                    android:inputType="number"
+                    android:gravity="center"
+                    android:maxLength="2"
+                    android:textColor="@color/marble_white"
+                    android:textColorHint="@color/outline_variant"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingHorizontal="8dp"
+                    android:text="/"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="24sp" />
+
+                <EditText
+                    android:id="@+id/et_birth_month"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1"
+                    android:background="@color/surface_container_lowest"
+                    android:fontFamily="@font/newsreader"
+                    android:hint="MM"
+                    android:inputType="number"
+                    android:gravity="center"
+                    android:maxLength="2"
+                    android:textColor="@color/marble_white"
+                    android:textColorHint="@color/outline_variant"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingHorizontal="8dp"
+                    android:text="/"
+                    android:textColor="@color/outline_variant"
+                    android:textSize="24sp" />
+
+                <EditText
+                    android:id="@+id/et_birth_year"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1.5"
+                    android:background="@color/surface_container_lowest"
+                    android:fontFamily="@font/newsreader"
+                    android:hint="AAAA"
+                    android:inputType="number"
+                    android:gravity="center"
+                    android:maxLength="4"
+                    android:textColor="@color/marble_white"
+                    android:textColorHint="@color/outline_variant"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
+            </LinearLayout>
 
             <!-- Taille -->
             <TextView
@@ -234,7 +319,7 @@
                 android:layout_marginTop="24dp"
                 android:fontFamily="@font/manrope"
                 android:letterSpacing="0.1"
-                android:text="NATURE"
+                android:text="GENRE"
                 android:textColor="@color/secondary"
                 android:textSize="10sp"
                 android:textStyle="bold" />
@@ -253,7 +338,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:fontFamily="@font/newsreader"
-                    android:text="MASCULIN"
+                    android:text="HOMME"
                     android:textColor="@color/secondary"
                     app:cornerRadius="0dp"
                     app:strokeColor="@color/outline_variant" />
@@ -266,7 +351,7 @@
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:fontFamily="@font/newsreader"
-                    android:text="FÉMININ"
+                    android:text="FEMME"
                     android:textColor="@color/outline_variant"
                     app:cornerRadius="0dp"
                     app:strokeColor="@color/outline_variant" />
@@ -279,7 +364,7 @@
                 android:layout_marginTop="48dp"
                 android:fontFamily="@font/newsreader"
                 android:letterSpacing="0.1"
-                android:text="LA VOCATION"
+                android:text="OBJECTIF"
                 android:textColor="@color/secondary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -291,23 +376,12 @@
                 android:background="@color/outline_variant"
                 android:alpha="0.2" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:fontFamily="@font/manrope"
-                android:letterSpacing="0.1"
-                android:text="L'IDÉAL"
-                android:textColor="@color/secondary"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
             <!-- Option cards -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/ideal_card_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="24dp"
                 app:cardBackgroundColor="@color/surface_container_low"
                 app:cardCornerRadius="0dp"
                 app:strokeColor="@color/secondary"
@@ -334,7 +408,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="@font/manrope"
-                        android:text="Bâtissez une stature de colosse."
+                        android:text="Surplus calorique (+10%)"
                         android:textColor="@color/outline_variant"
                         android:textSize="11sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -381,7 +455,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="@font/manrope"
-                        android:text="Affûtez vos muscles tel un gladiateur."
+                        android:text="Déficit calorique (-15%)"
                         android:textColor="@color/outline_variant"
                         android:textSize="11sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -398,72 +472,71 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/ideal_card_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/surface_container_lowest"
+                app:cardCornerRadius="0dp"
+                app:strokeWidth="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/ideal_title_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/newsreader"
+                        android:text="MAINTIEN"
+                        android:textColor="@color/outline_variant"
+                        android:textSize="20sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="@font/manrope"
+                        android:text="Stabilité (Aucun ajustement)"
+                        android:textColor="@color/outline_variant"
+                        android:textSize="11sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/ideal_title_3" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_preferences"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/outline_variant" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:fontFamily="@font/manrope"
                 android:letterSpacing="0.1"
-                android:text="GRADE DE BATAILLE"
+                android:text="NIVEAU D'ACTIVITÉ PHYSIQUE"
                 android:textColor="@color/secondary"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <Spinner
+                android:id="@+id/spinner_activity_level"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:layout_marginTop="8dp"
                 android:background="@color/surface_container_lowest"
-                android:paddingHorizontal="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/newsreader"
-                    android:text="Centurion (5j/7 intensif)"
-                    android:textColor="@color/marble_white"
-                    android:textSize="18sp"
-                    android:textStyle="italic"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/arrow_down_float"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/outline_variant" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <!-- Quote Block -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="48dp"
-                android:layout_marginBottom="24dp"
-                android:background="@color/surface_container_low">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:alpha="0.3"
-                    android:background="@drawable/ring_progress" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:fontFamily="@font/newsreader"
-                    android:gravity="center"
-                    android:padding="32dp"
-                    android:text="&quot;La force ne vient pas d'une capacité physique. Elle vient d'une volonté indomptable.&quot;"
-                    android:textColor="@color/marble_white"
-                    android:textSize="18sp"
-                    android:textStyle="italic" />
-            </FrameLayout>
+                android:paddingHorizontal="16dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
@@ -483,7 +556,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="@color/secondary_container"
             android:fontFamily="@font/newsreader"
-            android:text="SCELLER LE PACTE"
+            android:text="S\'INSCRIRE"
             android:textColor="@color/on_secondary"
             android:textSize="18sp"
             android:textStyle="bold"

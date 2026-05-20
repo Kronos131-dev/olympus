@@ -52,8 +52,11 @@ public class FoodItemService {
     public List<FoodItemResponse> searchFoodItemsByName(String name) {
         log.info("Recherche textuelle pour l'aliment : {}", name);
 
-        // Recherche d'abord dans la base locale (insensible à la casse)
-        List<FoodItem> localResults = foodItemRepository.findByNameContainingIgnoreCase(name);
+        // Recherche d'abord dans la base locale (insensible à la casse, trié par longueur pour avoir les correspondances exactes en premier)
+        List<FoodItem> localResults = foodItemRepository.searchByNameOrderedByLength(name)
+                .stream()
+                .limit(50) // Limite pour ne pas surcharger le front
+                .collect(Collectors.toList());
         
         // Si on a des résultats locaux, on les retourne en priorité (on peut aussi choisir de toujours chercher sur OFF)
         if (!localResults.isEmpty()) {
@@ -72,11 +75,12 @@ public class FoodItemService {
             return List.of(); // Retourne une liste vide au lieu de lever une exception
         }
 
-        // On sauvegarde les résultats de la recherche dans notre base pour les prochaines requêtes (Cache asynchrone idéalement, ici on le fait de suite)
+        // On sauvegarde les résultats de la recherche dans notre base pour les prochaines requêtes
         List<FoodItem> savedResults = foodItemRepository.saveAll(externalResults);
         
         return savedResults.stream()
                 .map(foodItemMapper::toResponse)
+                .limit(50)
                 .collect(Collectors.toList());
     }
 
@@ -87,8 +91,8 @@ public class FoodItemService {
             return List.of(); // On ne cherche rien si on a tapé moins de 2 lettres
         }
 
-        // On cherche, on limite à 50 résultats, et on mappe vers le DTO de réponse
-        return foodItemRepository.findByNameContainingIgnoreCaseAndSource(query.trim(), FoodSource.CIQUAL)
+        // Recherche intelligente FTS + Trigrammes limités nativement en BDD à 50
+        return foodItemRepository.searchSmartCiqual(query.trim(), FoodSource.CIQUAL.name())
                 .stream()
                 .limit(50)
                 .map(foodItemMapper::toResponse)

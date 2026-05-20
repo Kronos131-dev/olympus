@@ -6,6 +6,7 @@ public class LogEntryResponse {
     private MealPresetResponse mealPreset;
     private Double quantityGrams;
     private String consumedAt;
+    private Boolean fromPlan;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -17,4 +18,6 @@ public class LogEntryResponse {
     public void setQuantityGrams(Double quantityGrams) { this.quantityGrams = quantityGrams; }
     public String getConsumedAt() { return consumedAt; }
     public void setConsumedAt(String consumedAt) { this.consumedAt = consumedAt; }
+    public Boolean getFromPlan() { return fromPlan; }
+    public void setFromPlan(Boolean fromPlan) { this.fromPlan = fromPlan; }
 }

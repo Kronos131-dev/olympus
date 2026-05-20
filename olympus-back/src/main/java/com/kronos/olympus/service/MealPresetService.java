@@ -9,12 +9,14 @@ import com.kronos.olympus.model.MealIngredient;
 import com.kronos.olympus.model.MealPreset;
 import com.kronos.olympus.model.User;
 import com.kronos.olympus.repository.FoodItemRepository;
+import com.kronos.olympus.repository.MealIngredientRepository;
 import com.kronos.olympus.repository.MealPresetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,49 +27,78 @@ public class MealPresetService {
 
     private final MealPresetRepository mealPresetRepository;
     private final FoodItemRepository foodItemRepository;
+    private final MealIngredientRepository mealIngredientRepository;
     private final MealPresetMapper mealPresetMapper;
 
     @Transactional
     public MealPresetResponse createMealPreset(User user, MealPresetRequest request) {
         log.info("Création d'un nouveau repas pré-enregistré '{}' pour l'utilisateur ID: {}", request.getName(), user.getId());
 
-        // Création de l'entité mère (le repas)
         MealPreset mealPreset = MealPreset.builder()
                 .user(user)
                 .name(request.getName())
                 .build();
 
-        // Création de la liste des ingrédients
         List<MealIngredient> ingredients = request.getIngredients().stream().map(ingReq -> {
-            // Vérification que l'aliment existe bien dans notre base locale (cache)
             FoodItem foodItem = foodItemRepository.findById(ingReq.getFoodItemId())
-                    .orElseThrow(() -> new EntityNotFoundException("Aliment introuvable avec l'ID: " + ingReq.getFoodItemId() + ". Veuillez le scanner d'abord."));
+                    .orElseThrow(() -> new EntityNotFoundException("Aliment introuvable avec l'ID: " + ingReq.getFoodItemId()));
             
             return MealIngredient.builder()
-                    .mealPreset(mealPreset) // Lien bidirectionnel
+                    .mealPreset(mealPreset)
                     .foodItem(foodItem)
                     .quantityGrams(ingReq.getQuantityGrams())
                     .build();
         }).collect(Collectors.toList());
 
-        // Ajout des ingrédients au repas
         mealPreset.setIngredients(ingredients);
-        
-        // Sauvegarde en cascade (grâce à CascadeType.ALL sur la relation dans MealPreset)
         MealPreset savedPreset = mealPresetRepository.save(mealPreset);
         
-        return mealPresetMapper.toResponse(savedPreset);
+        return mapToResponseWithTotals(savedPreset);
+    }
+
+    @Transactional
+    public MealPresetResponse updateMealPreset(User user, Long presetId, MealPresetRequest request) {
+        log.info("Mise à jour du repas pré-enregistré '{}' pour l'utilisateur ID: {}", request.getName(), user.getId());
+
+        MealPreset mealPreset = mealPresetRepository.findById(presetId)
+                .orElseThrow(() -> new EntityNotFoundException("Repas pré-enregistré introuvable avec l'ID: " + presetId));
+
+        if (!mealPreset.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier ce repas");
+        }
+
+        mealPreset.setName(request.getName());
+
+        // Suppression explicite des anciens ingrédients dans la table
+        mealIngredientRepository.deleteByMealPresetId(mealPreset.getId());
+        mealPreset.getIngredients().clear();
+        mealPresetRepository.saveAndFlush(mealPreset);
+
+        // Ajout des nouveaux
+        List<MealIngredient> newIngredients = request.getIngredients().stream().map(ingReq -> {
+            FoodItem foodItem = foodItemRepository.findById(ingReq.getFoodItemId())
+                    .orElseThrow(() -> new EntityNotFoundException("Aliment introuvable avec l'ID: " + ingReq.getFoodItemId()));
+            return MealIngredient.builder()
+                    .mealPreset(mealPreset)
+                    .foodItem(foodItem)
+                    .quantityGrams(ingReq.getQuantityGrams())
+                    .build();
+        }).collect(Collectors.toList());
+
+        mealPreset.getIngredients().addAll(newIngredients);
+        MealPreset savedPreset = mealPresetRepository.save(mealPreset);
+
+        return mapToResponseWithTotals(savedPreset);
     }
 
     @Transactional(readOnly = true)
     public List<MealPresetResponse> getUserMealPresets(Long userId) {
         log.info("Récupération de tous les repas pré-enregistrés de l'utilisateur ID: {}", userId);
         
-        // La méthode findAllByUserId utilise un @EntityGraph pour charger les ingrédients efficacement en une seule requête SQL
         List<MealPreset> presets = mealPresetRepository.findAllByUserId(userId);
         
         return presets.stream()
-                .map(mealPresetMapper::toResponse)
+                .map(this::mapToResponseWithTotals)
                 .collect(Collectors.toList());
     }
 
@@ -76,12 +107,11 @@ public class MealPresetService {
         MealPreset preset = mealPresetRepository.findById(presetId)
                 .orElseThrow(() -> new EntityNotFoundException("Repas pré-enregistré introuvable avec l'ID: " + presetId));
                 
-        // Vérification de sécurité pour s'assurer qu'un utilisateur n'accède pas au repas d'un autre
         if (!preset.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("Vous n'êtes pas autorisé à voir ce repas");
         }
         
-        return mealPresetMapper.toResponse(preset);
+        return mapToResponseWithTotals(preset);
     }
 
     @Transactional
@@ -91,12 +121,41 @@ public class MealPresetService {
         MealPreset preset = mealPresetRepository.findById(presetId)
                 .orElseThrow(() -> new EntityNotFoundException("Repas pré-enregistré introuvable avec l'ID: " + presetId));
                 
-        // Vérification de sécurité
         if (!preset.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("Vous n'êtes pas autorisé à supprimer ce repas");
         }
         
-        // Grâce au orphanRemoval = true dans l'entité, la suppression du preset supprimera automatiquement les MealIngredients liés
         mealPresetRepository.delete(preset);
+    }
+
+    // Calcul manuel sûr et certain des totaux pour éviter les problèmes de MapStruct
+    private MealPresetResponse mapToResponseWithTotals(MealPreset preset) {
+        MealPresetResponse response = mealPresetMapper.toResponse(preset);
+        
+        double totalKcal = 0;
+        double totalProteins = 0;
+        double totalCarbs = 0;
+        double totalFats = 0;
+
+        if (preset.getIngredients() != null) {
+            for (MealIngredient ingredient : preset.getIngredients()) {
+                if (ingredient.getFoodItem() != null && ingredient.getQuantityGrams() != null) {
+                    double ratio = ingredient.getQuantityGrams() / 100.0;
+                    FoodItem fi = ingredient.getFoodItem();
+                    
+                    totalKcal += (fi.getKcal100g() != null ? fi.getKcal100g() : 0.0) * ratio;
+                    totalProteins += (fi.getProteins100g() != null ? fi.getProteins100g() : 0.0) * ratio;
+                    totalCarbs += (fi.getCarbs100g() != null ? fi.getCarbs100g() : 0.0) * ratio;
+                    totalFats += (fi.getFats100g() != null ? fi.getFats100g() : 0.0) * ratio;
+                }
+            }
+        }
+
+        response.setTotalKcal(Math.round(totalKcal * 10.0) / 10.0);
+        response.setTotalProteins(Math.round(totalProteins * 10.0) / 10.0);
+        response.setTotalCarbs(Math.round(totalCarbs * 10.0) / 10.0);
+        response.setTotalFats(Math.round(totalFats * 10.0) / 10.0);
+
+        return response;
     }
 }

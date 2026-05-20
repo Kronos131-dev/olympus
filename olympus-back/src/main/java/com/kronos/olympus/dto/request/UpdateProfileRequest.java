@@ -1,23 +1,29 @@
 package com.kronos.olympus.dto.request;
 
 import com.kronos.olympus.model.enums.ActivityLevel;
+import com.kronos.olympus.model.enums.AiProvider;
 import com.kronos.olympus.model.enums.Goal;
-import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class UpdateProfileRequest {
-
-    @Positive(message = "Le poids doit être positif")
-    private Double weightKg;
-
+    private Double currentWeightKg;
+    private Double heightCm;
+    private LocalDate birthDate;
     private ActivityLevel activityLevel;
-
     private Goal goal;
+    
+    // Pour activer/désactiver le calcul automatique
+    private Boolean autoCalculateTargets;
+    
+    // Si autoCalculateTargets est false, l'utilisateur peut set ces quotas
+    private Double manualTargetKcal;
+    private Double manualTargetProteins;
+    private Double manualTargetCarbs;
+    private Double manualTargetFats;
+
+    // Préférence de fournisseur d'IA (MISTRAL / GEMINI)
+    private AiProvider aiProvider;
 }

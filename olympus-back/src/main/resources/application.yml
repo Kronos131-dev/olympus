@@ -3,7 +3,6 @@ spring:
     name: olympus
 
   datasource:
-    # On utilise les variables d'environnement définies dans le docker-compose, ou on fallback sur localhost pour le dev depuis l'IDE
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/olympus_db}
     username: ${SPRING_DATASOURCE_USERNAME:olympus_user}
     password: ${SPRING_DATASOURCE_PASSWORD:olympus_password}
@@ -12,23 +11,44 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update # Met à jour le schéma automatiquement en dev. En prod, utiliser 'validate' avec Flyway.
+      ddl-auto: update # Keep update for dev
     show-sql: true
     properties:
       hibernate:
         format_sql: true
 
-  # Flyway configuration (Désactivé par défaut si ddl-auto est à update, mais prêt pour la prod)
+  # On active Flyway pour pouvoir injecter les extensions PostgreSQL
   flyway:
-    enabled: false
+    enabled: true
     baseline-on-migrate: true
+
+  ai:
+    mistralai:
+      api-key: ${MISTRAL_API_KEY:REDACTED-ROTATED-MISTRAL-KEY}
+      chat:
+        options:
+          model: mistral-small-latest
+          temperature: 0.0
+
+  # Taille des uploads (photos envoyées à l'agent IA)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+# Configuration de l'agent IA conversationnel
+olympus:
+  agent:
+    mistral-model: ${OLYMPUS_AGENT_MISTRAL_MODEL:mistral-small-latest}
+    # Clé d'API Google Gemini (Generative Language API). Vide = Gemini désactivé, Mistral utilisé par défaut.
+    gemini-api-key: ${GEMINI_API_KEY:}
+    gemini-model: ${OLYMPUS_AGENT_GEMINI_MODEL:gemini-2.0-flash}
 
 server:
   port: 8080
 
-# Logging
 logging:
   level:
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE # Affiche les paramètres des requêtes SQL
+    org.hibernate.orm.jdbc.bind: TRACE

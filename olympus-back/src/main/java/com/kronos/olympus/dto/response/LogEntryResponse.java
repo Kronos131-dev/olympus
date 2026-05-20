@@ -20,4 +20,7 @@ public class LogEntryResponse {
     
     private Double quantityGrams;
     private LocalDateTime consumedAt;
+
+    // True si l'entrée a été générée automatiquement depuis un plan de repas
+    private Boolean fromPlan;
 }

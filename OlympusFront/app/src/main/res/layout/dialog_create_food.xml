@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NOM DE L'ALIMENT"
+        android:textColor="@color/secondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/manrope" />
+
+    <EditText
+        android:id="@+id/et_custom_name"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/surface_container_lowest"
+        android:inputType="text"
+        android:hint="Ex: Mon Plat"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/marble_white" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="POUR 100G DE PRODUIT:"
+        android:textColor="@color/outline_variant"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:fontFamily="@font/manrope" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CALORIES"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/manrope" />
+            <EditText
+                android:id="@+id/et_custom_kcal"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container_lowest"
+                android:inputType="numberDecimal"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/marble_white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PROTÉINES (g)"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/manrope" />
+            <EditText
+                android:id="@+id/et_custom_prot"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container_lowest"
+                android:inputType="numberDecimal"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/marble_white" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GLUCIDES (g)"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/manrope" />
+            <EditText
+                android:id="@+id/et_custom_carbs"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container_lowest"
+                android:inputType="numberDecimal"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/marble_white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LIPIDES (g)"
+                android:textColor="@color/secondary"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/manrope" />
+            <EditText
+                android:id="@+id/et_custom_fats"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container_lowest"
+                android:inputType="numberDecimal"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/marble_white" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

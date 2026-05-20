@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/transparent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NOMBRE DE PAS"
+        android:textColor="@color/secondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/manrope" />
+
+    <EditText
+        android:id="@+id/et_steps"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/surface_container_lowest"
+        android:inputType="number"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/marble_white" />
+
+    <TextView
+        android:id="@+id/tv_step_goal_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Objectif de pas par défaut : 8000"
+        android:textColor="@color/outline_variant"
+        android:textSize="11sp"
+        android:textStyle="italic"
+        android:fontFamily="@font/manrope" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="DURÉE D'ENTRAÎNEMENT (MINUTES)"
+        android:textColor="@color/secondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/manrope" />
+
+    <EditText
+        android:id="@+id/et_workout"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/surface_container_lowest"
+        android:inputType="number"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/marble_white" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="AUTRES CALORIES BRÛLÉES (ex: Cardio)"
+        android:textColor="@color/secondary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/manrope" />
+
+    <EditText
+        android:id="@+id/et_manual_kcal_burned"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/surface_container_lowest"
+        android:inputType="number"
+        android:hint="250"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/marble_white" />
+
+</LinearLayout>

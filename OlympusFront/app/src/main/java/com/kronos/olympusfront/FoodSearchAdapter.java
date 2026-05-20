@@ -1,8 +1,12 @@
 package com.kronos.olympusfront;
 
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -60,17 +64,43 @@ public class FoodSearchAdapter extends RecyclerView.Adapter<FoodSearchAdapter.Fo
             binding.foodName.setText(foodItem.getName());
             binding.foodSource.setText("SOURCE: " + foodItem.getSource());
             binding.foodMacros.setText(foodItem.getKcal100g() + " KCAL\n(100g)");
+            
+            // Si l'aliment vient de l'IA et a un poids estimé, on pré-remplit avec ce poids pour avoir le total
+            if ("AI".equals(foodItem.getSource()) && foodItem.getEstimatedWeightGrams() != null) {
+                 binding.etQuantity.setText(String.valueOf(foodItem.getEstimatedWeightGrams().intValue()));
+            } else {
+                 binding.etQuantity.setText(""); // Vidé par défaut pour Ciqual et autres
+            }
 
-            binding.btnAddIngredient.setOnClickListener(v -> {
-                String qtyStr = binding.etQuantity.getText().toString();
-                if (!qtyStr.isEmpty()) {
-                    double qty = Double.parseDouble(qtyStr);
-                    listener.onAddIngredient(foodItem, qty);
-                    binding.etQuantity.setText(""); // Clear after adding
-                } else {
-                    binding.etQuantity.setError("!");
+            // Gestion du clic classique sur le bouton
+            binding.btnAddIngredient.setOnClickListener(v -> addIngredientAndHideKeyboard(foodItem, v));
+
+            // Gestion de l'action "Terminé" (Enter / Done) sur le clavier
+            binding.etQuantity.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_DONE || 
+                    (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                    addIngredientAndHideKeyboard(foodItem, v);
+                    return true; // L'événement est consommé
                 }
+                return false;
             });
+        }
+
+        private void addIngredientAndHideKeyboard(FoodItemResponse foodItem, View view) {
+            String qtyStr = binding.etQuantity.getText().toString();
+            if (!qtyStr.isEmpty()) {
+                double qty = Double.parseDouble(qtyStr);
+                listener.onAddIngredient(foodItem, qty);
+                binding.etQuantity.setText(""); // Clear after adding
+                
+                // Masquer le clavier virtuel
+                InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            } else {
+                binding.etQuantity.setError("!");
+            }
         }
     }
 }
