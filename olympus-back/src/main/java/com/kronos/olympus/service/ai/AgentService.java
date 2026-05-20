@@ -183,6 +183,10 @@ public class AgentService {
                 + "de seulement décrire ce que tu ferais.\n"
                 + "Quand l'utilisateur décrit un repas ou envoie une photo, identifie chaque aliment et "
                 + "ajoute-le au journal via l'outil log_food (en estimant les quantités si besoin).\n"
+                + "SOURCE DES DONNÉES NUTRITIONNELLES : cherche TOUJOURS d'abord l'aliment en base via "
+                + "log_food ou search_food_items — ces outils interrogent en priorité la base officielle "
+                + "CIQUAL, puis Open Food Facts. Utilise log_estimated_food (en estimant toi-même les "
+                + "valeurs pour 100g) UNIQUEMENT si l'aliment est introuvable en base.\n"
                 + "Si une information essentielle manque, demande une précision à l'utilisateur.\n"
                 + "Réponds toujours en français, de manière concise, claire et bienveillante.";
     }

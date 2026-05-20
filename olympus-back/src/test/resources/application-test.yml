@@ -1,0 +1,21 @@
+# Profil de test : Flyway désactivé (les migrations V2-V5 supposent les tables cœur
+# déjà créées par Hibernate). Hibernate bâtit tout le schéma en create-drop.
+# Les extensions PostgreSQL unaccent / pg_trgm doivent être créées au préalable
+# sur la base de test (étape `psql` du pipeline CI, ou docker exec en local).
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  # Valeur factice (PAS un vrai secret) : l'auto-config Spring AI exige une clé
+  # non vide pour charger le contexte. Les tests n'appellent jamais l'API Mistral.
+  ai:
+    mistralai:
+      api-key: test-key-not-used
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN

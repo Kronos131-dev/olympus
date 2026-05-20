@@ -2,8 +2,10 @@ package com.kronos.olympus;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-// On désactive le test de chargement complet du contexte si la base de données n'est pas lancée
+// Profil "test" : Flyway off, schéma bâti par Hibernate (voir application-test.yml)
+@ActiveProfiles("test")
 @SpringBootTest(classes = OlympusApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OlympusApplicationTests {
 
