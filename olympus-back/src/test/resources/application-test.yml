@@ -1,0 +1,16 @@
+# Profil de test : Flyway désactivé (les migrations V2-V5 supposent les tables cœur
+# déjà créées par Hibernate). Hibernate bâtit tout le schéma en create-drop.
+# Les extensions PostgreSQL unaccent / pg_trgm doivent être créées au préalable
+# sur la base de test (étape `psql` du pipeline CI, ou docker exec en local).
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN

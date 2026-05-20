@@ -1,0 +1,7 @@
+# Garde le contexte de build Docker léger
+target/
+.git/
+.idea/
+.mvn/wrapper/maven-wrapper.jar
+*.md
+docker-compose*.yml

@@ -1,0 +1,13 @@
+# Profil de production (activé par le Dockerfile : SPRING_PROFILES_ACTIVE=prod).
+# ddl-auto reste en "update" : les tables cœur ne sont pas créées par Flyway.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+logging:
+  level:
+    org.springframework.web: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.orm.jdbc.bind: INFO
