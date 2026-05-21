@@ -9,6 +9,11 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+  # Valeur factice (PAS un vrai secret) : l'auto-config Spring AI exige une clé
+  # non vide pour charger le contexte. Les tests n'appellent jamais l'API Mistral.
+  ai:
+    mistralai:
+      api-key: test-key-not-used
 
 logging:
   level:
