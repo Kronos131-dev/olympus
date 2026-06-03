@@ -12,6 +12,7 @@ import com.kronos.olympusfront.network.dto.FoodItemRequest;
 import com.kronos.olympusfront.network.dto.FoodItemResponse;
 import com.kronos.olympusfront.network.dto.LogEntryRequest;
 import com.kronos.olympusfront.network.dto.LogoutRequest;
+import com.kronos.olympusfront.network.dto.MealPlanGenerationRequest;
 import com.kronos.olympusfront.network.dto.MealPlanRequest;
 import com.kronos.olympusfront.network.dto.MealPlanResponse;
 import com.kronos.olympusfront.network.dto.MealPresetRequest;
@@ -20,6 +21,7 @@ import com.kronos.olympusfront.network.dto.RefreshTokenRequest;
 import com.kronos.olympusfront.network.dto.RegisterRequest;
 import com.kronos.olympusfront.network.dto.UpdateActivityRequest;
 import com.kronos.olympusfront.network.dto.UserResponse;
+import com.kronos.olympusfront.network.dto.WeeklyPlanRequest;
 
 import java.util.List;
 
@@ -79,6 +81,15 @@ public interface ApiService {
 
     @DELETE("/api/v1/meal-plans/{id}")
     Call<Void> deleteMealPlan(@Path("id") Long id);
+
+    @GET("/api/v1/meal-plans/weekly")
+    Call<MealPlanResponse> getWeeklyPlan();
+
+    @PUT("/api/v1/meal-plans/weekly")
+    Call<MealPlanResponse> saveWeeklyPlan(@Body WeeklyPlanRequest request);
+
+    @POST("/api/v1/meal-plans/generate")
+    Call<MealPlanResponse> generateMealPlan(@Body MealPlanGenerationRequest request);
 
     @POST("/api/v1/daily-logs/entries")
     Call<DailyLogResponse> addLogEntry(@Body LogEntryRequest request);

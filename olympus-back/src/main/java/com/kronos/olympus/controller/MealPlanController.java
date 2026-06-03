@@ -1,8 +1,11 @@
 package com.kronos.olympus.controller;
 
+import com.kronos.olympus.dto.request.MealPlanGenerationRequest;
 import com.kronos.olympus.dto.request.MealPlanRequest;
+import com.kronos.olympus.dto.request.WeeklyPlanRequest;
 import com.kronos.olympus.dto.response.MealPlanResponse;
 import com.kronos.olympus.security.UserDetailsImpl;
+import com.kronos.olympus.service.mealplan.MealPlanGenerationService;
 import com.kronos.olympus.service.mealplan.MealPlanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import java.util.List;
 public class MealPlanController {
 
     private final MealPlanService mealPlanService;
+    private final MealPlanGenerationService mealPlanGenerationService;
 
     @PostMapping
     public ResponseEntity<MealPlanResponse> createMealPlan(
@@ -34,6 +38,31 @@ public class MealPlanController {
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return ResponseEntity.ok(mealPlanService.getUserMealPlans(userDetails.getUser().getId()));
+    }
+
+    @GetMapping("/weekly")
+    public ResponseEntity<MealPlanResponse> getWeeklyPlan(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        return ResponseEntity.ok(mealPlanService.getWeeklyPlan(userDetails.getUser()));
+    }
+
+    @PutMapping("/weekly")
+    public ResponseEntity<MealPlanResponse> saveWeeklyPlan(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Valid @RequestBody WeeklyPlanRequest request) {
+
+        return ResponseEntity.ok(mealPlanService.saveWeeklyPlan(userDetails.getUser(), request));
+    }
+
+    @PostMapping("/generate")
+    public ResponseEntity<MealPlanResponse> generateWeeklyPlan(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestBody(required = false) MealPlanGenerationRequest request) {
+
+        String prompt = request != null ? request.getPrompt() : null;
+        return ResponseEntity.ok(
+                mealPlanGenerationService.generateWeeklyPlan(userDetails.getUser(), prompt));
     }
 
     @GetMapping("/{id}")

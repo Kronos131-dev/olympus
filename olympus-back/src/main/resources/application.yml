@@ -43,6 +43,12 @@ olympus:
     # Clé d'API Google Gemini (Generative Language API). Vide = Gemini désactivé, Mistral utilisé par défaut.
     gemini-api-key: ${GEMINI_API_KEY:}
     gemini-model: ${OLYMPUS_AGENT_GEMINI_MODEL:gemini-2.0-flash}
+    # Nombre maximum d'allers-retours d'outils par message (limite les appels LLM).
+    max-tool-rounds: ${OLYMPUS_AGENT_MAX_TOOL_ROUNDS:3}
+    # Cadence et résilience des appels aux API LLM (clé Mistral gratuite ≈ 1 req/s).
+    mistral-min-interval-ms: ${OLYMPUS_AGENT_MISTRAL_MIN_INTERVAL_MS:1100}
+    gemini-min-interval-ms: ${OLYMPUS_AGENT_GEMINI_MIN_INTERVAL_MS:1100}
+    llm-max-retries: ${OLYMPUS_AGENT_LLM_MAX_RETRIES:3}
 
 server:
   port: 8080

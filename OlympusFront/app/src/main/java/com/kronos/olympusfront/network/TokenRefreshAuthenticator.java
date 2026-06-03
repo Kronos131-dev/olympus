@@ -50,6 +50,12 @@ public class TokenRefreshAuthenticator implements Authenticator {
             return null;
         }
 
+        // Un 401 sur les endpoints d'authentification (login, register, refresh) n'a rien
+        // à voir avec un access token expiré : on ne tente pas de refresh ni de logout.
+        if (response.request().url().encodedPath().contains("/api/v1/auth/")) {
+            return null;
+        }
+
         String refreshToken = tokenManager.getRefreshToken();
         if (refreshToken == null || refreshToken.isEmpty()) {
             forceLogout();

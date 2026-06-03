@@ -1,7 +1,9 @@
 package com.kronos.olympusfront;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -15,6 +17,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -26,10 +30,13 @@ import com.kronos.olympusfront.network.dto.ConversationSummaryDto;
 import com.kronos.olympusfront.network.dto.UserResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
+
+import org.json.JSONObject;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -46,6 +53,7 @@ public class ChatFragment extends Fragment {
     private ChatAdapter adapter;
     private Long conversationId;
     private Uri pendingImageUri;
+    private Uri cameraImageUri;
     private UserResponse currentUser;
 
     // Reconnaissance vocale (push-to-talk) : remplit le champ de saisie
@@ -61,14 +69,24 @@ public class ChatFragment extends Fragment {
                 }
             });
 
-    // Sélecteur d'image (photo de plat)
-    private final ActivityResultLauncher<String> imagePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
-                if (uri != null) {
-                    pendingImageUri = uri;
+    // Capture d'une photo de plat via l'appareil photo
+    private final ActivityResultLauncher<Uri> takePictureLauncher =
+            registerForActivityResult(new ActivityResultContracts.TakePicture(), success -> {
+                if (Boolean.TRUE.equals(success) && cameraImageUri != null) {
+                    pendingImageUri = cameraImageUri;
                     if (getContext() != null) {
                         Toast.makeText(getContext(), "Photo jointe au prochain message", Toast.LENGTH_SHORT).show();
                     }
+                }
+            });
+
+    // Demande de la permission appareil photo au moment du clic
+    private final ActivityResultLauncher<String> cameraPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (Boolean.TRUE.equals(granted)) {
+                    launchCamera();
+                } else if (getContext() != null) {
+                    Toast.makeText(getContext(), "Permission appareil photo refusée", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -92,7 +110,7 @@ public class ChatFragment extends Fragment {
 
         binding.btnSend.setOnClickListener(v -> sendMessage());
         binding.btnMic.setOnClickListener(v -> startVoiceInput());
-        binding.btnPhoto.setOnClickListener(v -> imagePickerLauncher.launch("image/*"));
+        binding.btnPhoto.setOnClickListener(v -> onPhotoButtonClicked());
         binding.btnProvider.setOnClickListener(v -> toggleProvider());
 
         fetchProfile();
@@ -200,6 +218,37 @@ public class ChatFragment extends Fragment {
         }
     }
 
+    /** Vérifie la permission appareil photo puis ouvre l'appareil photo pour une prise de vue. */
+    private void onPhotoButtonClicked() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            launchCamera();
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    /** Crée un fichier temporaire et ouvre l'appareil photo pour y écrire la photo prise. */
+    private void launchCamera() {
+        try {
+            File imagesDir = new File(requireContext().getCacheDir(), "images");
+            if (!imagesDir.exists() && !imagesDir.mkdirs()) {
+                throw new IOException("Impossible de créer le dossier des photos");
+            }
+            File photoFile = new File(imagesDir, "oracle_" + System.currentTimeMillis() + ".jpg");
+            cameraImageUri = FileProvider.getUriForFile(
+                    requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    photoFile);
+            takePictureLauncher.launch(cameraImageUri);
+        } catch (Exception e) {
+            Log.e(TAG, "Erreur ouverture appareil photo", e);
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Appareil photo indisponible", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void sendMessage() {
         if (binding == null) return;
         String text = binding.etMessage.getText().toString().trim();
@@ -256,7 +305,7 @@ public class ChatFragment extends Fragment {
                             }
                         } else {
                             adapter.addMessage(new ChatMessageDto("ASSISTANT",
-                                    "Désolé, une erreur est survenue (" + response.code() + ")."));
+                                    "⚠️ " + extractErrorMessage(response)));
                             updateEmptyState();
                             scrollToBottom();
                         }
@@ -282,6 +331,25 @@ public class ChatFragment extends Fragment {
             sb.append(action);
         }
         return sb.toString();
+    }
+
+    /**
+     * Extrait le message d'erreur lisible renvoyé par le serveur (champ "detail"
+     * d'un ProblemDetail RFC 7807) ; à défaut, un message générique avec le code HTTP.
+     */
+    private String extractErrorMessage(Response<?> response) {
+        try {
+            if (response.errorBody() != null) {
+                String body = response.errorBody().string();
+                String detail = new JSONObject(body).optString("detail", "");
+                if (!detail.isEmpty()) {
+                    return detail;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Erreur parsing réponse d'erreur serveur", e);
+        }
+        return "Une erreur est survenue (" + response.code() + ").";
     }
 
     private byte[] readBytes(Uri uri) throws IOException {

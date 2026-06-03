@@ -9,6 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.kronos.olympusfront.databinding.ActivityMainBinding;
@@ -23,7 +27,20 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // ViewPager2 : 5 pages swipables
+        // Edge-to-edge cohérent sur toutes les versions d'Android : le clavier est alors
+        // remonté via les insets (ci-dessous) plutôt que par un redimensionnement de fenêtre.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        // Le contenu se cale sous les barres système et AU-DESSUS du clavier
+        // (sans ça, le clavier recouvre la zone de saisie du chat).
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            v.setPadding(bars.left, bars.top, bars.right, Math.max(bars.bottom, ime.bottom));
+            return insets;
+        });
+
+        // ViewPager2 : 6 pages swipables
         binding.viewPager.setAdapter(new MainPagerAdapter(this));
         binding.viewPager.setOffscreenPageLimit(1);
 
@@ -31,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         binding.navChat.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_CHAT, true));
         binding.navHome.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_HOME, true));
         binding.navMeals.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_MEALS, true));
+        binding.navPlan.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_PLAN, true));
         binding.navStats.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_STATS, true));
         binding.navProfile.setOnClickListener(v -> binding.viewPager.setCurrentItem(MainPagerAdapter.PAGE_PROFILE, true));
 
@@ -58,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         styleNavItem(binding.navChat, binding.navChatIcon, binding.navChatText, inactiveColor, inactiveBg);
         styleNavItem(binding.navHome, binding.navHomeIcon, binding.navHomeText, inactiveColor, inactiveBg);
         styleNavItem(binding.navMeals, binding.navMealsIcon, binding.navMealsText, inactiveColor, inactiveBg);
+        styleNavItem(binding.navPlan, binding.navPlanIcon, binding.navPlanText, inactiveColor, inactiveBg);
         styleNavItem(binding.navStats, binding.navStatsIcon, binding.navStatsText, inactiveColor, inactiveBg);
         styleNavItem(binding.navProfile, binding.navProfileIcon, binding.navProfileText, inactiveColor, inactiveBg);
 
@@ -67,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case MainPagerAdapter.PAGE_MEALS:
                 styleNavItem(binding.navMeals, binding.navMealsIcon, binding.navMealsText, activeColor, activeBg);
+                break;
+            case MainPagerAdapter.PAGE_PLAN:
+                styleNavItem(binding.navPlan, binding.navPlanIcon, binding.navPlanText, activeColor, activeBg);
                 break;
             case MainPagerAdapter.PAGE_STATS:
                 styleNavItem(binding.navStats, binding.navStatsIcon, binding.navStatsText, activeColor, activeBg);
