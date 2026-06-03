@@ -3,6 +3,7 @@ package com.kronos.olympus.service.ai;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kronos.olympus.exception.ExternalApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,18 +29,21 @@ import java.util.Map;
 public class MistralAgentClient implements AgentClient {
 
     private static final String API_URL = "https://api.mistral.ai/v1/chat/completions";
-    private static final int MAX_TOOL_ROUNDS = 6;
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final LlmRateLimiter llmRateLimiter;
 
     @Value("${spring.ai.mistralai.api-key:}")
     private String apiKey;
 
     @Value("${olympus.agent.mistral-model:mistral-small-latest}")
     private String model;
+
+    @Value("${olympus.agent.max-tool-rounds:3}")
+    private int maxToolRounds;
 
     @Override
     public boolean isConfigured() {
@@ -73,7 +77,7 @@ public class MistralAgentClient implements AgentClient {
 
         List<String> actionsTaken = new ArrayList<>();
 
-        for (int round = 0; round < MAX_TOOL_ROUNDS; round++) {
+        for (int round = 0; round < maxToolRounds; round++) {
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("model", model);
             body.put("messages", messages);
@@ -85,6 +89,10 @@ public class MistralAgentClient implements AgentClient {
 
             JsonNode response = post(body);
             JsonNode message = response.path("choices").path(0).path("message");
+            if (message.isMissingNode()) {
+                log.warn("Réponse inattendue de l'API Mistral : {}", response);
+                throw new ExternalApiException("L'agent Mistral a renvoyé une réponse inattendue.");
+            }
             JsonNode toolCalls = message.path("tool_calls");
 
             if (toolCalls.isArray() && !toolCalls.isEmpty()) {
@@ -156,10 +164,17 @@ public class MistralAgentClient implements AgentClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
         try {
-            return restTemplate.postForEntity(API_URL, new HttpEntity<>(body, headers), JsonNode.class).getBody();
+            // L'appel passe par le limiteur de débit : cadence respectée + retry sur 429/503.
+            JsonNode response = llmRateLimiter.execute("mistral", () -> restTemplate
+                    .postForEntity(API_URL, new HttpEntity<>(body, headers), JsonNode.class)
+                    .getBody());
+            if (response == null) {
+                throw new ExternalApiException("L'API Mistral a renvoyé une réponse vide.");
+            }
+            return response;
         } catch (RestClientException e) {
             log.error("Erreur lors de l'appel à l'API Mistral", e);
-            throw new RuntimeException("L'agent Mistral est momentanément indisponible.");
+            throw new ExternalApiException("L'agent Mistral est momentanément indisponible.");
         }
     }
 }

@@ -2,6 +2,8 @@ package com.kronos.olympusfront;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,9 +60,26 @@ public class MealsFragment extends Fragment implements MealsAdapter.OnMealClickL
             startActivity(intent);
         });
 
-        binding.planningButton.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), MealPlanActivity.class);
+        // Création d'un repas assistée par l'IA : ouvre directement le dialogue d'analyse IA.
+        binding.aiMealButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), CreateMealActivity.class);
+            intent.putExtra("EXTRA_START_AI", true);
             startActivity(intent);
+        });
+
+        binding.searchMeals.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (adapter != null) {
+                    adapter.filter(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
         });
     }
     
@@ -101,6 +120,9 @@ public class MealsFragment extends Fragment implements MealsAdapter.OnMealClickL
             public void onResponse(Call<List<MealPresetResponse>> call, Response<List<MealPresetResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     adapter.setMeals(response.body());
+                    if (binding != null) {
+                        adapter.filter(binding.searchMeals.getText().toString());
+                    }
                 } else {
                     Log.e(TAG, "Erreur récupération repas: " + response.code());
                     if (isAdded() && getContext() != null) {

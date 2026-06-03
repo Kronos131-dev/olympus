@@ -3,6 +3,7 @@ package com.kronos.olympus.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 /**
@@ -44,4 +45,9 @@ public class PlannedMealEntry {
     // Heure prévue (optionnelle) : utilisée comme consumedAt lors de la matérialisation
     @Column
     private LocalTime plannedTime;
+
+    // Jour de la semaine pour un plan hebdomadaire (WEEKLY) ; null pour les autres récurrences
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", length = 12)
+    private DayOfWeek dayOfWeek;
 }

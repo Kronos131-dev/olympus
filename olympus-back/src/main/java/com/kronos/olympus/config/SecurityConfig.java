@@ -1,5 +1,7 @@
 package com.kronos.olympus.config;
 
+import com.kronos.olympus.security.IntegrationTokenAuthenticationFilter;
+import com.kronos.olympus.security.JwtAuthenticationEntryPoint;
 import com.kronos.olympus.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +28,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final IntegrationTokenAuthenticationFilter integrationTokenAuthFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserDetailsService userDetailsService;
 
     // Définition des routes publiques sans JWT
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/auth/**",
+            // Liaison de comptes pour les apps tierces : /link valide les identifiants,
+            // /link/status et la révocation valident eux-mêmes le token d'intégration.
+            "/api/v1/integration/**",
             "/v2/api-docs",
             "/v3/api-docs",
             "/v3/api-docs/**",
@@ -55,8 +62,13 @@ public class SecurityConfig {
                     .authenticated() // Toute autre requête requiert une authentification
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Renvoie 401 (et non 403) sur token absent/expiré : indispensable pour que
+            // le client mobile déclenche le rafraîchissement automatique du token.
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // On injecte le JWT Filter avant celui de Spring
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class) // On injecte le JWT Filter avant celui de Spring
+            // Authentifie les apps tierces liées (Chiron) via le token d'intégration permanent.
+            .addFilterBefore(integrationTokenAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

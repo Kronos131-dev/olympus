@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="6dp">
+
+    <View
+        android:layout_width="6dp"
+        android:layout_height="6dp"
+        android:layout_marginEnd="10dp"
+        android:background="@color/secondary" />
+
+    <TextView
+        android:id="@+id/meal_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="@font/manrope"
+        android:text="Repas"
+        android:textColor="@color/marble_white"
+        android:textSize="14sp" />
+
+    <ImageButton
+        android:id="@+id/btn_remove_meal"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Retirer ce repas"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="@color/outline_variant" />
+
+</LinearLayout>

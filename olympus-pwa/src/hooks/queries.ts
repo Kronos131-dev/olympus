@@ -1,0 +1,118 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  analyticsApi,
+  dailyLogApi,
+  mealPlanApi,
+  mealPresetApi,
+  userApi,
+} from "@/lib/api/endpoints";
+import type {
+  DailyLogResponse,
+  LogEntryRequest,
+  MealPresetRequest,
+  UpdateActivityRequest,
+  UpdateProfileRequest,
+} from "@/types/api";
+
+export const qk = {
+  profile: ["profile"] as const,
+  dailyLog: (date: string) => ["dailyLog", date] as const,
+  presets: ["presets"] as const,
+  weeklyPlan: ["weeklyPlan"] as const,
+  analytics: (start: string, end: string) => ["analytics", start, end] as const,
+};
+
+// ---- Profil ----
+export function useProfile() {
+  return useQuery({ queryKey: qk.profile, queryFn: userApi.profile });
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdateProfileRequest) => userApi.update(body),
+    onSuccess: (user) => qc.setQueryData(qk.profile, user),
+  });
+}
+
+// ---- Journal du jour ----
+export function useDailyLog(date: string) {
+  return useQuery({
+    queryKey: qk.dailyLog(date),
+    queryFn: () => dailyLogApi.get(date),
+  });
+}
+
+export function useAddLogEntry(date: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: LogEntryRequest) => dailyLogApi.addEntry(body),
+    onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
+  });
+}
+
+export function useDeleteLogEntry(date: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (entryId: number) => dailyLogApi.deleteEntry(entryId),
+    // Suppression optimiste : on retire l'entrée immédiatement.
+    onMutate: async (entryId) => {
+      await qc.cancelQueries({ queryKey: qk.dailyLog(date) });
+      const prev = qc.getQueryData<DailyLogResponse>(qk.dailyLog(date));
+      if (prev) {
+        qc.setQueryData<DailyLogResponse>(qk.dailyLog(date), {
+          ...prev,
+          entries: prev.entries.filter((e) => e.id !== entryId),
+        });
+      }
+      return { prev };
+    },
+    onError: (_e, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(qk.dailyLog(date), ctx.prev);
+    },
+    onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
+  });
+}
+
+export function useUpdateActivity(date: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdateActivityRequest) => dailyLogApi.updateActivity(body),
+    onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
+  });
+}
+
+// ---- Repas prédéfinis ----
+export function usePresets() {
+  return useQuery({ queryKey: qk.presets, queryFn: mealPresetApi.list });
+}
+
+export function useDeletePreset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => mealPresetApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.presets }),
+  });
+}
+
+export function useSavePreset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id?: number; body: MealPresetRequest }) =>
+      id ? mealPresetApi.update(id, body) : mealPresetApi.create(body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.presets }),
+  });
+}
+
+// ---- Planning hebdo ----
+export function useWeeklyPlan() {
+  return useQuery({ queryKey: qk.weeklyPlan, queryFn: mealPlanApi.weekly });
+}
+
+// ---- Analytics ----
+export function useAnalytics(start: string, end: string) {
+  return useQuery({
+    queryKey: qk.analytics(start, end),
+    queryFn: () => analyticsApi.range(start, end),
+  });
+}

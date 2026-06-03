@@ -29,6 +29,8 @@ public class RecurrenceEvaluator {
 
         switch (plan.getRecurrenceType()) {
             case DAILY:
+            case WEEKLY:
+                // WEEKLY : le filtrage par jour se fait au niveau de chaque entrée (dayOfWeek)
                 return true;
 
             case SPECIFIC_WEEKDAYS:

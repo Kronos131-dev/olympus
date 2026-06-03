@@ -2,6 +2,7 @@ package com.kronos.olympus.service.mealplan;
 
 import com.kronos.olympus.dto.request.MealPlanRequest;
 import com.kronos.olympus.dto.request.PlannedMealEntryRequest;
+import com.kronos.olympus.dto.request.WeeklyPlanRequest;
 import com.kronos.olympus.dto.response.MealPlanResponse;
 import com.kronos.olympus.exception.EntityNotFoundException;
 import com.kronos.olympus.mapper.MealPlanMapper;
@@ -10,6 +11,7 @@ import com.kronos.olympus.model.MealPlan;
 import com.kronos.olympus.model.MealPreset;
 import com.kronos.olympus.model.PlannedMealEntry;
 import com.kronos.olympus.model.User;
+import com.kronos.olympus.model.enums.RecurrenceType;
 import com.kronos.olympus.repository.FoodItemRepository;
 import com.kronos.olympus.repository.MealPlanRepository;
 import com.kronos.olympus.repository.MealPresetRepository;
@@ -125,6 +127,51 @@ public class MealPlanService {
         mealPlanRepository.delete(plan);
     }
 
+    /** Récupère l'emploi du temps hebdomadaire de l'utilisateur (le crée vide s'il n'existe pas). */
+    @Transactional
+    public MealPlanResponse getWeeklyPlan(User user) {
+        return mealPlanMapper.toResponse(getOrCreateWeeklyPlanEntity(user));
+    }
+
+    /** Enregistre l'emploi du temps hebdomadaire : remplace toutes les entrées des 7 jours. */
+    @Transactional
+    public MealPlanResponse saveWeeklyPlan(User user, WeeklyPlanRequest request) {
+        MealPlan plan = getOrCreateWeeklyPlanEntity(user);
+
+        List<PlannedMealEntryRequest> entries = request.getEntries() != null
+                ? request.getEntries() : new ArrayList<>();
+        for (PlannedMealEntryRequest entry : entries) {
+            if (entry.getDayOfWeek() == null) {
+                throw new IllegalArgumentException("Chaque repas planifié doit indiquer un jour de la semaine");
+            }
+        }
+
+        // Remplacement des entrées via orphanRemoval. On évite un DELETE bulk : il entrerait
+        // en conflit avec les entrées déjà chargées (EntityGraph) et provoquerait une
+        // StaleStateException au flush dès le 2e enregistrement.
+        List<PlannedMealEntry> newEntries = buildPlannedEntries(user, plan, entries);
+        if (plan.getPlannedEntries() == null) {
+            plan.setPlannedEntries(new ArrayList<>());
+        }
+        plan.getPlannedEntries().clear();
+        plan.getPlannedEntries().addAll(newEntries);
+
+        return mealPlanMapper.toResponse(mealPlanRepository.save(plan));
+    }
+
+    private MealPlan getOrCreateWeeklyPlanEntity(User user) {
+        return mealPlanRepository
+                .findFirstByUserIdAndRecurrenceType(user.getId(), RecurrenceType.WEEKLY)
+                .orElseGet(() -> mealPlanRepository.save(MealPlan.builder()
+                        .user(user)
+                        .name("Ma semaine")
+                        .recurrenceType(RecurrenceType.WEEKLY)
+                        .anchorDate(LocalDate.now())
+                        .active(true)
+                        .plannedEntries(new ArrayList<>())
+                        .build()));
+    }
+
     private void validateRecurrence(MealPlanRequest request) {
         if (request.getRecurrenceType() == null) {
             throw new IllegalArgumentException("Le type de récurrence est obligatoire");
@@ -157,6 +204,7 @@ public class MealPlanService {
 
             PlannedMealEntry.PlannedMealEntryBuilder builder = PlannedMealEntry.builder()
                     .mealPlan(plan)
+                    .dayOfWeek(req.getDayOfWeek())
                     .plannedTime(req.getPlannedTime());
 
             if (hasFood) {

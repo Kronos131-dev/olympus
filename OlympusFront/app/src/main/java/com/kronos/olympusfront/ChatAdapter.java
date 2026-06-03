@@ -52,7 +52,22 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        holder.text.setText(messages.get(position).getContent());
+        holder.text.setText(stripMarkdown(messages.get(position).getContent()));
+    }
+
+    /** Retire le formatage Markdown éventuel renvoyé par l'IA (l'app affiche du texte brut). */
+    private static String stripMarkdown(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text
+                .replace("**", "")
+                .replace("__", "")
+                .replace("`", "")
+                .replaceAll("(?m)^\\s{0,3}#{1,6}\\s*", "")
+                .replaceAll("(?m)^\\s*[-*]\\s+", "• ")
+                .replace("*", "")
+                .trim();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.kronos.olympus.service;
 
 import com.kronos.olympus.dto.response.AiEstimation;
+import com.kronos.olympus.service.ai.LlmRateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel; // Nouveau nom de l'interface
@@ -18,6 +19,7 @@ public class AiService {
 
     // On utilise ChatModel à la place de ChatClient
     private final ChatModel chatModel;
+    private final LlmRateLimiter llmRateLimiter;
 
     public AiEstimation analyzeMeal(String description) {
 
@@ -48,8 +50,10 @@ public class AiService {
         log.info("Appel de Mistral AI pour l'analyse du repas: {}", description);
 
         try {
-            // L'appel se fait maintenant sur chatModel
-            String aiResponse = chatModel.call(prompt).getResult().getOutput().getText();
+            // L'appel passe par le limiteur de débit : il compte dans le même budget
+            // de cadence que l'agent conversationnel (clé Mistral partagée).
+            String aiResponse = llmRateLimiter.execute("mistral",
+                    () -> chatModel.call(prompt).getResult().getOutput().getText());
             log.debug("Réponse brute de Mistral: {}", aiResponse);
 
             // On utilise .convert() au lieu de .parse()
