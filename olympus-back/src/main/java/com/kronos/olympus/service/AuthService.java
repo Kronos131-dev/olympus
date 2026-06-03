@@ -106,6 +106,18 @@ public class AuthService {
         refreshTokenService.revokeByToken(refreshToken);
     }
 
+    /**
+     * Émet un couple access/refresh complet pour un utilisateur déjà authentifié par un
+     * autre moyen que le mot de passe (ex. token de liaison Chiron déjà vérifié).
+     * L'appelant est responsable d'avoir validé l'identité avant d'invoquer cette méthode.
+     */
+    @Transactional
+    public AuthResponse issueTokensFor(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable : " + email));
+        return buildAuthResponse(user, userMapper.toResponse(user));
+    }
+
     private AuthResponse buildAuthResponse(User user, UserResponse responseDto) {
         UserDetails userDetails = new UserDetailsImpl(user);
         String accessToken = jwtService.generateToken(userDetails);

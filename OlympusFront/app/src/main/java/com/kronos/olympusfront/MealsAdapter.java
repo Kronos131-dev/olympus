@@ -16,6 +16,7 @@ import java.util.List;
 public class MealsAdapter extends RecyclerView.Adapter<MealsAdapter.MealViewHolder> {
 
     private List<MealPresetResponse> meals = new ArrayList<>();
+    private final List<MealPresetResponse> allMeals = new ArrayList<>();
     private final OnMealClickListener listener;
     
     // Variables pour les cibles (afin de configurer les max des ProgressBar)
@@ -35,7 +36,28 @@ public class MealsAdapter extends RecyclerView.Adapter<MealsAdapter.MealViewHold
     }
 
     public void setMeals(List<MealPresetResponse> meals) {
-        this.meals = meals;
+        allMeals.clear();
+        if (meals != null) {
+            allMeals.addAll(meals);
+        }
+        this.meals = new ArrayList<>(allMeals);
+        notifyDataSetChanged();
+    }
+
+    /** Filtre la liste affichée par nom de repas (recherche insensible à la casse). */
+    public void filter(String query) {
+        String q = query == null ? "" : query.trim().toLowerCase();
+        if (q.isEmpty()) {
+            this.meals = new ArrayList<>(allMeals);
+        } else {
+            List<MealPresetResponse> filtered = new ArrayList<>();
+            for (MealPresetResponse meal : allMeals) {
+                if (meal.getName() != null && meal.getName().toLowerCase().contains(q)) {
+                    filtered.add(meal);
+                }
+            }
+            this.meals = filtered;
+        }
         notifyDataSetChanged();
     }
     

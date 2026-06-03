@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@import "@fontsource/newsreader/400.css";
+@import "@fontsource/newsreader/500.css";
+@import "@fontsource/newsreader/600-italic.css";
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+
+/*
+ * Design system « Digital Pantheon » (cf. DESIGN.md).
+ * Hiérarchie par tons de surface, or impérial, pourpre, marbre. Angles vifs (0px).
+ */
+@theme {
+  --color-surface-lowest: #0c0f0f;
+  --color-surface: #121414;
+  --color-surface-low: #1a1c1c;
+  --color-surface-high: #242727;
+  --color-surface-variant: #333535;
+  --color-surface-bright: #2c2f2f;
+
+  --color-gold: #e9c349;
+  --color-gold-deep: #af8d11;
+  --color-on-gold: #3c2f00;
+
+  --color-purple: #5d3fd3;
+  --color-purple-bright: #7b5cff;
+
+  --color-marble: #e2e2e2;
+  --color-marble-dim: #9a9a96;
+  --color-outline: #484554;
+
+  --color-success: #6fae6f;
+  --color-danger: #d36b5d;
+
+  --font-display: "Newsreader", Georgia, serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+
+  --radius-none: 0px;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-surface-lowest);
+    color: var(--color-marble);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    /* Texture marbre : bruit haute fréquence subtil sur le fond. */
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(93, 63, 211, 0.08), transparent 45%),
+      radial-gradient(circle at 90% 100%, rgba(175, 141, 17, 0.06), transparent 40%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  input, button, textarea, select {
+    font-family: inherit;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+@layer components {
+  /* Éclat métallique pour les surfaces or. */
+  .gold-sheen {
+    background-image: linear-gradient(45deg, var(--color-gold-deep), var(--color-gold) 50%, var(--color-gold-deep));
+  }
+
+  /* Barre de navigation flottante en verre dépoli. */
+  .glass {
+    background-color: color-mix(in srgb, var(--color-surface-variant) 60%, transparent);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+
+  /* Inscription monumentale : titres serif qui « débordent ». */
+  .lapidary {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+/* Transitions de page légères. */
+.page-enter {
+  animation: page-fade 0.28s ease both;
+}
+@keyframes page-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none; }
+}

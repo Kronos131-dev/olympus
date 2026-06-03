@@ -8,6 +8,7 @@ public class PlannedMealEntryResponse implements Serializable {
     private MealPresetResponse mealPreset;
     private Double quantityGrams;
     private String plannedTime;
+    private String dayOfWeek;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -19,4 +20,6 @@ public class PlannedMealEntryResponse implements Serializable {
     public void setQuantityGrams(Double quantityGrams) { this.quantityGrams = quantityGrams; }
     public String getPlannedTime() { return plannedTime; }
     public void setPlannedTime(String plannedTime) { this.plannedTime = plannedTime; }
+    public String getDayOfWeek() { return dayOfWeek; }
+    public void setDayOfWeek(String dayOfWeek) { this.dayOfWeek = dayOfWeek; }
 }

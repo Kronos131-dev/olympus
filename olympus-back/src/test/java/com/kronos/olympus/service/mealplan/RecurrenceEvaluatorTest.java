@@ -67,6 +67,19 @@ class RecurrenceEvaluatorTest {
     }
 
     @Test
+    void weekly_matchesAnyDate_dayFilteringHandledPerEntry() {
+        // Un plan WEEKLY s'applique chaque jour ; le filtrage par jour se fait
+        // au niveau de chaque PlannedMealEntry (dayOfWeek), pas dans l'évaluateur.
+        MealPlan plan = MealPlan.builder()
+                .recurrenceType(RecurrenceType.WEEKLY)
+                .active(true)
+                .build();
+        assertTrue(evaluator.matches(plan, MONDAY));
+        assertTrue(evaluator.matches(plan, TUESDAY));
+        assertTrue(evaluator.matches(plan, FRIDAY));
+    }
+
+    @Test
     void validityWindow_excludesDatesOutsideRange() {
         MealPlan plan = MealPlan.builder()
                 .recurrenceType(RecurrenceType.DAILY)

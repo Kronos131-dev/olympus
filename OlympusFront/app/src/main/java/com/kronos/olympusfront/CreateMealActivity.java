@@ -165,6 +165,11 @@ public class CreateMealActivity extends AppCompatActivity {
             binding.btnAiFood.setOnClickListener(v -> showAiMealDialog());
         }
 
+        // Lancé depuis l'onglet Repas via « Créer avec l'IA » : ouverture directe du dialogue IA.
+        if (getIntent().getBooleanExtra("EXTRA_START_AI", false)) {
+            showAiMealDialog();
+        }
+
         // Save Button
         binding.btnSaveMeal.setOnClickListener(v -> saveMeal());
 

@@ -198,6 +198,11 @@ public class DailyLogService {
                 continue;
             }
             for (PlannedMealEntry planned : plan.getPlannedEntries()) {
+                // Plan hebdomadaire : seules les entrées du jour courant s'appliquent
+                if (planned.getDayOfWeek() != null
+                        && planned.getDayOfWeek() != dailyLog.getTargetDate().getDayOfWeek()) {
+                    continue;
+                }
                 LogEntry entry = buildLogEntry(dailyLog, planned.getFoodItem(), planned.getMealPreset(), planned.getQuantityGrams());
                 entry.setFromPlan(true);
                 entry.setConsumedAt(planned.getPlannedTime() != null

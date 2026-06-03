@@ -7,6 +7,7 @@ import com.kronos.olympus.dto.request.MealPresetRequest;
 import com.kronos.olympus.dto.response.DailyLogResponse;
 import com.kronos.olympus.dto.response.FoodItemResponse;
 import com.kronos.olympus.dto.response.LogEntryResponse;
+import com.kronos.olympus.dto.response.MealPlanResponse;
 import com.kronos.olympus.dto.response.MealPresetResponse;
 import com.kronos.olympus.dto.response.UserResponse;
 import com.kronos.olympus.mapper.UserMapper;
@@ -17,6 +18,7 @@ import com.kronos.olympus.repository.FoodItemRepository;
 import com.kronos.olympus.service.DailyLogService;
 import com.kronos.olympus.service.FoodItemService;
 import com.kronos.olympus.service.MealPresetService;
+import com.kronos.olympus.service.mealplan.MealPlanGenerationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +42,7 @@ public class NutritionAgentTools {
     private final MealPresetService mealPresetService;
     private final FoodItemService foodItemService;
     private final FoodItemRepository foodItemRepository;
+    private final MealPlanGenerationService mealPlanGenerationService;
     private final UserMapper userMapper;
 
     /**
@@ -291,6 +294,25 @@ public class NutritionAgentTools {
                 }));
 
         tools.add(new AgentTool(
+                "create_meal_plan",
+                "Crée ou remplace l'emploi du temps hebdomadaire de repas de l'utilisateur. "
+                        + "Fournis pour chaque repas le jour de la semaine et les valeurs nutritionnelles "
+                        + "estimées pour 100g.",
+                objectSchema(props(
+                        "meals", arrayOfPlannedMeals()
+                ), List.of("meals")),
+                args -> {
+                    JsonNode meals = args.path("meals");
+                    if (!meals.isArray() || meals.isEmpty()) {
+                        return "Fournis un tableau 'meals' non vide.";
+                    }
+                    MealPlanResponse plan = mealPlanGenerationService.applyGeneratedPlan(user, meals);
+                    int count = plan.getEntries() != null ? plan.getEntries().size() : 0;
+                    return "Emploi du temps hebdomadaire enregistré : " + count
+                            + " repas planifiés sur la semaine.";
+                }));
+
+        tools.add(new AgentTool(
                 "delete_meal_preset",
                 "Supprime un repas pré-enregistré de l'utilisateur par son identifiant.",
                 objectSchema(props(
@@ -370,6 +392,30 @@ public class NutritionAgentTools {
         Map<String, Object> array = new LinkedHashMap<>();
         array.put("type", "array");
         array.put("description", "Liste des ingrédients du repas.");
+        array.put("items", item);
+        return array;
+    }
+
+    private static Map<String, Object> arrayOfPlannedMeals() {
+        Map<String, Object> itemProps = new LinkedHashMap<>();
+        itemProps.put("day", strProp("Jour de la semaine en anglais majuscules : MONDAY, TUESDAY, "
+                + "WEDNESDAY, THURSDAY, FRIDAY, SATURDAY ou SUNDAY."));
+        itemProps.put("name", strProp("Nom du plat ou de l'aliment."));
+        itemProps.put("quantityGrams", numProp("Quantité en grammes."));
+        itemProps.put("kcalPer100g", numProp("Calories pour 100g."));
+        itemProps.put("proteinsPer100g", numProp("Protéines en grammes pour 100g."));
+        itemProps.put("carbsPer100g", numProp("Glucides en grammes pour 100g."));
+        itemProps.put("fatsPer100g", numProp("Lipides en grammes pour 100g."));
+
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("type", "object");
+        item.put("properties", itemProps);
+        item.put("required", List.of("day", "name", "quantityGrams",
+                "kcalPer100g", "proteinsPer100g", "carbsPer100g", "fatsPer100g"));
+
+        Map<String, Object> array = new LinkedHashMap<>();
+        array.put("type", "array");
+        array.put("description", "Liste des repas planifiés sur la semaine.");
         array.put("items", item);
         return array;
     }

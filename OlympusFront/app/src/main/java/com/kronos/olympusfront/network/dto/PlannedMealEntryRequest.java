@@ -5,6 +5,7 @@ public class PlannedMealEntryRequest {
     private Long mealPresetId;
     private Double quantityGrams;
     private String plannedTime;
+    private String dayOfWeek;
 
     public PlannedMealEntryRequest() {}
 
@@ -16,4 +17,6 @@ public class PlannedMealEntryRequest {
     public void setQuantityGrams(Double quantityGrams) { this.quantityGrams = quantityGrams; }
     public String getPlannedTime() { return plannedTime; }
     public void setPlannedTime(String plannedTime) { this.plannedTime = plannedTime; }
+    public String getDayOfWeek() { return dayOfWeek; }
+    public void setDayOfWeek(String dayOfWeek) { this.dayOfWeek = dayOfWeek; }
 }
