@@ -3,6 +3,7 @@ package com.kronos.olympus.service.ai;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kronos.olympus.exception.ExternalApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,18 +29,21 @@ import java.util.Map;
 @Slf4j
 public class GeminiAgentClient implements AgentClient {
 
-    private static final int MAX_TOOL_ROUNDS = 6;
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final LlmRateLimiter llmRateLimiter;
 
     @Value("${olympus.agent.gemini-api-key:}")
     private String apiKey;
 
     @Value("${olympus.agent.gemini-model:gemini-2.0-flash}")
     private String model;
+
+    @Value("${olympus.agent.max-tool-rounds:3}")
+    private int maxToolRounds;
 
     @Override
     public boolean isConfigured() {
@@ -86,7 +90,7 @@ public class GeminiAgentClient implements AgentClient {
                 + model + ":generateContent?key=" + apiKey;
         List<String> actionsTaken = new ArrayList<>();
 
-        for (int round = 0; round < MAX_TOOL_ROUNDS; round++) {
+        for (int round = 0; round < maxToolRounds; round++) {
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("systemInstruction", Map.of("parts", List.of(textPart(systemPrompt))));
             body.put("contents", contents);
@@ -96,6 +100,10 @@ public class GeminiAgentClient implements AgentClient {
 
             JsonNode response = post(url, body);
             JsonNode candidateContent = response.path("candidates").path(0).path("content");
+            if (candidateContent.isMissingNode()) {
+                log.warn("Réponse inattendue de l'API Gemini : {}", response);
+                throw new ExternalApiException("L'agent Gemini a renvoyé une réponse inattendue.");
+            }
             JsonNode parts = candidateContent.path("parts");
 
             List<JsonNode> functionCalls = new ArrayList<>();
@@ -172,10 +180,17 @@ public class GeminiAgentClient implements AgentClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         try {
-            return restTemplate.postForEntity(url, new HttpEntity<>(body, headers), JsonNode.class).getBody();
+            // L'appel passe par le limiteur de débit : cadence respectée + retry sur 429/503.
+            JsonNode response = llmRateLimiter.execute("gemini", () -> restTemplate
+                    .postForEntity(url, new HttpEntity<>(body, headers), JsonNode.class)
+                    .getBody());
+            if (response == null) {
+                throw new ExternalApiException("L'API Gemini a renvoyé une réponse vide.");
+            }
+            return response;
         } catch (RestClientException e) {
             log.error("Erreur lors de l'appel à l'API Gemini", e);
-            throw new RuntimeException("L'agent Gemini est momentanément indisponible.");
+            throw new ExternalApiException("L'agent Gemini est momentanément indisponible.");
         }
     }
 }

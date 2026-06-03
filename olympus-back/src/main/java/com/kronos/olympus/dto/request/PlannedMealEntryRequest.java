@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Data
@@ -24,4 +25,7 @@ public class PlannedMealEntryRequest {
 
     // Heure prévue (optionnelle), ex: "08:30"
     private LocalTime plannedTime;
+
+    // Jour de la semaine (plan hebdomadaire) : MONDAY, TUESDAY, ...
+    private DayOfWeek dayOfWeek;
 }

@@ -11,5 +11,7 @@ public enum RecurrenceType {
     /** Un jour sur deux à partir de la date d'ancrage. */
     EVERY_OTHER_DAY,
     /** Tous les N jours à partir de la date d'ancrage (voir customIntervalDays). */
-    CUSTOM
+    CUSTOM,
+    /** Emploi du temps hebdomadaire : chaque entrée porte son jour (voir PlannedMealEntry.dayOfWeek). */
+    WEEKLY
 }

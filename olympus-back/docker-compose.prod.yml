@@ -1,0 +1,79 @@
+# Compose de PRODUCTION (serveur), modèle « artefacts montés » — aligné sur Chiron.
+# La pipeline Chiron build les artefacts et les dépose, par scp, à côté de ce fichier
+# (dans ~/olympus) puis recrée les conteneurs. Aucun build ni image GHCR ici.
+#
+# Fichiers attendus à côté de ce compose sur le serveur :
+#   olympus.jar               -> le JAR backend (target/olympus-0.0.1-SNAPSHOT.jar renommé)
+#   olympus-pwa-dist/         -> le build de la PWA (olympus-pwa/dist)
+#   olympus-pwa-nginx.conf    -> la conf nginx de la PWA (olympus-pwa/nginx.conf)
+#   .env                      -> MISTRAL_API_KEY, GEMINI_API_KEY, ...
+services:
+
+  olympus-api:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: olympus-api
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://olympus-db:5432/olympus_db
+      - SPRING_DATASOURCE_USERNAME=olympus_user
+      - SPRING_DATASOURCE_PASSWORD=olympus_password
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      # Le JAR déposé par la pipeline Chiron (scp).
+      - ./olympus.jar:/app/olympus.jar
+    command: ["java", "-jar", "/app/olympus.jar"]
+    depends_on:
+      - olympus-db
+    restart: always
+    # `default` : communication interne avec olympus-db.
+    # `chiron-olympus` : réseau partagé permettant à chiron-backend d'atteindre
+    # olympus-api par son nom de service (http://olympus-api:8080).
+    networks:
+      - default
+      - chiron-olympus
+
+  # Front PWA React servi par nginx (assets montés), qui relaie aussi /olympus/api
+  # vers olympus-api (même origine -> pas de CORS). Le reverse-proxy (NPM) de Chiron
+  # route chiron-sanctuaire.duckdns.org/olympus vers ce service.
+  olympus-pwa:
+    image: nginx:1.27-alpine
+    container_name: olympus-pwa
+    ports:
+      - "8082:80"
+    volumes:
+      - ./olympus-pwa-dist:/usr/share/nginx/html/olympus:ro
+      - ./olympus-pwa-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - olympus-api
+    restart: always
+    networks:
+      - default
+      - chiron-olympus
+
+  olympus-db:
+    image: postgres:16-alpine
+    container_name: olympus-db
+    environment:
+      POSTGRES_USER: olympus_user
+      POSTGRES_PASSWORD: olympus_password
+      POSTGRES_DB: olympus_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+    # Réseau partagé pour que chiron-backend lise directement la base (nutrition/poids).
+    networks:
+      - default
+      - chiron-olympus
+
+volumes:
+  db_data:
+
+networks:
+  # Réseau partagé avec la stack Chiron. À créer une fois sur le serveur :
+  #   docker network create chiron-olympus
+  chiron-olympus:
+    external: true
+    name: chiron-olympus

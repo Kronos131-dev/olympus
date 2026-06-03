@@ -27,6 +27,7 @@
 
     <string name="menu_home">ACCUEIL</string>
     <string name="menu_meals">REPAS</string>
+    <string name="menu_plan">PLANNING</string>
     <string name="menu_stats">STATS</string>
     <string name="menu_profile">PROFIL</string>
 
@@ -35,6 +36,7 @@
     <string name="meals_subtitle">LISTE DES REPAS PRÉDÉFINIS</string>
     <string name="consume">CONSOMMER</string>
     <string name="new_meal">+ NOUVEAU REPAS</string>
+    <string name="ai_meal_button">✦ CRÉER AVEC L\'IA</string>
     <string name="label_protein">PROTÉINES</string>
     <string name="label_carbs">GLUCIDES</string>
     <string name="label_fats">LIPIDES</string>

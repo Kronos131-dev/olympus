@@ -4,6 +4,7 @@ import com.kronos.olympus.dto.response.ChatMessageDto;
 import com.kronos.olympus.dto.response.ChatResponseDto;
 import com.kronos.olympus.dto.response.ConversationSummaryDto;
 import com.kronos.olympus.exception.EntityNotFoundException;
+import com.kronos.olympus.exception.ExternalApiException;
 import com.kronos.olympus.model.ChatMessage;
 import com.kronos.olympus.model.Conversation;
 import com.kronos.olympus.model.User;
@@ -34,7 +35,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AgentService {
 
-    private static final int MAX_HISTORY = 20;
+    // Fenêtre d'historique envoyée au LLM : volontairement limitée pour réduire la
+    // taille des prompts (donc les tokens et le risque de dépassement de débit).
+    private static final int MAX_HISTORY = 12;
 
     private final ConversationRepository conversationRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -162,7 +165,7 @@ public class AgentService {
         if (geminiAgentClient.isConfigured()) {
             return geminiAgentClient;
         }
-        throw new IllegalStateException("Aucun fournisseur d'IA n'est configuré côté serveur.");
+        throw new ExternalApiException("Aucun fournisseur d'IA n'est configuré côté serveur.");
     }
 
     private void persistMessage(Conversation conversation, ChatRole role, String content) {
@@ -183,7 +186,15 @@ public class AgentService {
                 + "de seulement décrire ce que tu ferais.\n"
                 + "Quand l'utilisateur décrit un repas ou envoie une photo, identifie chaque aliment et "
                 + "ajoute-le au journal via l'outil log_food (en estimant les quantités si besoin).\n"
+                + "SOURCE DES DONNÉES NUTRITIONNELLES : cherche TOUJOURS d'abord l'aliment en base via "
+                + "log_food ou search_food_items — ces outils interrogent en priorité la base officielle "
+                + "CIQUAL, puis Open Food Facts. Utilise log_estimated_food (en estimant toi-même les "
+                + "valeurs pour 100g) UNIQUEMENT si l'aliment est introuvable en base.\n"
+                + "Pour planifier les repas de la semaine, utilise l'outil create_meal_plan en "
+                + "fournissant, pour chaque jour, les repas et leurs valeurs nutritionnelles estimées pour 100g.\n"
                 + "Si une information essentielle manque, demande une précision à l'utilisateur.\n"
-                + "Réponds toujours en français, de manière concise, claire et bienveillante.";
+                + "Réponds toujours en français, de manière concise, claire et bienveillante. "
+                + "N'utilise JAMAIS de formatage Markdown : pas d'astérisques (*), pas de dièses (#), "
+                + "pas de tirets de liste — réponds en texte brut uniquement.";
     }
 }

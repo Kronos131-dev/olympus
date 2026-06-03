@@ -152,6 +152,33 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/nav_plan"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/nav_plan_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_month"
+                app:tint="@color/marble_white" />
+
+            <TextView
+                android:id="@+id/nav_plan_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/manrope"
+                android:text="@string/menu_plan"
+                android:textColor="@color/marble_white"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/nav_stats"
             android:layout_width="0dp"
             android:layout_height="match_parent"

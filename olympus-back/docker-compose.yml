@@ -4,11 +4,14 @@ services:
     image: eclipse-temurin:17-jre-alpine
     container_name: olympus-api
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
+      - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://olympus-db:5432/olympus_db
       - SPRING_DATASOURCE_USERNAME=olympus_user
       - SPRING_DATASOURCE_PASSWORD=olympus_password
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     depends_on:
       - olympus-db
     restart: always
@@ -17,6 +20,12 @@ services:
       # ⚠️ Vérifie le nom exact du .jar dans ton dossier /target/
       - ./target/olympus-0.0.1-SNAPSHOT.jar:/app/olympus.jar
     command: ["java", "-jar", "/app/olympus.jar"]
+    # `default` : communication interne avec olympus-db.
+    # `chiron-olympus` : réseau partagé permettant à chiron-backend d'atteindre
+    # olympus-api par son nom de service (http://olympus-api:8080).
+    networks:
+      - default
+      - chiron-olympus
 
   olympus-db:
     image: postgres:16-alpine
@@ -30,6 +39,28 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: unless-stopped
+    # `default` : usage interne Olympus. `chiron-olympus` : permet à chiron-backend
+    # de lire directement la base (nutrition/poids) via jdbc:postgresql://olympus-db:5432.
+    networks:
+      - default
+      - chiron-olympus
+
+  # Front PWA React servi par nginx, qui relaie aussi /olympus/api vers olympus-api
+  # (même origine -> pas de CORS). Exposé pour que le reverse-proxy Chiron route
+  # chiron-sanctuaire.duckdns.org/olympus vers ce service.
+  olympus-pwa:
+    build:
+      context: ../olympus-pwa
+      dockerfile: Dockerfile
+    container_name: olympus-pwa
+    ports:
+      - "8082:80"
+    depends_on:
+      - olympus-api
+    restart: unless-stopped
+    networks:
+      - default
+      - chiron-olympus
 
   olympus-pgadmin:
     image: dpage/pgadmin4
@@ -45,3 +76,8 @@ services:
 
 volumes:
   db_data:
+
+networks:
+  chiron-olympus:
+    external: true
+    name: chiron-olympus
