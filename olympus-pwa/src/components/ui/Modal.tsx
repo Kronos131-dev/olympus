@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -24,7 +25,9 @@ export function Modal({ open, onClose, title, children, className }: Props) {
 
   if (!open) return null;
 
-  return (
+  // Portail vers <body> : la modale échappe ainsi à tout ancêtre transformé (.page-enter), qui
+  // sinon redéfinit le référentiel de `position: fixed` et fait apparaître la modale hors écran.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -49,6 +52,7 @@ export function Modal({ open, onClose, title, children, className }: Props) {
         )}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

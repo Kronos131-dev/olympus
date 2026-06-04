@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { FullPageSpinner } from "@/components/ui/misc";
+import { RouteError } from "@/components/RouteError";
 import { lazyWithReload } from "@/lib/lazyWithReload";
 
 const LoginPage = lazyWithReload(() => import("@/pages/LoginPage"));
@@ -32,33 +33,40 @@ function RedirectIfAuth() {
 
 export const router = createBrowserRouter(
   [
+    // Route racine sans chemin : errorElement global → écran de secours + reload auto sur
+    // chunk périmé, au lieu du « Unexpected Application Error! » brut de React Router.
     {
-      element: <RedirectIfAuth />,
+      errorElement: <RouteError />,
       children: [
-        { path: "/login", element: <LoginPage /> },
-        { path: "/register", element: <RegisterPage /> },
-      ],
-    },
-    {
-      element: <RequireAuth />,
-      children: [
-        // Pages plein écran (sans nav) : éditeurs/modaux.
-        { path: "/meals/new", element: <MealEditorPage /> },
-        { path: "/meals/:id/edit", element: <MealEditorPage /> },
-        { path: "/food/add", element: <AddFoodPage /> },
         {
-          element: <AppLayout />,
+          element: <RedirectIfAuth />,
           children: [
-            { path: "/", element: <DashboardPage /> },
-            { path: "/oracle", element: <OraclePage /> },
-            { path: "/meals", element: <MealsPage /> },
-            { path: "/plan", element: <PlanPage /> },
-            { path: "/profile", element: <ProfilePage /> },
+            { path: "/login", element: <LoginPage /> },
+            { path: "/register", element: <RegisterPage /> },
           ],
         },
+        {
+          element: <RequireAuth />,
+          children: [
+            // Pages plein écran (sans nav) : éditeurs/modaux.
+            { path: "/meals/new", element: <MealEditorPage /> },
+            { path: "/meals/:id/edit", element: <MealEditorPage /> },
+            { path: "/food/add", element: <AddFoodPage /> },
+            {
+              element: <AppLayout />,
+              children: [
+                { path: "/", element: <DashboardPage /> },
+                { path: "/oracle", element: <OraclePage /> },
+                { path: "/meals", element: <MealsPage /> },
+                { path: "/plan", element: <PlanPage /> },
+                { path: "/profile", element: <ProfilePage /> },
+              ],
+            },
+          ],
+        },
+        { path: "*", element: <Navigate to="/" replace /> },
       ],
     },
-    { path: "*", element: <Navigate to="/" replace /> },
   ],
   { basename: "/" },
 );
