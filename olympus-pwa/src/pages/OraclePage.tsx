@@ -15,7 +15,10 @@ interface LocalMessage {
   role: "USER" | "ASSISTANT";
   content: string;
   pending?: boolean;
+  provider?: AiProvider;
 }
+
+const PROVIDER_LABEL: Record<AiProvider, string> = { MISTRAL: "Mistral", GEMINI: "Gemini" };
 
 export default function OraclePage() {
   const toast = useToast();
@@ -79,10 +82,15 @@ export default function OraclePage() {
       setMessages((m) =>
         m.map((msg) =>
           msg.id === `${tempId}-a`
-            ? { ...msg, content: res.reply, pending: false }
+            ? { ...msg, content: res.reply, pending: false, provider: res.provider }
             : msg,
         ),
       );
+      // Si on voulait Gemini mais que le serveur a répondu avec un autre fournisseur.
+      const wanted = profile.data?.aiProvider;
+      if (wanted && res.provider && res.provider !== wanted) {
+        toast(`${PROVIDER_LABEL[wanted]} indisponible · réponse via ${PROVIDER_LABEL[res.provider]}`, "info");
+      }
       if (res.actionsTaken?.length) toast(res.actionsTaken.join(" · "), "success");
       qc.invalidateQueries({ queryKey: ["conversations"] });
       qc.invalidateQueries({ queryKey: ["dailyLog"] });
@@ -99,9 +107,9 @@ export default function OraclePage() {
     }
   };
 
-  const toggleProvider = () => {
-    const next: AiProvider = profile.data?.aiProvider === "MISTRAL" ? "GEMINI" : "MISTRAL";
-    updateProfile.mutate({ aiProvider: next });
+  const provider: AiProvider = profile.data?.aiProvider ?? "MISTRAL";
+  const setProvider = (p: AiProvider) => {
+    if (p !== provider) updateProfile.mutate({ aiProvider: p });
   };
 
   const startNew = () => {
@@ -118,12 +126,20 @@ export default function OraclePage() {
           <h1 className="text-2xl text-marble">Conseil divin</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={toggleProvider}
-            className="rounded-full bg-surface-high px-3 py-1.5 text-xs font-medium text-gold"
-          >
-            {profile.data?.aiProvider ?? "MISTRAL"}
-          </button>
+          <div className="flex rounded-full bg-surface-high p-0.5 text-xs font-semibold">
+            {(["MISTRAL", "GEMINI"] as AiProvider[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setProvider(p)}
+                className={cn(
+                  "rounded-full px-3 py-1 transition-colors",
+                  provider === p ? "bg-gold text-[var(--color-on-gold)]" : "text-marble-dim",
+                )}
+              >
+                {PROVIDER_LABEL[p]}
+              </button>
+            ))}
+          </div>
           <button
             onClick={startNew}
             className="rounded-full p-2 text-marble-dim hover:text-marble"
@@ -148,7 +164,7 @@ export default function OraclePage() {
         {messages.map((m) => (
           <div
             key={m.id}
-            className={cn("flex", m.role === "USER" ? "justify-end" : "justify-start")}
+            className={cn("flex flex-col", m.role === "USER" ? "items-end" : "items-start")}
           >
             <div
               className={cn(
@@ -160,6 +176,11 @@ export default function OraclePage() {
             >
               {m.pending ? <Spinner className="size-4" /> : m.content}
             </div>
+            {m.role === "ASSISTANT" && m.provider && !m.pending && (
+              <span className="mt-1 px-1 text-[0.65rem] text-marble-dim">
+                via {PROVIDER_LABEL[m.provider]}
+              </span>
+            )}
           </div>
         ))}
         <div ref={endRef} />

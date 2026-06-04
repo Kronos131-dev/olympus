@@ -35,7 +35,7 @@ export default function DashboardPage() {
   const log = useDailyLog(today);
   const deleteEntry = useDeleteLogEntry(today);
 
-  const targetKcal = profile.data?.targetKcal ?? 0;
+  const targetKcal = profile.data?.targetKcal ?? 2000;
   const effectiveTarget = round(targetKcal);
   const consumed = round(log.data?.totalKcal ?? 0);
   const remaining = effectiveTarget - consumed;
