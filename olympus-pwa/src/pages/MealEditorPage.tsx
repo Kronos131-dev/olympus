@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { mealPresetApi } from "@/lib/api/endpoints";
+import { errorMessage } from "@/lib/api/client";
 import { useSavePreset } from "@/hooks/queries";
 import { FoodFinder } from "@/components/FoodFinder";
 import { Input } from "@/components/ui/Input";
@@ -86,7 +87,7 @@ export default function MealEditorPage() {
           qc.invalidateQueries({ queryKey: ["presets"] });
           navigate("/meals");
         },
-        onError: () => toast("Échec de l'enregistrement", "error"),
+        onError: (e) => toast(errorMessage(e, "Échec de l'enregistrement"), "error"),
       },
     );
   };

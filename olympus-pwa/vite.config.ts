@@ -31,7 +31,8 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: [
-        "icons/favicon.svg",
+        "icons/favicon-32.png",
+        "icons/favicon-180.png",
         "icons/olympus-192.png",
         "icons/olympus-512.png",
         "icons/olympus-apple-touch-180.png",

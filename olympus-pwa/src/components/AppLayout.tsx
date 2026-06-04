@@ -32,6 +32,18 @@ export function AppLayout() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-lg" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      {/* Barre d'app : médaillon IMPERIUM à gauche + wordmark « Olympus » centré. */}
+      <header className="glass sticky top-0 z-30 flex items-center justify-between px-5 py-2.5">
+        <img
+          src="/icons/olympus-192.png"
+          alt="Olympus"
+          className="h-9 w-9 rounded-full"
+          width={36}
+          height={36}
+        />
+        <span className="font-display text-lg font-bold tracking-wide text-gold">Olympus</span>
+        <span className="h-9 w-9" aria-hidden />
+      </header>
       {/* L'Oracle gère sa propre hauteur (colonne fixe) : pas de marge basse ici. */}
       <main
         className={location.pathname === "/oracle" ? "" : "pb-28"}
@@ -66,7 +78,12 @@ export function PageHeader({
         {overline && (
           <p className="text-xs font-semibold tracking-wide text-gold">{overline}</p>
         )}
-        <h1 className="mt-1 text-3xl leading-none text-marble">{title}</h1>
+        <h1
+          className="mt-1 leading-none text-marble"
+          style={{ fontSize: "clamp(1.5rem, 7vw, 1.875rem)" }}
+        >
+          {title}
+        </h1>
       </div>
       {action}
     </header>

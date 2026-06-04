@@ -15,6 +15,14 @@ export class ApiError extends Error {
   }
 }
 
+// Extrait un message lisible d'une erreur (le vrai message du backend si dispo), sinon un
+// libellé de repli. Évite les toasts génériques qui masquent la cause réelle (ex. 500).
+export function errorMessage(e: unknown, fallback: string): string {
+  if (e instanceof ApiError && e.message) return e.message;
+  if (e instanceof Error && e.message) return e.message;
+  return fallback;
+}
+
 // Déclenché quand le refresh échoue : l'app doit rediriger vers le login.
 let onAuthExpired: (() => void) | null = null;
 export function setAuthExpiredHandler(fn: () => void) {
