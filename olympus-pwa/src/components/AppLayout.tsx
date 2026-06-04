@@ -32,8 +32,9 @@ export function AppLayout() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-lg" style={{ paddingTop: "env(safe-area-inset-top)" }}>
-      {/* Barre d'app : médaillon IMPERIUM à gauche + wordmark « Olympus » centré. */}
-      <header className="glass sticky top-0 z-30 flex items-center justify-between px-5 py-2.5">
+      {/* Barre d'app : médaillon IMPERIUM à gauche + wordmark « Olympus » centré.
+          Hauteur fixe (h-14 = 3.5rem) : sert au calcul de hauteur de l'Oracle. */}
+      <header className="glass sticky top-0 z-30 flex h-14 items-center justify-between px-5">
         <img
           src="/icons/olympus-192.png"
           alt="Olympus"

@@ -44,6 +44,10 @@ public class DailyLogService {
         DailyLog dailyLog = getOrCreateDailyLog(user, date);
         // Matérialisation automatique du plan de repas si la journée n'a pas encore été remplie
         applyPlanIfEligible(user, dailyLog);
+        // Recalcul depuis les entrées : auto-corrige les journées déjà désynchronisées
+        // (totaux fantômes hérités d'un ancien bug ou d'un repas pré-enregistré supprimé).
+        recalculateTotals(dailyLog);
+        dailyLogRepository.save(dailyLog);
         return toResponseWithTotals(dailyLog);
     }
 
@@ -114,7 +118,17 @@ public class DailyLogService {
         }
 
         logEntryRepository.save(logEntry);
-        dailyLogRepository.save(dailyLog); // Met à jour les totaux en base
+
+        // Ajouter l'entrée à la collection en mémoire (comme applyPlanIfEligible) : sinon la
+        // réponse mappée depuis dailyLog.getEntries() omet la nouvelle entrée et elle
+        // n'apparaît pas dans l'historique côté front.
+        if (dailyLog.getEntries() == null) {
+            dailyLog.setEntries(new ArrayList<>());
+        }
+        dailyLog.getEntries().add(logEntry);
+
+        recalculateTotals(dailyLog);
+        dailyLogRepository.save(dailyLog); // Persiste les totaux recalculés
 
         return toResponseWithTotals(dailyLog);
     }
@@ -132,40 +146,14 @@ public class DailyLogService {
             throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier ce journal");
         }
 
-        double removedKcal = 0;
-        double removedProteins = 0;
-        double removedCarbs = 0;
-        double removedFats = 0;
-
-        if (logEntry.getFoodItem() != null) {
-            double ratio = logEntry.getQuantityGrams() / 100.0;
-            removedKcal = logEntry.getFoodItem().getKcal100g() * ratio;
-            removedProteins = logEntry.getFoodItem().getProteins100g() * ratio;
-            removedCarbs = logEntry.getFoodItem().getCarbs100g() * ratio;
-            removedFats = logEntry.getFoodItem().getFats100g() * ratio;
-
-        } else if (logEntry.getMealPreset() != null) {
-            for (MealIngredient ingredient : logEntry.getMealPreset().getIngredients()) {
-                double ratio = ingredient.getQuantityGrams() / 100.0;
-                removedKcal += ingredient.getFoodItem().getKcal100g() * ratio;
-                removedProteins += ingredient.getFoodItem().getProteins100g() * ratio;
-                removedCarbs += ingredient.getFoodItem().getCarbs100g() * ratio;
-                removedFats += ingredient.getFoodItem().getFats100g() * ratio;
-            }
-        }
-
-        // On soustrait et on s'assure de ne pas avoir de valeurs négatives à cause des arrondis
-        dailyLog.setTotalKcal(Math.max(0, round(dailyLog.getTotalKcal() - removedKcal)));
-        dailyLog.setTotalProteins(Math.max(0, round(dailyLog.getTotalProteins() - removedProteins)));
-        dailyLog.setTotalCarbs(Math.max(0, round(dailyLog.getTotalCarbs() - removedCarbs)));
-        dailyLog.setTotalFats(Math.max(0, round(dailyLog.getTotalFats() - removedFats)));
-
-        // Suppression de l'entrée et mise à jour du log.
+        // Suppression de l'entrée puis recalcul des totaux depuis les entrées restantes.
         // NB : on ne touche jamais à planApplied — supprimer toutes les entrées ne fait pas revenir le plan.
         if (dailyLog.getEntries() != null) {
             dailyLog.getEntries().remove(logEntry);
         }
         logEntryRepository.delete(logEntry);
+
+        recalculateTotals(dailyLog);
         dailyLogRepository.save(dailyLog);
 
         return toResponseWithTotals(dailyLog);
@@ -220,6 +208,7 @@ public class DailyLogService {
         // On ne marque la journée comme initialisée que si le plan a réellement produit des entrées :
         // une journée sans plan correspondant reste ré-évaluable si un plan est créé plus tard.
         if (anyApplied) {
+            recalculateTotals(dailyLog);
             dailyLog.setPlanApplied(true);
             dailyLogRepository.save(dailyLog);
         }
@@ -252,9 +241,9 @@ public class DailyLogService {
     }
 
     /**
-     * Construit une {@link LogEntry} pour un aliment OU un repas pré-enregistré et applique
-     * ses macros aux totaux du {@link DailyLog}. Logique partagée entre l'ajout manuel et la
-     * matérialisation d'un plan.
+     * Construit une {@link LogEntry} pour un aliment OU un repas pré-enregistré. Les totaux du
+     * jour ne sont PAS mutés ici : ils sont recalculés depuis les entrées via
+     * {@link #recalculateTotals(DailyLog)} (source de vérité unique, anti-désynchronisation).
      */
     private LogEntry buildLogEntry(DailyLog dailyLog, FoodItem foodItem, MealPreset mealPreset, Double quantityGrams) {
         LogEntry logEntry = LogEntry.builder()
@@ -262,45 +251,62 @@ public class DailyLogService {
                 .consumedAt(LocalDateTime.now())
                 .build();
 
-        double addedKcal = 0;
-        double addedProteins = 0;
-        double addedCarbs = 0;
-        double addedFats = 0;
-
         if (foodItem != null) {
             if (quantityGrams == null || quantityGrams <= 0) {
                 throw new IllegalArgumentException("La quantité est obligatoire et doit être positive pour un aliment unitaire");
             }
             logEntry.setFoodItem(foodItem);
             logEntry.setQuantityGrams(quantityGrams);
-
-            double ratio = quantityGrams / 100.0;
-            addedKcal = foodItem.getKcal100g() * ratio;
-            addedProteins = foodItem.getProteins100g() * ratio;
-            addedCarbs = foodItem.getCarbs100g() * ratio;
-            addedFats = foodItem.getFats100g() * ratio;
-
         } else if (mealPreset != null) {
             logEntry.setMealPreset(mealPreset);
             logEntry.setQuantityGrams(1.0); // 1 portion du repas
-
-            for (MealIngredient ingredient : mealPreset.getIngredients()) {
-                double ratio = ingredient.getQuantityGrams() / 100.0;
-                addedKcal += ingredient.getFoodItem().getKcal100g() * ratio;
-                addedProteins += ingredient.getFoodItem().getProteins100g() * ratio;
-                addedCarbs += ingredient.getFoodItem().getCarbs100g() * ratio;
-                addedFats += ingredient.getFoodItem().getFats100g() * ratio;
-            }
         } else {
             throw new IllegalArgumentException("Vous devez fournir soit un aliment, soit un repas pré-enregistré");
         }
 
-        dailyLog.setTotalKcal(round(dailyLog.getTotalKcal() + addedKcal));
-        dailyLog.setTotalProteins(round(dailyLog.getTotalProteins() + addedProteins));
-        dailyLog.setTotalCarbs(round(dailyLog.getTotalCarbs() + addedCarbs));
-        dailyLog.setTotalFats(round(dailyLog.getTotalFats() + addedFats));
-
         return logEntry;
+    }
+
+    /**
+     * Recalcule les totaux macros du jour à partir des entrées (source de vérité). Évite toute
+     * désynchronisation : entrée orpheline (repas pré-enregistré supprimé → mealPreset détaché),
+     * édition d'ingrédients après log, double application de plan, etc. Une entrée sans aliment
+     * ni repas contribue 0. N'affecte pas l'activité (extraKcalBurned, pas…).
+     */
+    private void recalculateTotals(DailyLog dailyLog) {
+        double kcal = 0, proteins = 0, carbs = 0, fats = 0;
+        if (dailyLog.getEntries() != null) {
+            for (LogEntry entry : dailyLog.getEntries()) {
+                if (entry.getFoodItem() != null && entry.getQuantityGrams() != null) {
+                    double ratio = entry.getQuantityGrams() / 100.0;
+                    FoodItem fi = entry.getFoodItem();
+                    kcal += nz(fi.getKcal100g()) * ratio;
+                    proteins += nz(fi.getProteins100g()) * ratio;
+                    carbs += nz(fi.getCarbs100g()) * ratio;
+                    fats += nz(fi.getFats100g()) * ratio;
+                } else if (entry.getMealPreset() != null && entry.getMealPreset().getIngredients() != null) {
+                    for (MealIngredient ing : entry.getMealPreset().getIngredients()) {
+                        if (ing.getFoodItem() == null || ing.getQuantityGrams() == null) {
+                            continue;
+                        }
+                        double ratio = ing.getQuantityGrams() / 100.0;
+                        FoodItem fi = ing.getFoodItem();
+                        kcal += nz(fi.getKcal100g()) * ratio;
+                        proteins += nz(fi.getProteins100g()) * ratio;
+                        carbs += nz(fi.getCarbs100g()) * ratio;
+                        fats += nz(fi.getFats100g()) * ratio;
+                    }
+                }
+            }
+        }
+        dailyLog.setTotalKcal(round(kcal));
+        dailyLog.setTotalProteins(round(proteins));
+        dailyLog.setTotalCarbs(round(carbs));
+        dailyLog.setTotalFats(round(fats));
+    }
+
+    private double nz(Double value) {
+        return value != null ? value : 0.0;
     }
 
     private DailyLog getOrCreateDailyLog(User user, LocalDate date) {

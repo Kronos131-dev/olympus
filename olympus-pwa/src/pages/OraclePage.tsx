@@ -95,12 +95,12 @@ export default function OraclePage() {
       if (res.actionsTaken?.length) toast(res.actionsTaken.join(" · "), "success");
       qc.invalidateQueries({ queryKey: ["conversations"] });
       qc.invalidateQueries({ queryKey: ["dailyLog"] });
-    } catch {
+    } catch (e) {
+      // Afficher la vraie cause (ex. erreur Gemini) au lieu d'un message générique muet.
+      const msg = errorMessage(e, "L'Oracle est resté silencieux. Réessaie.");
       setMessages((m) =>
-        m.map((msg) =>
-          msg.id === `${tempId}-a`
-            ? { ...msg, content: "L'Oracle est resté silencieux. Réessaie.", pending: false }
-            : msg,
+        m.map((mm) =>
+          mm.id === `${tempId}-a` ? { ...mm, content: msg, pending: false } : mm,
         ),
       );
     } finally {
@@ -125,8 +125,12 @@ export default function OraclePage() {
   };
 
   return (
-    // Colonne de hauteur fixe (viewport moins la barre de nav) : header / messages / saisie.
-    <div className="flex h-[calc(100dvh-5.5rem)] flex-col">
+    // Colonne de hauteur fixe : viewport moins la barre d'app (3.5rem), la BottomNav (5.5rem)
+    // et l'encoche haute. La saisie reste ainsi au-dessus de la barre de navigation.
+    <div
+      className="flex flex-col"
+      style={{ height: "calc(100dvh - 3.5rem - 5.5rem - env(safe-area-inset-top))" }}
+    >
       <header className="flex flex-none items-center justify-between px-5 pt-7 pb-3">
         <div>
           <p className="text-xs font-semibold tracking-wide text-gold">L'Oracle</p>
