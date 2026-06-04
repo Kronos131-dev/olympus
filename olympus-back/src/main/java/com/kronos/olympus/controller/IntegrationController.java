@@ -1,10 +1,12 @@
 package com.kronos.olympus.controller;
 
 import com.kronos.olympus.dto.request.IntegrationLinkRequest;
+import com.kronos.olympus.dto.request.WeightSyncRequest;
 import com.kronos.olympus.dto.response.AuthResponse;
 import com.kronos.olympus.dto.response.IntegrationLinkResponse;
 import com.kronos.olympus.service.AuthService;
 import com.kronos.olympus.service.IntegrationLinkService;
+import com.kronos.olympus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,7 @@ public class IntegrationController {
     private final IntegrationLinkService integrationLinkService;
     private final AuthenticationManager authenticationManager;
     private final AuthService authService;
+    private final UserService userService;
 
     /** Crée le lien permanent après vérification des identifiants Olympus. */
     @PostMapping("/link")
@@ -60,6 +63,24 @@ public class IntegrationController {
             @RequestHeader(value = TOKEN_HEADER, required = false) String token) {
         return integrationLinkService.resolveUserEmail(token)
                 .map(email -> ResponseEntity.ok(authService.issueTokensFor(email)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    /**
+     * Synchronise le poids de l'utilisateur depuis l'app tierce liée. C'est la seule
+     * écriture autorisée via le token d'intégration : l'endpoint résout lui-même le token
+     * (comme {@code /session}) et délègue à {@link UserService}, qui historise la métrique
+     * du jour. Le filtre {@code X-Integration-Token} (lecture seule) reste inchangé.
+     */
+    @PostMapping("/weight")
+    public ResponseEntity<Void> syncWeight(
+            @RequestHeader(value = TOKEN_HEADER, required = false) String token,
+            @Valid @RequestBody WeightSyncRequest request) {
+        return integrationLinkService.resolveUserEmail(token)
+                .map(email -> {
+                    userService.updateWeightByEmail(email, request.getWeightKg());
+                    return ResponseEntity.noContent().<Void>build();
+                })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
