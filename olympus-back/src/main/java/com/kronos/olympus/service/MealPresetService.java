@@ -131,12 +131,12 @@ public class MealPresetService {
         }
 
         // Détacher / supprimer les références avant suppression pour éviter la violation FK.
-        // L'historique est détaché (totaux déjà agrégés sur daily_log) ; le planning est purgé ;
-        // les ingrédients sont supprimés explicitement (comme updateMealPreset) pour ne pas
-        // dépendre de l'initialisation lazy du cascade.
+        // L'historique est détaché (totaux déjà agrégés sur daily_log) ; le planning est purgé.
+        // Les ingrédients sont supprimés par le cascade JPA (cascade=ALL + orphanRemoval) : on
+        // NE les supprime PAS par requête bulk ici, sinon elle entre en conflit avec la collection
+        // déjà chargée et provoque une ObjectOptimisticLockingFailureException au flush.
         logEntryRepository.detachMealPreset(presetId);
         plannedMealEntryRepository.deleteByMealPresetId(presetId);
-        mealIngredientRepository.deleteByMealPresetId(presetId);
 
         mealPresetRepository.delete(preset);
     }

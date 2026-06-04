@@ -61,11 +61,10 @@ class MealPresetServiceTest {
         mealPresetService.deleteMealPreset(5L, 1L);
 
         // L'ordre est essentiel : on doit lever les références AVANT le delete.
-        InOrder order = inOrder(logEntryRepository, plannedMealEntryRepository,
-                mealIngredientRepository, mealPresetRepository);
+        // Les ingrédients sont gérés par le cascade JPA, pas par une requête bulk ici.
+        InOrder order = inOrder(logEntryRepository, plannedMealEntryRepository, mealPresetRepository);
         order.verify(logEntryRepository).detachMealPreset(5L);
         order.verify(plannedMealEntryRepository).deleteByMealPresetId(5L);
-        order.verify(mealIngredientRepository).deleteByMealPresetId(5L);
         order.verify(mealPresetRepository).delete(preset);
     }
 
