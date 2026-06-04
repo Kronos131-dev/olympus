@@ -1,16 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/AppLayout";
-import { Card, SectionTitle } from "@/components/ui/Card";
+import { SectionTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { MacroBar } from "@/components/ui/MacroBar";
-import { Modal } from "@/components/ui/Modal";
-import { Input } from "@/components/ui/Input";
 import { EmptyState, Skeleton } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
-import { IconActivity, IconPlus, IconTrash } from "@/components/icons";
-import { useDailyLog, useDeleteLogEntry, useProfile, useUpdateActivity } from "@/hooks/queries";
+import { IconPlus, IconTrash } from "@/components/icons";
+import { useDailyLog, useDeleteLogEntry, useProfile } from "@/hooks/queries";
 import { formatDateLong, macrosFor, round, todayIso } from "@/lib/utils";
 import type { LogEntryResponse } from "@/types/api";
 
@@ -36,11 +34,9 @@ export default function DashboardPage() {
   const profile = useProfile();
   const log = useDailyLog(today);
   const deleteEntry = useDeleteLogEntry(today);
-  const [activityOpen, setActivityOpen] = useState(false);
 
   const targetKcal = profile.data?.targetKcal ?? 0;
-  const extraBurned = log.data?.extraKcalBurned ?? 0;
-  const effectiveTarget = round(targetKcal + extraBurned);
+  const effectiveTarget = round(targetKcal);
   const consumed = round(log.data?.totalKcal ?? 0);
   const remaining = effectiveTarget - consumed;
 
@@ -89,30 +85,6 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        <Card tone="low" className="mt-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-gold">
-                <IconActivity size={20} />
-              </span>
-              <div>
-                <p className="text-sm text-marble">
-                  {log.data?.stepCount ? `${log.data.stepCount} pas` : "Activité"}
-                </p>
-                <p className="text-xs text-marble-dim">
-                  {round(extraBurned)} kcal brûlées
-                  {log.data?.workoutDurationMinutes
-                    ? ` · ${log.data.workoutDurationMinutes} min`
-                    : ""}
-                </p>
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => setActivityOpen(true)}>
-              Éditer
-            </Button>
-          </div>
-        </Card>
-
         <section className="mt-6">
           <SectionTitle>Consommations récentes</SectionTitle>
           {log.isLoading ? (
@@ -156,58 +128,6 @@ export default function DashboardPage() {
           )}
         </section>
       </div>
-
-      <ActivityModal open={activityOpen} onClose={() => setActivityOpen(false)} date={today} />
     </div>
-  );
-}
-
-function ActivityModal({ open, onClose, date }: { open: boolean; onClose: () => void; date: string }) {
-  const toast = useToast();
-  const log = useDailyLog(date);
-  const update = useUpdateActivity(date);
-  const [steps, setSteps] = useState("");
-  const [workout, setWorkout] = useState("");
-  const [burned, setBurned] = useState("");
-
-  // Pré-remplit à l'ouverture.
-  const data = log.data;
-  useEffect(() => {
-    if (open) {
-      setSteps(data?.stepCount ? String(data.stepCount) : "");
-      setWorkout(data?.workoutDurationMinutes ? String(data.workoutDurationMinutes) : "");
-      setBurned(data?.manualKcalBurned ? String(data.manualKcalBurned) : "");
-    }
-  }, [open, data]);
-
-  const save = () => {
-    update.mutate(
-      {
-        targetDate: date,
-        stepCount: steps ? Number(steps) : undefined,
-        workoutDurationMinutes: workout ? Number(workout) : undefined,
-        manualKcalBurned: burned ? Number(burned) : undefined,
-      },
-      {
-        onSuccess: () => {
-          toast("Activité mise à jour", "success");
-          onClose();
-        },
-        onError: () => toast("Échec de la mise à jour", "error"),
-      },
-    );
-  };
-
-  return (
-    <Modal open={open} onClose={onClose} title="Activité du jour">
-      <div className="space-y-3">
-        <Input label="Pas" type="number" inputMode="numeric" value={steps} onChange={(e) => setSteps(e.target.value)} />
-        <Input label="Entraînement (min)" type="number" inputMode="numeric" value={workout} onChange={(e) => setWorkout(e.target.value)} />
-        <Input label="Calories brûlées (manuel)" type="number" inputMode="numeric" value={burned} onChange={(e) => setBurned(e.target.value)} />
-        <Button block loading={update.isPending} onClick={save}>
-          Enregistrer
-        </Button>
-      </div>
-    </Modal>
   );
 }

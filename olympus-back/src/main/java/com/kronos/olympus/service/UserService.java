@@ -92,6 +92,25 @@ public class UserService {
         return userMapper.toResponse(updatedUser);
     }
 
+    /**
+     * Met à jour le poids d'un utilisateur identifié par son e-mail, puis enregistre la
+     * métrique du jour. Utilisé par la synchronisation depuis une app tierce liée (Chiron).
+     */
+    @Transactional
+    public void updateWeightByEmail(String email, Double weightKg) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+
+        if (weightKg == null || weightKg.equals(user.getCurrentWeightKg())) {
+            return; // Rien à faire : poids identique ou absent.
+        }
+
+        user.setCurrentWeightKg(weightKg);
+        User updatedUser = userRepository.save(user);
+        recordNewMetrics(updatedUser, true);
+        log.info("Poids synchronisé depuis une app tierce pour {} : {} kg", email, weightKg);
+    }
+
     private void recordNewMetrics(User user, boolean weightChanged) {
         // Utilisera les mêmes cibles que celles envoyées dans UserResponse par le mapper
         UserResponse response = userMapper.toResponse(user);
