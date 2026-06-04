@@ -42,8 +42,9 @@ export async function exchangeChironToken(integrationToken: string): Promise<Aut
 }
 
 export const userApi = {
-  profile: () => api.get<UserResponse>("/users/profile/"),
-  update: (body: UpdateProfileRequest) => api.put<UserResponse>("/users/profile/", body),
+  // Pas de slash final : Spring Boot 3.2 ne matche plus le trailing slash (sinon 500/404).
+  profile: () => api.get<UserResponse>("/users/profile"),
+  update: (body: UpdateProfileRequest) => api.put<UserResponse>("/users/profile", body),
 };
 
 export const dailyLogApi = {
