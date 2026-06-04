@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { agentApi } from "@/lib/api/endpoints";
+import { errorMessage } from "@/lib/api/client";
 import { qk, useProfile, useUpdateProfile } from "@/hooks/queries";
 import { useToast } from "@/components/ui/Toast";
 import { useSpeech } from "@/hooks/useSpeech";
@@ -114,7 +115,7 @@ export default function OraclePage() {
     if (profile.data) qc.setQueryData(qk.profile, { ...profile.data, aiProvider: p });
     updateProfile.mutate(
       { aiProvider: p },
-      { onError: () => toast("Impossible de changer de fournisseur d'IA", "error") },
+      { onError: (e) => toast(errorMessage(e, "Impossible de changer de fournisseur d'IA"), "error") },
     );
   };
 

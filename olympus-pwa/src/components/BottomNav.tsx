@@ -46,7 +46,7 @@ export function BottomNav() {
                   </span>
                   <span
                     className={cn(
-                      "text-[0.6rem] font-medium transition-colors",
+                      "whitespace-nowrap text-[0.6rem] font-medium transition-colors",
                       isActive ? "text-gold" : "text-marble-dim",
                     )}
                   >

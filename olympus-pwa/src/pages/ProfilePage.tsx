@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
+import { errorMessage } from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useProfile, useUpdateProfile } from "@/hooks/queries";
 import { ACTIVITY_LABELS, GENDER_LABELS, GOAL_LABELS, optionsFrom } from "@/lib/labels";
@@ -30,7 +31,7 @@ export default function ProfilePage() {
           <>
             <Card tone="low">
               <SectionTitle>Cibles quotidiennes</SectionTitle>
-              <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
                 <Target label="Kcal" value={round(data.targetKcal)} />
                 <Target label="Prot" value={round(data.targetProteins)} />
                 <Target label="Gluc" value={round(data.targetCarbs)} />
@@ -126,7 +127,7 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
           toast("Profil mis à jour", "success");
           onClose();
         },
-        onError: () => toast("Mise à jour impossible", "error"),
+        onError: (e) => toast(errorMessage(e, "Mise à jour impossible"), "error"),
       },
     );
   };
@@ -191,7 +192,7 @@ function EditTargetsModal({ open, onClose }: { open: boolean; onClose: () => voi
           toast("Cibles mises à jour", "success");
           onClose();
         },
-        onError: () => toast("Mise à jour impossible", "error"),
+        onError: (e) => toast(errorMessage(e, "Mise à jour impossible"), "error"),
       },
     );
   };

@@ -29,7 +29,9 @@ export default function LoginPage() {
     <div className="page-enter mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
       <div className="mb-10 text-center">
         <p className="lapidary text-[0.65rem] tracking-[0.4em] text-gold">Le Panthéon</p>
-        <h1 className="text-6xl text-marble">Olympus</h1>
+        <h1 className="text-marble" style={{ fontSize: "clamp(2.5rem, 16vw, 3.75rem)" }}>
+          Olympus
+        </h1>
         <p className="mt-3 text-sm text-marble-dim">Ta conquête personnelle commence ici.</p>
       </div>
 

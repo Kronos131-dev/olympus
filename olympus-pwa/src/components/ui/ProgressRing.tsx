@@ -18,8 +18,13 @@ export function ProgressRing({ value, max, size = 220, stroke = 16, children, cl
   const over = max > 0 && value > max;
 
   return (
-    <div className={cn("relative inline-grid place-items-center", className)} style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    // Taille fluide : ne dépasse jamais `size` (220px) mais se réduit sur les petits écrans.
+    // Le SVG garde son repère interne via viewBox et remplit le conteneur à 100%.
+    <div
+      className={cn("relative inline-grid aspect-square place-items-center", className)}
+      style={{ width: `min(${size}px, 62vw)` }}
+    >
+      <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
         <defs>
           <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#af8d11" />

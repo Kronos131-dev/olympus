@@ -7,6 +7,7 @@ import { ProgressRing } from "@/components/ui/ProgressRing";
 import { MacroBar } from "@/components/ui/MacroBar";
 import { EmptyState, Skeleton } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
+import { errorMessage } from "@/lib/api/client";
 import { IconPlus, IconTrash } from "@/components/icons";
 import { useDailyLog, useDeleteLogEntry, useProfile } from "@/hooks/queries";
 import { formatDateLong, macrosFor, round, todayIso } from "@/lib/utils";
@@ -56,7 +57,12 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center">
             <ProgressRing value={consumed} max={effectiveTarget || 1}>
               <div>
-                <p className="text-6xl font-extrabold tracking-tight text-marble">{consumed}</p>
+                <p
+                  className="font-extrabold leading-none tracking-tight text-marble"
+                  style={{ fontSize: "clamp(2.5rem, 14vw, 3.75rem)" }}
+                >
+                  {consumed}
+                </p>
                 <p className="text-xs font-medium text-marble-dim">
                   / {effectiveTarget} kcal
                 </p>
@@ -70,7 +76,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
+        <div className="mt-6 grid grid-cols-3 gap-2">
           <MacroBar label="Protéines" value={log.data?.totalProteins ?? 0} target={profile.data?.targetProteins} color="var(--color-purple-bright)" />
           <MacroBar label="Glucides" value={log.data?.totalCarbs ?? 0} target={profile.data?.targetCarbs} color="var(--color-gold)" />
           <MacroBar label="Lipides" value={log.data?.totalFats ?? 0} target={profile.data?.targetFats} color="var(--color-pink)" />
@@ -113,7 +119,7 @@ export default function DashboardPage() {
                     <button
                       onClick={() =>
                         deleteEntry.mutate(e.id, {
-                          onError: () => toast("Suppression impossible", "error"),
+                          onError: (e) => toast(errorMessage(e, "Suppression impossible"), "error"),
                         })
                       }
                       className="text-marble-dim transition-colors hover:text-[var(--color-danger)]"

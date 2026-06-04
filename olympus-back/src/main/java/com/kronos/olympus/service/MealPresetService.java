@@ -131,9 +131,12 @@ public class MealPresetService {
         }
 
         // Détacher / supprimer les références avant suppression pour éviter la violation FK.
-        // L'historique est détaché (totaux déjà agrégés sur daily_log) ; le planning est purgé.
+        // L'historique est détaché (totaux déjà agrégés sur daily_log) ; le planning est purgé ;
+        // les ingrédients sont supprimés explicitement (comme updateMealPreset) pour ne pas
+        // dépendre de l'initialisation lazy du cascade.
         logEntryRepository.detachMealPreset(presetId);
         plannedMealEntryRepository.deleteByMealPresetId(presetId);
+        mealIngredientRepository.deleteByMealPresetId(presetId);
 
         mealPresetRepository.delete(preset);
     }

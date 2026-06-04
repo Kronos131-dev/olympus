@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { errorMessage } from "@/lib/api/client";
 import { IconBack } from "@/components/icons";
 import { useAddLogEntry } from "@/hooks/queries";
 import { macrosFor, round, todayIso } from "@/lib/utils";
@@ -33,7 +34,7 @@ export default function AddFoodPage() {
           toast(`${picked.name} ajouté`, "success");
           navigate("/");
         },
-        onError: () => toast("Ajout impossible", "error"),
+        onError: (e) => toast(errorMessage(e, "Ajout impossible"), "error"),
       },
     );
   };
@@ -62,7 +63,7 @@ export default function AddFoodPage() {
             autoFocus
           />
           {preview && (
-            <div className="grid grid-cols-4 gap-2 rounded-[var(--radius)] bg-surface-lowest p-3 text-center">
+            <div className="grid grid-cols-2 gap-2 rounded-[var(--radius)] bg-surface-lowest p-3 text-center sm:grid-cols-4">
               {[
                 ["kcal", round(preview.kcal)],
                 ["Prot", round(preview.proteins)],

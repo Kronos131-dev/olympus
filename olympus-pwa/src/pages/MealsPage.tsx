@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { EmptyState, Skeleton } from "@/components/ui/misc";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
+import { errorMessage } from "@/lib/api/client";
 import { IconEdit, IconPlus, IconSparkle, IconTrash } from "@/components/icons";
 import { useAddLogEntry, useDeletePreset, usePresets } from "@/hooks/queries";
 import { round, todayIso } from "@/lib/utils";
@@ -33,7 +34,7 @@ export default function MealsPage() {
       { targetDate: todayIso(), mealPresetId: preset.id },
       {
         onSuccess: () => toast(`${preset.name} consommé`, "success"),
-        onError: () => toast("Impossible de consommer", "error"),
+        onError: (e) => toast(errorMessage(e, "Impossible de consommer"), "error"),
       },
     );
   };
@@ -128,7 +129,7 @@ export default function MealsPage() {
                   toast("Repas supprimé", "success");
                   setToDelete(null);
                 },
-                onError: () => toast("Suppression impossible", "error"),
+                onError: (e) => toast(errorMessage(e, "Suppression impossible"), "error"),
               })
             }
           >
