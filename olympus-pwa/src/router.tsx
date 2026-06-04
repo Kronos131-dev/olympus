@@ -1,18 +1,18 @@
-import { lazy } from "react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { FullPageSpinner } from "@/components/ui/misc";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 
-const LoginPage = lazy(() => import("@/pages/LoginPage"));
-const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
-const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
-const OraclePage = lazy(() => import("@/pages/OraclePage"));
-const MealsPage = lazy(() => import("@/pages/MealsPage"));
-const MealEditorPage = lazy(() => import("@/pages/MealEditorPage"));
-const AddFoodPage = lazy(() => import("@/pages/AddFoodPage"));
-const PlanPage = lazy(() => import("@/pages/PlanPage"));
-const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const LoginPage = lazyWithReload(() => import("@/pages/LoginPage"));
+const RegisterPage = lazyWithReload(() => import("@/pages/RegisterPage"));
+const DashboardPage = lazyWithReload(() => import("@/pages/DashboardPage"));
+const OraclePage = lazyWithReload(() => import("@/pages/OraclePage"));
+const MealsPage = lazyWithReload(() => import("@/pages/MealsPage"));
+const MealEditorPage = lazyWithReload(() => import("@/pages/MealEditorPage"));
+const AddFoodPage = lazyWithReload(() => import("@/pages/AddFoodPage"));
+const PlanPage = lazyWithReload(() => import("@/pages/PlanPage"));
+const ProfilePage = lazyWithReload(() => import("@/pages/ProfilePage"));
 
 // N'autorise l'accès qu'aux utilisateurs authentifiés.
 function RequireAuth() {

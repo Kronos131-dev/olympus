@@ -91,7 +91,13 @@ export function useDeletePreset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => mealPresetApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.presets }),
+    onSuccess: () => {
+      // Le repas supprimé est détaché du planning et de l'historique côté backend :
+      // on rafraîchit aussi ces vues. ["dailyLog"] en préfixe couvre toutes les dates.
+      qc.invalidateQueries({ queryKey: qk.presets });
+      qc.invalidateQueries({ queryKey: qk.weeklyPlan });
+      qc.invalidateQueries({ queryKey: ["dailyLog"] });
+    },
   });
 }
 

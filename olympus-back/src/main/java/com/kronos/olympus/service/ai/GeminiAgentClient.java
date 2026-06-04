@@ -125,6 +125,9 @@ public class GeminiAgentClient implements AgentClient {
                 for (JsonNode functionCall : functionCalls) {
                     String name = functionCall.path("name").asText("");
                     JsonNode args = functionCall.path("args");
+                    if (args.isMissingNode() || args.isNull()) {
+                        args = objectMapper.createObjectNode();
+                    }
                     AgentTool tool = toolMap.get(name);
                     String result = tool != null ? tool.execute(args) : "Outil inconnu : " + name;
                     actionsTaken.add(name);

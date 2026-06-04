@@ -9,8 +9,10 @@ import com.kronos.olympus.model.MealIngredient;
 import com.kronos.olympus.model.MealPreset;
 import com.kronos.olympus.model.User;
 import com.kronos.olympus.repository.FoodItemRepository;
+import com.kronos.olympus.repository.LogEntryRepository;
 import com.kronos.olympus.repository.MealIngredientRepository;
 import com.kronos.olympus.repository.MealPresetRepository;
+import com.kronos.olympus.repository.PlannedMealEntryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ public class MealPresetService {
     private final MealPresetRepository mealPresetRepository;
     private final FoodItemRepository foodItemRepository;
     private final MealIngredientRepository mealIngredientRepository;
+    private final LogEntryRepository logEntryRepository;
+    private final PlannedMealEntryRepository plannedMealEntryRepository;
     private final MealPresetMapper mealPresetMapper;
     private final MealPresetTotalsCalculator totalsCalculator;
 
@@ -125,7 +129,12 @@ public class MealPresetService {
         if (!preset.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("Vous n'êtes pas autorisé à supprimer ce repas");
         }
-        
+
+        // Détacher / supprimer les références avant suppression pour éviter la violation FK.
+        // L'historique est détaché (totaux déjà agrégés sur daily_log) ; le planning est purgé.
+        logEntryRepository.detachMealPreset(presetId);
+        plannedMealEntryRepository.deleteByMealPresetId(presetId);
+
         mealPresetRepository.delete(preset);
     }
 
