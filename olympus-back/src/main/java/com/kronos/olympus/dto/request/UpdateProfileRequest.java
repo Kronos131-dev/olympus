@@ -2,6 +2,7 @@ package com.kronos.olympus.dto.request;
 
 import com.kronos.olympus.model.enums.ActivityLevel;
 import com.kronos.olympus.model.enums.AiProvider;
+import com.kronos.olympus.model.enums.Gender;
 import com.kronos.olympus.model.enums.Goal;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 public class UpdateProfileRequest {
     private Double currentWeightKg;
     private Double heightCm;
+    private Gender gender;
     private LocalDate birthDate;
     private ActivityLevel activityLevel;
     private Goal goal;

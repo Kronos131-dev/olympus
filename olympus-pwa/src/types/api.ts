@@ -71,6 +71,7 @@ export interface UserResponse {
 export interface UpdateProfileRequest {
   currentWeightKg?: number;
   heightCm?: number;
+  gender?: Gender;
   birthDate?: string;
   activityLevel?: ActivityLevel;
   goal?: Goal;

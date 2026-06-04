@@ -10,7 +10,7 @@ import {
 import { tokenStore } from "@/lib/api/tokenStore";
 import { setAuthExpiredHandler } from "@/lib/api/client";
 import { authApi, userApi } from "@/lib/api/endpoints";
-import { tryChironHandoff } from "./handoff";
+import { hasHandoffToken, tryChironHandoff } from "./handoff";
 import type { AuthRequest, RegisterRequest, UserResponse } from "@/types/api";
 
 interface AuthState {
@@ -43,7 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false;
     (async () => {
-      if (!tokenStore.hasSession()) {
+      // Un token de handoff dans l'URL (entrée directe depuis Chiron) est PRIORITAIRE :
+      // on remplace toute session locale éventuellement périmée par la nouvelle.
+      if (hasHandoffToken()) {
+        tokenStore.clear();
+        await tryChironHandoff();
+      } else if (!tokenStore.hasSession()) {
         await tryChironHandoff();
       }
       if (cancelled) return;

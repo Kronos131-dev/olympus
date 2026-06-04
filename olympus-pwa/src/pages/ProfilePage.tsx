@@ -10,7 +10,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/queries";
 import { ACTIVITY_LABELS, GENDER_LABELS, GOAL_LABELS, optionsFrom } from "@/lib/labels";
 import { round } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/misc";
-import type { ActivityLevel, Goal } from "@/types/api";
+import type { ActivityLevel, Gender, Goal } from "@/types/api";
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -95,6 +95,8 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
   const update = useUpdateProfile();
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+  const [gender, setGender] = useState<Gender>("MALE");
+  const [birthDate, setBirthDate] = useState("");
   const [goal, setGoal] = useState<Goal>("MAINTAIN");
   const [activity, setActivity] = useState<ActivityLevel>("MODERATE");
 
@@ -102,6 +104,8 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
     if (open && profile.data) {
       setWeight(String(round(profile.data.currentWeightKg, 1)));
       setHeight(String(round(profile.data.heightCm)));
+      setGender(profile.data.gender ?? "MALE");
+      setBirthDate(profile.data.birthDate ?? "");
       setGoal(profile.data.goal);
       setActivity(profile.data.activityLevel);
     }
@@ -112,6 +116,8 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
       {
         currentWeightKg: Number(weight),
         heightCm: Number(height),
+        gender,
+        birthDate: birthDate || undefined,
         goal,
         activityLevel: activity,
       },
@@ -131,6 +137,10 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
         <div className="grid grid-cols-2 gap-3">
           <Input label="Poids (kg)" type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} />
           <Input label="Taille (cm)" type="number" inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value)} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Select label="Genre" value={gender} onChange={(e) => setGender(e.target.value as Gender)} options={optionsFrom(GENDER_LABELS)} />
+          <Input label="Naissance" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
         </div>
         <Select label="Objectif" value={goal} onChange={(e) => setGoal(e.target.value as Goal)} options={optionsFrom(GOAL_LABELS)} />
         <Select label="Niveau d'activité" value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)} options={optionsFrom(ACTIVITY_LABELS)} />

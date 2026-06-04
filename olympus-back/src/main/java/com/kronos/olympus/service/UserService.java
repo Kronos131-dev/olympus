@@ -52,6 +52,11 @@ public class UserService {
             needsNewMetrics = true;
         }
 
+        if (request.getGender() != null && !request.getGender().equals(user.getGender())) {
+            user.setGender(request.getGender());
+            needsNewMetrics = true;
+        }
+
         if (request.getBirthDate() != null && !request.getBirthDate().equals(user.getBirthDate())) {
             user.setBirthDate(request.getBirthDate());
             needsNewMetrics = true;

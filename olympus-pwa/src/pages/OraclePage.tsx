@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { agentApi } from "@/lib/api/endpoints";
-import { useProfile, useUpdateProfile } from "@/hooks/queries";
+import { qk, useProfile, useUpdateProfile } from "@/hooks/queries";
 import { useToast } from "@/components/ui/Toast";
 import { useSpeech } from "@/hooks/useSpeech";
 import { compressImage } from "@/lib/image";
@@ -109,7 +109,13 @@ export default function OraclePage() {
 
   const provider: AiProvider = profile.data?.aiProvider ?? "MISTRAL";
   const setProvider = (p: AiProvider) => {
-    if (p !== provider) updateProfile.mutate({ aiProvider: p });
+    if (p === provider) return;
+    // Optimiste : l'UI bascule immédiatement, sans attendre le réseau.
+    if (profile.data) qc.setQueryData(qk.profile, { ...profile.data, aiProvider: p });
+    updateProfile.mutate(
+      { aiProvider: p },
+      { onError: () => toast("Impossible de changer de fournisseur d'IA", "error") },
+    );
   };
 
   const startNew = () => {
