@@ -12,12 +12,12 @@ const tones = {
   high: "bg-surface-high",
 };
 
-// Slab de pierre : hiérarchie par ton de surface, pas de bordure 1px, angles vifs.
+// Carte : hiérarchie par ton de surface, coins arrondis doux.
 export function Card({ tone = "default", goldEdge, className, children, ...rest }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-none p-5",
+        "rounded-[var(--radius-lg)] p-5",
         tones[tone],
         goldEdge && "border-l-2 border-gold",
         className,
@@ -31,7 +31,7 @@ export function Card({ tone = "default", goldEdge, className, children, ...rest 
 
 export function SectionTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <h2 className={cn("lapidary text-xs text-marble-dim tracking-[0.18em] mb-3", className)}>
+    <h2 className={cn("text-sm font-semibold text-marble mb-3", className)}>
       {children}
     </h2>
   );

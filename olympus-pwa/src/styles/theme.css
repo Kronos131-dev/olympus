@@ -1,15 +1,13 @@
 @import "tailwindcss";
-@import "@fontsource/newsreader/400.css";
-@import "@fontsource/newsreader/500.css";
-@import "@fontsource/newsreader/600-italic.css";
 @import "@fontsource/manrope/400.css";
 @import "@fontsource/manrope/500.css";
 @import "@fontsource/manrope/600.css";
 @import "@fontsource/manrope/700.css";
+@import "@fontsource/manrope/800.css";
 
 /*
- * Design system « Digital Pantheon » (cf. DESIGN.md).
- * Hiérarchie par tons de surface, or impérial, pourpre, marbre. Angles vifs (0px).
+ * Design system Olympus — moderne & sobre.
+ * Fond quasi-noir, accent OR sobre, typo Manrope sans-serif, angles arrondis doux.
  */
 @theme {
   --color-surface-lowest: #0c0f0f;
@@ -21,22 +19,29 @@
 
   --color-gold: #e9c349;
   --color-gold-deep: #af8d11;
-  --color-on-gold: #3c2f00;
+  --color-on-gold: #1a1500;
 
   --color-purple: #5d3fd3;
   --color-purple-bright: #7b5cff;
+  --color-pink: #d81b60;
 
-  --color-marble: #e2e2e2;
+  --color-marble: #e8e8e6;
   --color-marble-dim: #9a9a96;
-  --color-outline: #484554;
+  --color-outline: #3a3d3d;
 
   --color-success: #6fae6f;
   --color-danger: #d36b5d;
 
-  --font-display: "Newsreader", Georgia, serif;
+  /* Tout en Manrope : on abandonne le serif pour un rendu app moderne. */
+  --font-display: "Manrope", system-ui, sans-serif;
   --font-body: "Manrope", system-ui, sans-serif;
 
-  --radius-none: 0px;
+  /* Angles arrondis doux. */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
 }
 
 @layer base {
@@ -60,17 +65,17 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;
-    /* Texture marbre : bruit haute fréquence subtil sur le fond. */
+    /* Halo subtil et discret en fond (pas de texture criarde). */
     background-image:
-      radial-gradient(circle at 20% 0%, rgba(93, 63, 211, 0.08), transparent 45%),
-      radial-gradient(circle at 90% 100%, rgba(175, 141, 17, 0.06), transparent 40%);
+      radial-gradient(circle at 18% -5%, rgba(233, 195, 73, 0.05), transparent 42%),
+      radial-gradient(circle at 95% 105%, rgba(123, 92, 255, 0.05), transparent 40%);
     background-attachment: fixed;
   }
 
   h1, h2, h3 {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     margin: 0;
   }
 
@@ -85,32 +90,36 @@
 }
 
 @layer components {
-  /* Éclat métallique pour les surfaces or. */
-  .gold-sheen {
-    background-image: linear-gradient(45deg, var(--color-gold-deep), var(--color-gold) 50%, var(--color-gold-deep));
-  }
-
-  /* Barre de navigation flottante en verre dépoli. */
+  /* Barre de navigation / header flottant en verre dépoli. */
   .glass {
-    background-color: color-mix(in srgb, var(--color-surface-variant) 60%, transparent);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    background-color: color-mix(in srgb, var(--color-surface) 78%, transparent);
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
   }
 
-  /* Inscription monumentale : titres serif qui « débordent ». */
+  /*
+   * Anciennement « inscription monumentale » (serif + MAJUSCULES). Redéfini en sur-titre
+   * sobre sans-serif : tous les usages existants se modernisent sans tout réécrire. Les
+   * utilitaires `tracking-[...]` inline restent appliqués par-dessus.
+   */
   .lapidary {
-    font-family: var(--font-display);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: none;
+  }
+
+  /* Accent or PLEIN et net (fini le dégradé « sheen » cheap). */
+  .gold-sheen {
+    background-color: var(--color-gold);
   }
 }
 
 /* Transitions de page légères. */
 .page-enter {
-  animation: page-fade 0.28s ease both;
+  animation: page-fade 0.26s ease both;
 }
 @keyframes page-fade {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

@@ -36,6 +36,7 @@ export function Modal({ open, onClose, title, children, className }: Props) {
         aria-modal="true"
         className={cn(
           "relative w-full max-w-lg bg-surface-low p-6",
+          "rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)]",
           "max-h-[88vh] overflow-y-auto",
           "shadow-[0px_24px_48px_rgba(0,0,0,0.5)]",
           "animate-[page-fade_0.22s_ease]",
@@ -44,7 +45,7 @@ export function Modal({ open, onClose, title, children, className }: Props) {
         style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
       >
         {title && (
-          <h2 className="lapidary mb-5 text-base tracking-[0.1em] text-marble">{title}</h2>
+          <h2 className="mb-5 text-lg font-bold text-marble">{title}</h2>
         )}
         {children}
       </div>

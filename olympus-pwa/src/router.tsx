@@ -12,7 +12,6 @@ const MealsPage = lazy(() => import("@/pages/MealsPage"));
 const MealEditorPage = lazy(() => import("@/pages/MealEditorPage"));
 const AddFoodPage = lazy(() => import("@/pages/AddFoodPage"));
 const PlanPage = lazy(() => import("@/pages/PlanPage"));
-const StatsPage = lazy(() => import("@/pages/StatsPage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 
 // N'autorise l'accès qu'aux utilisateurs authentifiés.
@@ -54,7 +53,6 @@ export const router = createBrowserRouter(
             { path: "/oracle", element: <OraclePage /> },
             { path: "/meals", element: <MealsPage /> },
             { path: "/plan", element: <PlanPage /> },
-            { path: "/stats", element: <StatsPage /> },
             { path: "/profile", element: <ProfilePage /> },
           ],
         },
