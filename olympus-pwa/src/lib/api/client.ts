@@ -1,7 +1,8 @@
 import { tokenStore } from "./tokenStore";
 import type { AuthResponse } from "@/types/api";
 
-// Même origine derrière le reverse-proxy : /olympus/api/v1/...
+// Même origine : la PWA est servie à la racine de son domaine, l'API est relayée
+// par nginx sous /api/v1 (aucun CORS). import.meta.env.BASE_URL = "/".
 const BASE_URL = `${import.meta.env.BASE_URL}api/v1`;
 
 export class ApiError extends Error {

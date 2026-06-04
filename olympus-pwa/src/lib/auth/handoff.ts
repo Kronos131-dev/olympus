@@ -10,6 +10,11 @@ function readHandoffToken(): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/** Vrai si Chiron a transmis un token de liaison dans l'URL (`#ctk=…`). */
+export function hasHandoffToken(): boolean {
+  return readHandoffToken() !== null;
+}
+
 function stripHandoffFromUrl() {
   const cleaned = window.location.hash.replace(/(?:^#|&)ctk=[^&]+/, "").replace(/^#&/, "#");
   const hash = cleaned === "#" ? "" : cleaned;
