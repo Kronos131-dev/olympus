@@ -14,7 +14,7 @@ export const Input = forwardRef<HTMLInputElement, FieldProps>(function Input(
   return (
     <label className="block">
       {label && (
-        <span className="lapidary mb-1.5 block text-[0.65rem] tracking-[0.15em] text-gold">
+        <span className="mb-1.5 block text-xs font-medium text-marble-dim">
           {label}
         </span>
       )}
@@ -22,9 +22,9 @@ export const Input = forwardRef<HTMLInputElement, FieldProps>(function Input(
         ref={ref}
         id={id}
         className={cn(
-          "w-full rounded-none bg-surface-lowest px-4 py-3 text-marble outline-none",
-          "border-b-2 border-outline/30 transition-colors placeholder:text-marble-dim/60",
-          "focus:border-gold",
+          "w-full rounded-[var(--radius)] bg-surface-lowest px-4 py-3 text-marble outline-none",
+          "border border-outline/60 transition-colors placeholder:text-marble-dim/60",
+          "focus:border-gold focus:ring-1 focus:ring-gold/40",
           error && "border-[var(--color-danger)]",
           className,
         )}
@@ -48,15 +48,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   return (
     <label className="block">
       {label && (
-        <span className="lapidary mb-1.5 block text-[0.65rem] tracking-[0.15em] text-gold">
+        <span className="mb-1.5 block text-xs font-medium text-marble-dim">
           {label}
         </span>
       )}
       <select
         ref={ref}
         className={cn(
-          "w-full rounded-none bg-surface-lowest px-4 py-3 text-marble outline-none",
-          "border-b-2 border-outline/30 transition-colors focus:border-gold",
+          "w-full rounded-[var(--radius)] bg-surface-lowest px-4 py-3 text-marble outline-none",
+          "border border-outline/60 transition-colors focus:border-gold focus:ring-1 focus:ring-gold/40",
           className,
         )}
         {...rest}

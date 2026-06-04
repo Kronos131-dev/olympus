@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse bg-surface-high", className)} />;
+  return <div className={cn("animate-pulse rounded-[var(--radius)] bg-surface-high", className)} />;
 }
 
 export function EmptyState({
@@ -16,7 +16,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
       {icon && <div className="text-gold/50">{icon}</div>}
-      <p className="lapidary text-sm tracking-[0.1em] text-marble-dim">{title}</p>
+      <p className="text-sm font-semibold text-marble">{title}</p>
       {hint && <p className="max-w-xs text-xs text-marble-dim/70">{hint}</p>}
     </div>
   );
@@ -35,8 +35,8 @@ export function Chip({
     <button
       onClick={onClick}
       className={cn(
-        "lapidary rounded-none px-3 py-1.5 text-[0.65rem] tracking-[0.1em] transition-colors",
-        active ? "gold-sheen text-[var(--color-on-gold)]" : "bg-surface-high text-marble-dim hover:text-marble",
+        "rounded-full px-4 py-1.5 text-xs font-semibold transition-colors",
+        active ? "bg-gold text-[var(--color-on-gold)]" : "bg-surface-high text-marble-dim hover:text-marble",
       )}
     >
       {children}

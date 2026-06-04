@@ -56,8 +56,8 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center">
             <ProgressRing value={consumed} max={effectiveTarget || 1}>
               <div>
-                <p className="font-display text-5xl text-marble">{consumed}</p>
-                <p className="lapidary text-[0.6rem] tracking-[0.2em] text-marble-dim">
+                <p className="text-6xl font-extrabold tracking-tight text-marble">{consumed}</p>
+                <p className="text-xs font-medium text-marble-dim">
                   / {effectiveTarget} kcal
                 </p>
                 <p
@@ -73,7 +73,7 @@ export default function DashboardPage() {
         <div className="mt-6 grid grid-cols-3 gap-3">
           <MacroBar label="Protéines" value={log.data?.totalProteins ?? 0} target={profile.data?.targetProteins} color="var(--color-purple-bright)" />
           <MacroBar label="Glucides" value={log.data?.totalCarbs ?? 0} target={profile.data?.targetCarbs} color="var(--color-gold)" />
-          <MacroBar label="Lipides" value={log.data?.totalFats ?? 0} target={profile.data?.targetFats} color="#c98b6b" />
+          <MacroBar label="Lipides" value={log.data?.totalFats ?? 0} target={profile.data?.targetFats} color="var(--color-pink)" />
         </div>
 
         <div className="mt-5 flex gap-3">
@@ -101,7 +101,7 @@ export default function DashboardPage() {
                 return (
                   <li
                     key={e.id}
-                    className="flex items-center justify-between bg-surface-low px-4 py-3"
+                    className="flex items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm text-marble">{m.name}</p>

@@ -62,7 +62,7 @@ export default function AddFoodPage() {
             autoFocus
           />
           {preview && (
-            <div className="grid grid-cols-4 gap-2 bg-surface-lowest p-3 text-center">
+            <div className="grid grid-cols-4 gap-2 rounded-[var(--radius)] bg-surface-lowest p-3 text-center">
               {[
                 ["kcal", round(preview.kcal)],
                 ["Prot", round(preview.proteins)],
@@ -70,8 +70,8 @@ export default function AddFoodPage() {
                 ["Lip", round(preview.fats)],
               ].map(([k, v]) => (
                 <div key={k}>
-                  <p className="font-display text-lg text-marble">{v}</p>
-                  <p className="lapidary text-[0.5rem] tracking-[0.1em] text-marble-dim">{k}</p>
+                  <p className="text-lg font-bold text-marble">{v}</p>
+                  <p className="text-[0.6rem] font-medium text-marble-dim">{k}</p>
                 </div>
               ))}
             </div>

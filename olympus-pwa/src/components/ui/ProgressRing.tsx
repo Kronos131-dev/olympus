@@ -42,7 +42,7 @@ export function ProgressRing({ value, max, size = 220, stroke = 16, children, cl
           fill="none"
           stroke={over ? "var(--color-danger)" : "url(#goldRing)"}
           strokeWidth={stroke}
-          strokeLinecap="butt"
+          strokeLinecap="round"
           strokeDasharray={circ}
           strokeDashoffset={offset}
           style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1)" }}

@@ -29,6 +29,7 @@ public class MealPresetService {
     private final FoodItemRepository foodItemRepository;
     private final MealIngredientRepository mealIngredientRepository;
     private final MealPresetMapper mealPresetMapper;
+    private final MealPresetTotalsCalculator totalsCalculator;
 
     @Transactional
     public MealPresetResponse createMealPreset(User user, MealPresetRequest request) {
@@ -131,31 +132,7 @@ public class MealPresetService {
     // Calcul manuel sûr et certain des totaux pour éviter les problèmes de MapStruct
     private MealPresetResponse mapToResponseWithTotals(MealPreset preset) {
         MealPresetResponse response = mealPresetMapper.toResponse(preset);
-        
-        double totalKcal = 0;
-        double totalProteins = 0;
-        double totalCarbs = 0;
-        double totalFats = 0;
-
-        if (preset.getIngredients() != null) {
-            for (MealIngredient ingredient : preset.getIngredients()) {
-                if (ingredient.getFoodItem() != null && ingredient.getQuantityGrams() != null) {
-                    double ratio = ingredient.getQuantityGrams() / 100.0;
-                    FoodItem fi = ingredient.getFoodItem();
-                    
-                    totalKcal += (fi.getKcal100g() != null ? fi.getKcal100g() : 0.0) * ratio;
-                    totalProteins += (fi.getProteins100g() != null ? fi.getProteins100g() : 0.0) * ratio;
-                    totalCarbs += (fi.getCarbs100g() != null ? fi.getCarbs100g() : 0.0) * ratio;
-                    totalFats += (fi.getFats100g() != null ? fi.getFats100g() : 0.0) * ratio;
-                }
-            }
-        }
-
-        response.setTotalKcal(Math.round(totalKcal * 10.0) / 10.0);
-        response.setTotalProteins(Math.round(totalProteins * 10.0) / 10.0);
-        response.setTotalCarbs(Math.round(totalCarbs * 10.0) / 10.0);
-        response.setTotalFats(Math.round(totalFats * 10.0) / 10.0);
-
+        totalsCalculator.applyTotals(preset, response);
         return response;
     }
 }

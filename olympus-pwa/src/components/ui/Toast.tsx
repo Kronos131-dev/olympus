@@ -30,7 +30,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={t.id}
             className={cn(
-              "glass pointer-events-auto max-w-sm px-4 py-3 text-sm text-marble shadow-lg animate-[page-fade_0.2s_ease]",
+              "glass pointer-events-auto max-w-sm rounded-[var(--radius)] px-4 py-3 text-sm text-marble shadow-lg animate-[page-fade_0.2s_ease]",
               t.kind === "success" && "border-l-2 border-gold",
               t.kind === "error" && "border-l-2 border-[var(--color-danger)]",
             )}

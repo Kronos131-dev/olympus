@@ -101,13 +101,13 @@ export function FoodFinder({ onPick }: Props) {
           <button
             key={`${food.source}-${food.id}-${food.barcode ?? ""}`}
             onClick={() => onPick(food)}
-            className="flex w-full items-center justify-between bg-surface-low px-4 py-3 text-left transition-colors hover:bg-surface-high"
+            className="flex w-full items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3 text-left transition-colors hover:bg-surface-high"
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-marble">{food.name}</p>
               <p className="text-xs text-marble-dim">{round(food.kcal100g)} kcal / 100g</p>
             </div>
-            <span className="lapidary text-[0.55rem] text-gold/70">{food.source}</span>
+            <span className="text-[0.6rem] font-medium text-gold/70">{food.source}</span>
           </button>
         ))}
       </div>
@@ -223,7 +223,7 @@ function AiFoodModal({
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
             placeholder="ex. une assiette de pâtes carbonara avec 200g de pâtes"
-            className="w-full resize-none border-b-2 border-outline/30 bg-surface-lowest p-4 pr-12 text-marble outline-none focus:border-gold"
+            className="w-full resize-none rounded-[var(--radius)] border border-outline/60 bg-surface-lowest p-4 pr-12 text-marble outline-none focus:border-gold"
           />
           {supported && (
             <button

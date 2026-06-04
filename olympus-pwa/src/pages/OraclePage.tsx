@@ -110,20 +110,25 @@ export default function OraclePage() {
   };
 
   return (
-    <div className="flex h-dvh flex-col pb-24">
-      <header className="glass sticky top-0 z-10 flex items-center justify-between px-5 py-4">
+    // Colonne de hauteur fixe (viewport moins la barre de nav) : header / messages / saisie.
+    <div className="flex h-[calc(100dvh-5.5rem)] flex-col">
+      <header className="flex flex-none items-center justify-between px-5 pt-7 pb-3">
         <div>
-          <p className="lapidary text-[0.6rem] tracking-[0.25em] text-gold">L'Oracle</p>
+          <p className="text-xs font-semibold tracking-wide text-gold">L'Oracle</p>
           <h1 className="text-2xl text-marble">Conseil divin</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={toggleProvider}
-            className="lapidary bg-surface-high px-3 py-1.5 text-[0.6rem] tracking-[0.1em] text-gold"
+            className="rounded-full bg-surface-high px-3 py-1.5 text-xs font-medium text-gold"
           >
             {profile.data?.aiProvider ?? "MISTRAL"}
           </button>
-          <button onClick={startNew} className="text-marble-dim hover:text-marble" aria-label="Nouvelle conversation">
+          <button
+            onClick={startNew}
+            className="rounded-full p-2 text-marble-dim hover:text-marble"
+            aria-label="Nouvelle conversation"
+          >
             <IconSparkle size={20} />
           </button>
         </div>
@@ -133,10 +138,8 @@ export default function OraclePage() {
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
             <div>
-              <p className="lapidary text-sm tracking-[0.1em] text-marble-dim">
-                Interroge l'Oracle
-              </p>
-              <p className="mt-2 max-w-xs text-xs text-marble-dim/70">
+              <p className="text-base font-semibold text-marble">Interroge l'Oracle</p>
+              <p className="mt-2 max-w-xs text-sm text-marble-dim/80">
                 « Quels sont mes macros aujourd'hui ? » · « J'ai mangé un burger, ajoute-le. »
               </p>
             </div>
@@ -149,10 +152,10 @@ export default function OraclePage() {
           >
             <div
               className={cn(
-                "max-w-[82%] px-4 py-3 text-sm",
+                "max-w-[82%] whitespace-pre-wrap px-4 py-2.5 text-sm",
                 m.role === "USER"
-                  ? "gold-sheen text-[var(--color-on-gold)]"
-                  : "bg-surface-high text-marble",
+                  ? "rounded-2xl rounded-br-md bg-gold text-[var(--color-on-gold)]"
+                  : "rounded-2xl rounded-bl-md bg-surface-high text-marble",
               )}
             >
               {m.pending ? <Spinner className="size-4" /> : m.content}
@@ -162,7 +165,10 @@ export default function OraclePage() {
         <div ref={endRef} />
       </div>
 
-      <div className="glass px-4 py-3">
+      <div
+        className="flex-none border-t border-outline/20 bg-surface px-4 pt-3"
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+      >
         {image && (
           <div className="mb-2 flex items-center gap-2 text-xs text-marble-dim">
             <span className="truncate">📷 {image.name}</span>
@@ -171,7 +177,7 @@ export default function OraclePage() {
             </button>
           </div>
         )}
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-1.5">
           <input
             ref={fileRef}
             type="file"
@@ -180,13 +186,13 @@ export default function OraclePage() {
             className="hidden"
             onChange={(e) => setImage(e.target.files?.[0] ?? null)}
           />
-          <button onClick={() => fileRef.current?.click()} className="p-2 text-marble-dim hover:text-gold" aria-label="Photo">
+          <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-marble-dim hover:text-gold" aria-label="Photo">
             <IconCamera size={22} />
           </button>
           {supported && (
             <button
               onClick={toggle}
-              className={cn("p-2", listening ? "text-gold" : "text-marble-dim hover:text-gold")}
+              className={cn("rounded-full p-2", listening ? "text-gold" : "text-marble-dim hover:text-gold")}
               aria-label="Dicter"
             >
               <IconMic size={22} />
@@ -203,12 +209,12 @@ export default function OraclePage() {
             }}
             rows={1}
             placeholder="Parle à l'Oracle…"
-            className="max-h-28 flex-1 resize-none bg-surface-lowest px-3 py-2.5 text-sm text-marble outline-none"
+            className="max-h-28 min-h-[2.75rem] flex-1 resize-none rounded-[var(--radius)] border border-outline/60 bg-surface-lowest px-3 py-2.5 text-sm text-marble outline-none focus:border-gold"
           />
           <button
             onClick={send}
             disabled={sending || (!input.trim() && !image)}
-            className="gold-sheen p-2.5 text-[var(--color-on-gold)] disabled:opacity-40"
+            className="rounded-full bg-gold p-2.5 text-[var(--color-on-gold)] transition active:scale-95 disabled:opacity-40"
             aria-label="Envoyer"
           >
             <IconSend size={20} />

@@ -22,6 +22,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +37,14 @@ public class DailyLogService {
     private final MealPlanRepository mealPlanRepository;
     private final RecurrenceEvaluator recurrenceEvaluator;
     private final DailyLogMapper dailyLogMapper;
+    private final MealPresetTotalsCalculator mealPresetTotalsCalculator;
 
     @Transactional
     public DailyLogResponse getDailyLogByDate(User user, LocalDate date) {
         DailyLog dailyLog = getOrCreateDailyLog(user, date);
         // Matérialisation automatique du plan de repas si la journée n'a pas encore été remplie
         applyPlanIfEligible(user, dailyLog);
-        return dailyLogMapper.toResponse(dailyLog);
+        return toResponseWithTotals(dailyLog);
     }
 
     @Transactional
@@ -76,7 +79,7 @@ public class DailyLogService {
         dailyLog.setExtraKcalBurned(round(totalExtraKcal));
 
         dailyLogRepository.save(dailyLog);
-        return dailyLogMapper.toResponse(dailyLog);
+        return toResponseWithTotals(dailyLog);
     }
 
     @Transactional
@@ -113,7 +116,7 @@ public class DailyLogService {
         logEntryRepository.save(logEntry);
         dailyLogRepository.save(dailyLog); // Met à jour les totaux en base
 
-        return dailyLogMapper.toResponse(dailyLog);
+        return toResponseWithTotals(dailyLog);
     }
 
     @Transactional
@@ -165,7 +168,7 @@ public class DailyLogService {
         logEntryRepository.delete(logEntry);
         dailyLogRepository.save(dailyLog);
 
-        return dailyLogMapper.toResponse(dailyLog);
+        return toResponseWithTotals(dailyLog);
     }
 
     /**
@@ -220,6 +223,32 @@ public class DailyLogService {
             dailyLog.setPlanApplied(true);
             dailyLogRepository.save(dailyLog);
         }
+    }
+
+    /**
+     * Mappe le journal puis renseigne les totaux des entrées « repas » : MapStruct ne calcule
+     * pas les totaux d'un {@link MealPreset}, ce qui affichait 0 kcal/macros au front. On les
+     * recalcule ici à partir des entités, par id de preset.
+     */
+    private DailyLogResponse toResponseWithTotals(DailyLog dailyLog) {
+        DailyLogResponse response = dailyLogMapper.toResponse(dailyLog);
+        if (response.getEntries() == null || dailyLog.getEntries() == null) {
+            return response;
+        }
+        Map<Long, MealPreset> presetsById = dailyLog.getEntries().stream()
+                .map(LogEntry::getMealPreset)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toMap(MealPreset::getId, p -> p, (a, b) -> a));
+
+        response.getEntries().forEach(entry -> {
+            if (entry.getMealPreset() != null) {
+                MealPreset preset = presetsById.get(entry.getMealPreset().getId());
+                if (preset != null) {
+                    mealPresetTotalsCalculator.applyTotals(preset, entry.getMealPreset());
+                }
+            }
+        });
+        return response;
     }
 
     /**

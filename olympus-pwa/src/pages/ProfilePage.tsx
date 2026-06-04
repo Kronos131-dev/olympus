@@ -189,7 +189,7 @@ function EditTargetsModal({ open, onClose }: { open: boolean; onClose: () => voi
   return (
     <Modal open={open} onClose={onClose} title="Cibles caloriques">
       <div className="space-y-4">
-        <label className="flex items-center justify-between bg-surface-lowest px-4 py-3">
+        <label className="flex items-center justify-between rounded-[var(--radius)] bg-surface-lowest px-4 py-3">
           <span className="text-sm text-marble">Calcul automatique</span>
           <input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} className="size-5 accent-[var(--color-gold)]" />
         </label>

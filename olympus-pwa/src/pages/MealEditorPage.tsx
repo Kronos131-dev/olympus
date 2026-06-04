@@ -106,7 +106,7 @@ export default function MealEditorPage() {
 
       <section className="mt-6">
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="lapidary text-xs tracking-[0.18em] text-marble-dim">Ingrédients</h2>
+          <h2 className="text-sm font-semibold text-marble">Ingrédients</h2>
           <span className="text-xs text-gold">
             {round(totals.kcal)} kcal · {round(totals.p)}P / {round(totals.c)}G / {round(totals.f)}L
           </span>
@@ -118,7 +118,7 @@ export default function MealEditorPage() {
             {ingredients.map((i, idx) => {
               const m = macrosFor(i.foodItem, i.quantityGrams);
               return (
-                <li key={idx} className="flex items-center justify-between bg-surface-low px-4 py-3">
+                <li key={idx} className="flex items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm text-marble">{i.foodItem.name}</p>
                     <p className="text-xs text-marble-dim">

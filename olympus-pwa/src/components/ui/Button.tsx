@@ -12,22 +12,22 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const sizes: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-5 py-3 text-sm",
-  lg: "px-6 py-4 text-base",
+  sm: "px-3.5 py-2 text-xs rounded-[var(--radius-sm)]",
+  md: "px-5 py-3 text-sm rounded-[var(--radius)]",
+  lg: "px-6 py-4 text-base rounded-[var(--radius)]",
 };
 
 const variants: Record<Variant, string> = {
-  // Les Lauriers : or plein, texte sombre, angles vifs.
+  // Or plein et net.
   primary:
-    "gold-sheen text-[var(--color-on-gold)] font-bold tracking-wide hover:brightness-110 active:brightness-95 disabled:opacity-50",
-  // Le Sénat : ghost border or.
+    "bg-gold text-[var(--color-on-gold)] hover:brightness-105 active:brightness-95 disabled:opacity-50",
+  // Bord discret.
   ghost:
-    "bg-transparent text-gold border border-gold/30 hover:border-gold/70 hover:bg-gold/5 active:bg-gold/10 disabled:opacity-40",
+    "bg-transparent text-marble border border-outline hover:border-gold/60 hover:text-gold active:bg-gold/5 disabled:opacity-40",
   subtle:
     "bg-surface-high text-marble hover:bg-surface-variant active:brightness-95 disabled:opacity-40",
   danger:
-    "bg-transparent text-[var(--color-danger)] border border-[var(--color-danger)]/30 hover:bg-[var(--color-danger)]/10",
+    "bg-transparent text-[var(--color-danger)] border border-[var(--color-danger)]/40 hover:bg-[var(--color-danger)]/10",
 };
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
@@ -39,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        "lapidary inline-flex items-center justify-center gap-2 rounded-none uppercase transition-all select-none",
+        "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 select-none active:scale-[0.98]",
         sizes[size],
         variants[variant],
         block && "w-full",

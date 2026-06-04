@@ -222,7 +222,7 @@ function AddToDayModal({
             <button
               key={p.id}
               onClick={() => onAddPreset(day, p.id)}
-              className="flex w-full items-center justify-between bg-surface-low px-4 py-3 text-left hover:bg-surface-high"
+              className="flex w-full items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3 text-left hover:bg-surface-high"
             >
               <span className="truncate text-sm text-marble">{p.name}</span>
               <span className="text-xs text-marble-dim">{round(p.totalKcal)} kcal</span>
@@ -276,7 +276,7 @@ function GenerateModal({
           onChange={(e) => setPrompt(e.target.value)}
           rows={3}
           placeholder="ex. riche en protéines, sans porc, 3 repas/jour"
-          className="w-full resize-none border-b-2 border-outline/30 bg-surface-lowest p-4 text-marble outline-none focus:border-gold"
+          className="w-full resize-none rounded-[var(--radius)] border border-outline/60 bg-surface-lowest p-4 text-marble outline-none focus:border-gold"
         />
         <Button block loading={loading} onClick={run}>
           <IconSparkle size={16} /> Générer
