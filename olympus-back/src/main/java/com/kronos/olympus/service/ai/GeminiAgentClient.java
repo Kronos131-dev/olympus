@@ -193,10 +193,13 @@ public class GeminiAgentClient implements AgentClient {
             }
             return response;
         } catch (HttpStatusCodeException e) {
-            // Capture la VRAIE cause (modèle invalide, clé refusée, format rejeté, quota…) :
-            // sans le corps de réponse, l'échec Gemini restait un message générique opaque.
-            log.error("Erreur HTTP de l'API Gemini {} : {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new ExternalApiException("Gemini a refusé la requête (" + e.getStatusCode().value() + ").");
+            // Capture la VRAIE cause (modèle invalide, clé refusée, format rejeté, quota…) et la
+            // remonte jusqu'à la bulle de l'Oracle : sans le corps de réponse, l'échec Gemini
+            // restait un 503 opaque. (Le corps Gemini ne contient pas la clé d'API.)
+            String errorBody = e.getResponseBodyAsString();
+            log.error("Erreur HTTP de l'API Gemini {} : {}", e.getStatusCode(), errorBody);
+            String detail = errorBody.length() > 300 ? errorBody.substring(0, 300) : errorBody;
+            throw new ExternalApiException("Gemini " + e.getStatusCode().value() + " : " + detail);
         } catch (RestClientException e) {
             log.error("Erreur lors de l'appel à l'API Gemini", e);
             throw new ExternalApiException("L'agent Gemini est momentanément indisponible.");
