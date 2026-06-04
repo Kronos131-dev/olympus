@@ -4,8 +4,9 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { fileURLToPath, URL } from "node:url";
 
-// La PWA est servie sous le sous-chemin /olympus/ derrière le reverse-proxy Chiron.
-const BASE = "/olympus/";
+// La PWA Olympus est servie à la RACINE de son propre sous-domaine
+// (olympus.chiron-sanctuaire.duckdns.org).
+const BASE = "/";
 
 export default defineConfig({
   base: BASE,
@@ -18,10 +19,9 @@ export default defineConfig({
     port: 5174,
     // En dev, on relaie les appels API vers le backend local (port exposé 8081).
     proxy: {
-      "/olympus/api": {
+      "/api": {
         target: "http://localhost:8081",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/olympus\/api/, "/api"),
       },
     },
   },
@@ -30,7 +30,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icons/favicon.svg"],
+      includeAssets: ["icons/favicon.svg", "icons/olympus-192.png", "icons/olympus-512.png"],
       manifest: {
         name: "Olympus",
         short_name: "Olympus",
@@ -43,18 +43,31 @@ export default defineConfig({
         background_color: "#0c0f0f",
         theme_color: "#0c0f0f",
         icons: [
-          { src: "icons/favicon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
-          { src: "icons/favicon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+          { src: "icons/olympus-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "icons/olympus-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "icons/olympus-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: {
-        navigateFallback: `${BASE}index.html`,
-        // Ne jamais mettre en cache les appels API : on veut des données fraîches.
-        navigateFallbackDenylist: [/^\/olympus\/api\//],
+        navigateFallback: "/index.html",
+        // Ne jamais servir l'index pour les appels API.
+        navigateFallbackDenylist: [/^\/api\//],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith("/olympus/api/"),
+            // API toujours fraîche (jamais mise en cache).
+            urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
             handler: "NetworkOnly",
+          },
+          {
+            // Images d'aliments (Open Food Facts) : cache long pour les perfs.
+            urlPattern: ({ url }) => /openfoodfacts\.org$/.test(url.hostname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "off-images",
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
         ],
       },
