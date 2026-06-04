@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -191,6 +192,11 @@ public class GeminiAgentClient implements AgentClient {
                 throw new ExternalApiException("L'API Gemini a renvoyé une réponse vide.");
             }
             return response;
+        } catch (HttpStatusCodeException e) {
+            // Capture la VRAIE cause (modèle invalide, clé refusée, format rejeté, quota…) :
+            // sans le corps de réponse, l'échec Gemini restait un message générique opaque.
+            log.error("Erreur HTTP de l'API Gemini {} : {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new ExternalApiException("Gemini a refusé la requête (" + e.getStatusCode().value() + ").");
         } catch (RestClientException e) {
             log.error("Erreur lors de l'appel à l'API Gemini", e);
             throw new ExternalApiException("L'agent Gemini est momentanément indisponible.");

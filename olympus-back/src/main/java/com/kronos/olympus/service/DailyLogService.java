@@ -114,6 +114,15 @@ public class DailyLogService {
         }
 
         logEntryRepository.save(logEntry);
+
+        // Ajouter l'entrée à la collection en mémoire (comme applyPlanIfEligible) : sinon la
+        // réponse mappée depuis dailyLog.getEntries() omet la nouvelle entrée et elle
+        // n'apparaît pas dans l'historique côté front.
+        if (dailyLog.getEntries() == null) {
+            dailyLog.setEntries(new ArrayList<>());
+        }
+        dailyLog.getEntries().add(logEntry);
+
         dailyLogRepository.save(dailyLog); // Met à jour les totaux en base
 
         return toResponseWithTotals(dailyLog);
