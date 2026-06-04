@@ -114,13 +114,16 @@
   }
 }
 
-/* Transitions de page légères. */
+/* Transitions de page légères.
+ * IMPORTANT : on n'anime QUE l'opacité. Une transform résiduelle (fill-mode both garde
+ * `transform: translateY(0)`, qui n'est pas `none`) ferait de `.page-enter` le référentiel
+ * des descendants `position: fixed` (modales) → ils s'afficheraient hors écran. */
 .page-enter {
   animation: page-fade 0.26s ease both;
 }
 @keyframes page-fade {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -21,7 +21,10 @@ export function App() {
       <ToastProvider>
         <AuthProvider>
           <ErrorBoundary>
-            <RouterProvider router={router} />
+            {/* v7_startTransition : enveloppe les navigations dans React.startTransition.
+                Indispensable avec des pages React.lazy + Suspense, sinon React lève l'erreur
+                #426 (suspension sur input synchrone) lors d'une navigation. */}
+            <RouterProvider router={router} future={{ v7_startTransition: true }} />
           </ErrorBoundary>
         </AuthProvider>
       </ToastProvider>

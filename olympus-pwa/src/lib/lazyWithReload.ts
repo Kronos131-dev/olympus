@@ -1,13 +1,11 @@
 import { lazy, type ComponentType } from "react";
+import { isRecoverableLoadError, maybeReloadOnce } from "./chunkReload";
 
 /**
  * Variante de React.lazy() résiliente aux chunks périmés.
  *
- * Après un déploiement, le hash des chunks change : un bouton qui navigue vers une page
- * lazy tente de charger un ancien chunk (qui n'existe plus) → l'import dynamique échoue →
- * React plante (« page error »). On recharge alors la page une seule fois (l'index récupère
- * le nouveau manifeste). Le flag en sessionStorage évite une boucle de rechargement si
- * l'échec persiste pour une autre raison.
+ * Si l'import dynamique échoue parce que le chunk a changé de hash (déploiement), on recharge
+ * la page une fois (garde anti-boucle dans {@link maybeReloadOnce}) ; sinon on relance l'erreur.
  */
 export function lazyWithReload<T extends ComponentType<unknown>>(
   factory: () => Promise<{ default: T }>,
@@ -16,19 +14,11 @@ export function lazyWithReload<T extends ComponentType<unknown>>(
     try {
       return await factory();
     } catch (error) {
-      const key = "olympus.chunkReloaded";
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, "1");
-        window.location.reload();
-        // On renvoie une promesse qui ne se résout jamais : le reload prend le relais.
+      if (isRecoverableLoadError(error) && maybeReloadOnce()) {
+        // Le reload prend le relais : on renvoie une promesse qui ne se résout jamais.
         return new Promise<{ default: T }>(() => {});
       }
       throw error;
     }
   });
-}
-
-/** À appeler après un chargement réussi pour réarmer le mécanisme de rechargement. */
-export function clearChunkReloadFlag() {
-  sessionStorage.removeItem("olympus.chunkReloaded");
 }
