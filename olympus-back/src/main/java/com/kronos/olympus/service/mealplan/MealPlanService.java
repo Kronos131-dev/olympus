@@ -16,6 +16,7 @@ import com.kronos.olympus.repository.FoodItemRepository;
 import com.kronos.olympus.repository.MealPlanRepository;
 import com.kronos.olympus.repository.MealPresetRepository;
 import com.kronos.olympus.repository.PlannedMealEntryRepository;
+import com.kronos.olympus.service.MealPresetTotalsCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +39,7 @@ public class MealPlanService {
     private final FoodItemRepository foodItemRepository;
     private final MealPresetRepository mealPresetRepository;
     private final MealPlanMapper mealPlanMapper;
+    private final MealPresetTotalsCalculator mealPresetTotalsCalculator;
 
     @Transactional
     public MealPlanResponse createMealPlan(User user, MealPlanRequest request) {
@@ -130,7 +134,7 @@ public class MealPlanService {
     /** Récupère l'emploi du temps hebdomadaire de l'utilisateur (le crée vide s'il n'existe pas). */
     @Transactional
     public MealPlanResponse getWeeklyPlan(User user) {
-        return mealPlanMapper.toResponse(getOrCreateWeeklyPlanEntity(user));
+        return toResponseWithTotals(getOrCreateWeeklyPlanEntity(user));
     }
 
     /** Enregistre l'emploi du temps hebdomadaire : remplace toutes les entrées des 7 jours. */
@@ -156,7 +160,33 @@ public class MealPlanService {
         plan.getPlannedEntries().clear();
         plan.getPlannedEntries().addAll(newEntries);
 
-        return mealPlanMapper.toResponse(mealPlanRepository.save(plan));
+        return toResponseWithTotals(mealPlanRepository.save(plan));
+    }
+
+    /**
+     * Mappe le plan puis renseigne les totaux des entrées « repas » : MapStruct ne calcule pas
+     * les totaux d'un {@link MealPreset}, ce qui affichait 0 kcal/macros au planning. On les
+     * recalcule ici à partir des entités, par id de preset (miroir de DailyLogService).
+     */
+    private MealPlanResponse toResponseWithTotals(MealPlan plan) {
+        MealPlanResponse response = mealPlanMapper.toResponse(plan);
+        if (response.getEntries() == null || plan.getPlannedEntries() == null) {
+            return response;
+        }
+        Map<Long, MealPreset> presetsById = plan.getPlannedEntries().stream()
+                .map(PlannedMealEntry::getMealPreset)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(MealPreset::getId, p -> p, (a, b) -> a));
+
+        response.getEntries().forEach(entry -> {
+            if (entry.getMealPreset() != null) {
+                MealPreset preset = presetsById.get(entry.getMealPreset().getId());
+                if (preset != null) {
+                    mealPresetTotalsCalculator.applyTotals(preset, entry.getMealPreset());
+                }
+            }
+        });
+        return response;
     }
 
     private MealPlan getOrCreateWeeklyPlanEntity(User user) {

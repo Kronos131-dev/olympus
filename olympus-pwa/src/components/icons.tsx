@@ -56,14 +56,6 @@ export const IconPlan = (p: P) => (
   </Svg>
 );
 
-// Colonnes (stats)
-export const IconStats = (p: P) => (
-  <Svg {...p}>
-    <path d="M4 20h16" />
-    <path d="M7 20v-7M12 20V6M17 20v-10" />
-  </Svg>
-);
-
 // Buste / casque (profil)
 export const IconProfile = (p: P) => (
   <Svg {...p}>

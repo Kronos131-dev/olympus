@@ -13,4 +13,8 @@ public interface PlannedMealEntryRepository extends JpaRepository<PlannedMealEnt
     @Modifying
     @Query("DELETE FROM PlannedMealEntry p WHERE p.mealPlan.id = :mealPlanId")
     void deleteByMealPlanId(@Param("mealPlanId") Long mealPlanId);
+
+    @Modifying
+    @Query("DELETE FROM PlannedMealEntry p WHERE p.mealPreset.id = :id")
+    void deleteByMealPresetId(@Param("id") Long id);
 }
