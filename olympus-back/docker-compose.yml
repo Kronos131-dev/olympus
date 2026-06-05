@@ -12,6 +12,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=olympus_password
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GMAIL_USERNAME=${GMAIL_USERNAME:-}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
     depends_on:
       - olympus-db
     restart: always
