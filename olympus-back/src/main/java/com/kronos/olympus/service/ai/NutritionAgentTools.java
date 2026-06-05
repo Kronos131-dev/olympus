@@ -9,6 +9,7 @@ import com.kronos.olympus.dto.response.FoodItemResponse;
 import com.kronos.olympus.dto.response.LogEntryResponse;
 import com.kronos.olympus.dto.response.MealPlanResponse;
 import com.kronos.olympus.dto.response.MealPresetResponse;
+import com.kronos.olympus.dto.response.PlannedMealEntryResponse;
 import com.kronos.olympus.dto.response.UserResponse;
 import com.kronos.olympus.mapper.UserMapper;
 import com.kronos.olympus.model.FoodItem;
@@ -19,9 +20,11 @@ import com.kronos.olympus.service.DailyLogService;
 import com.kronos.olympus.service.FoodItemService;
 import com.kronos.olympus.service.MealPresetService;
 import com.kronos.olympus.service.mealplan.MealPlanGenerationService;
+import com.kronos.olympus.service.mealplan.MealPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,6 +46,7 @@ public class NutritionAgentTools {
     private final FoodItemService foodItemService;
     private final FoodItemRepository foodItemRepository;
     private final MealPlanGenerationService mealPlanGenerationService;
+    private final MealPlanService mealPlanService;
     private final UserMapper userMapper;
 
     /**
@@ -119,6 +123,52 @@ public class NutritionAgentTools {
                     for (MealPresetResponse m : presets) {
                         sb.append("- [mealPresetId=").append(m.getId()).append("] ").append(m.getName())
                                 .append(" (").append(intOf(m.getTotalKcal())).append(" kcal)\n");
+                    }
+                    return sb.toString();
+                }));
+
+        tools.add(new AgentTool(
+                "get_meal_plan",
+                "Récupère l'emploi du temps hebdomadaire des repas planifiés de l'utilisateur, "
+                        + "jour par jour, avec les valeurs caloriques estimées. Utile pour consulter ou analyser la diète prévue sur la semaine.",
+                objectSchema(new LinkedHashMap<>(), List.of()),
+                args -> {
+                    MealPlanResponse plan = mealPlanService.getWeeklyPlan(user);
+                    List<PlannedMealEntryResponse> entries = plan.getEntries();
+                    if (entries == null || entries.isEmpty()) {
+                        return "Aucun repas planifié dans l'emploi du temps hebdomadaire.";
+                    }
+                    StringBuilder sb = new StringBuilder("Planning hebdomadaire des repas :\n");
+                    for (DayOfWeek day : DayOfWeek.values()) {
+                        List<PlannedMealEntryResponse> dayEntries = new ArrayList<>();
+                        for (PlannedMealEntryResponse e : entries) {
+                            if (e.getDayOfWeek() == day) {
+                                dayEntries.add(e);
+                            }
+                        }
+                        if (dayEntries.isEmpty()) {
+                            continue;
+                        }
+                        sb.append(dayLabelFr(day)).append(" :\n");
+                        double dayKcal = 0;
+                        for (PlannedMealEntryResponse e : dayEntries) {
+                            double qty = e.getQuantityGrams() != null ? e.getQuantityGrams() : 0;
+                            if (e.getFoodItem() != null) {
+                                FoodItemResponse f = e.getFoodItem();
+                                double kcal = f.getKcal100g() != null ? f.getKcal100g() * qty / 100.0 : 0;
+                                dayKcal += kcal;
+                                sb.append("  - ").append(f.getName()).append(" (").append(intOf(qty))
+                                        .append("g, ").append(intOf(kcal)).append(" kcal)\n");
+                            } else if (e.getMealPreset() != null) {
+                                MealPresetResponse m = e.getMealPreset();
+                                double kcal = m.getTotalKcal() != null ? m.getTotalKcal() : 0;
+                                dayKcal += kcal;
+                                sb.append("  - ").append(m.getName()).append(" (repas pré-enregistré, ")
+                                        .append(intOf(kcal)).append(" kcal)\n");
+                            }
+                        }
+                        sb.append("  Total ").append(dayLabelFr(day)).append(" : ")
+                                .append(intOf(dayKcal)).append(" kcal\n");
                     }
                     return sb.toString();
                 }));
@@ -438,5 +488,18 @@ public class NutritionAgentTools {
 
     private static String intOf(double value) {
         return String.valueOf((int) Math.round(value));
+    }
+
+    private static String dayLabelFr(DayOfWeek day) {
+        switch (day) {
+            case MONDAY: return "Lundi";
+            case TUESDAY: return "Mardi";
+            case WEDNESDAY: return "Mercredi";
+            case THURSDAY: return "Jeudi";
+            case FRIDAY: return "Vendredi";
+            case SATURDAY: return "Samedi";
+            case SUNDAY: return "Dimanche";
+            default: return day.name();
+        }
     }
 }
