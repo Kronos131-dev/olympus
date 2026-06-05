@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouteError } from "react-router-dom";
 import { isRecoverableLoadError, maybeReloadOnce } from "@/lib/chunkReload";
+import { useT } from "@/lib/i18n";
 
 /**
  * errorElement du routeur : remplace l'écran brut « Unexpected Application Error! » de React
@@ -8,6 +9,7 @@ import { isRecoverableLoadError, maybeReloadOnce } from "@/lib/chunkReload";
  * affiche un écran de secours sobre avec un bouton Recharger.
  */
 export function RouteError() {
+  const t = useT();
   const error = useRouteError();
 
   useEffect(() => {
@@ -17,13 +19,13 @@ export function RouteError() {
   return (
     <div className="grid min-h-dvh place-items-center px-6">
       <div className="flex flex-col items-center gap-4 text-center">
-        <p className="text-sm font-semibold text-marble">Une erreur est survenue</p>
-        <p className="max-w-xs text-xs text-marble-dim/70">Rechargez la page pour continuer.</p>
+        <p className="text-sm font-semibold text-marble">{t.routeError.title}</p>
+        <p className="max-w-xs text-xs text-marble-dim/70">{t.routeError.hint}</p>
         <button
           onClick={() => window.location.reload()}
           className="rounded-full bg-gold px-5 py-2 text-xs font-semibold text-[var(--color-on-gold)]"
         >
-          Recharger
+          {t.routeError.reload}
         </button>
       </div>
     </div>

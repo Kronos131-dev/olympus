@@ -4,8 +4,10 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ApiError } from "@/lib/api/client";
+import { useT } from "@/lib/i18n";
 
 export default function LoginPage() {
+  const t = useT();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,11 @@ export default function LoginPage() {
     try {
       await login({ email: email.trim(), password });
     } catch (err) {
-      setError(err instanceof ApiError && err.status === 401 ? "Identifiants invalides" : "Connexion impossible");
+      setError(
+        err instanceof ApiError && err.status === 401
+          ? t.auth.login.errInvalid
+          : t.auth.login.errGeneric,
+      );
     } finally {
       setLoading(false);
     }
@@ -28,16 +34,16 @@ export default function LoginPage() {
   return (
     <div className="page-enter mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
       <div className="mb-10 text-center">
-        <p className="lapidary text-[0.65rem] tracking-[0.4em] text-gold">Le Panthéon</p>
+        <p className="lapidary text-[0.65rem] tracking-[0.4em] text-gold">{t.auth.login.overline}</p>
         <h1 className="text-marble" style={{ fontSize: "clamp(2.5rem, 16vw, 3.75rem)" }}>
           Olympus
         </h1>
-        <p className="mt-3 text-sm text-marble-dim">Ta conquête personnelle commence ici.</p>
+        <p className="mt-3 text-sm text-marble-dim">{t.auth.login.subtitle}</p>
       </div>
 
       <form onSubmit={submit} className="space-y-4">
         <Input
-          label="Pseudo"
+          label={t.auth.login.pseudo}
           type="text"
           autoComplete="username"
           value={email}
@@ -45,7 +51,7 @@ export default function LoginPage() {
           required
         />
         <Input
-          label="Mot de passe"
+          label={t.auth.login.password}
           type="password"
           autoComplete="current-password"
           value={password}
@@ -54,20 +60,20 @@ export default function LoginPage() {
         />
         {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
         <Button type="submit" block size="lg" loading={loading}>
-          Entrer l'arène
+          {t.auth.login.submit}
         </Button>
       </form>
 
       <p className="mt-4 text-center text-sm">
         <Link to="/forgot-password" className="text-marble-dim hover:text-gold hover:underline">
-          Mot de passe oublié ?
+          {t.auth.login.forgot}
         </Link>
       </p>
 
       <p className="mt-6 text-center text-sm text-marble-dim">
-        Pas encore de compte ?{" "}
+        {t.auth.login.noAccount}{" "}
         <Link to="/register" className="text-gold hover:underline">
-          Rejoindre Olympus
+          {t.auth.login.register}
         </Link>
       </p>
     </div>

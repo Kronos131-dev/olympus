@@ -15,6 +15,7 @@ const BarcodeScanner = lazy(() =>
   import("@/components/BarcodeScanner").then((m) => ({ default: m.BarcodeScanner })),
 );
 import { round } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type { FoodItemResponse } from "@/types/api";
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 
 // Recherche/scan/manuel/IA d'un aliment. Appelle onPick avec le FoodItem choisi.
 export function FoodFinder({ onPick }: Props) {
+  const t = useT();
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [useCiqual, setUseCiqual] = useState(false);
@@ -42,17 +44,17 @@ export function FoodFinder({ onPick }: Props) {
     try {
       const food = await foodItemApi.byBarcode(code);
       onPick(food);
-      toast(`${food.name} trouvé`, "success");
+      toast(t.food.barcode.found(food.name), "success");
     } catch {
-      toast("Aucun aliment pour ce code-barres", "error");
+      toast(t.food.barcode.notFound, "error");
     }
   };
 
   return (
     <div className="space-y-4">
       <Input
-        label="Rechercher un aliment"
-        placeholder="ex. poulet, riz, banane…"
+        label={t.food.finder.label}
+        placeholder={t.food.finder.placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         autoFocus
@@ -60,32 +62,30 @@ export function FoodFinder({ onPick }: Props) {
 
       <div className="flex flex-wrap items-center gap-2">
         <Chip active={!useCiqual} onClick={() => setUseCiqual(false)}>
-          Base produits
+          {t.food.finder.chipProducts}
         </Chip>
         <Chip active={useCiqual} onClick={() => setUseCiqual(true)}>
-          Ciqual
+          {t.food.finder.chipCiqual}
         </Chip>
         <div className="ml-auto flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => setScanOpen(true)}>
-            <IconBarcode size={16} /> Scanner
+            <IconBarcode size={16} /> {t.food.finder.scan}
           </Button>
         </div>
       </div>
 
       <div className="flex gap-2">
         <Button variant="subtle" size="sm" block onClick={() => setManualOpen(true)}>
-          <IconPlus size={16} /> Manuel
+          <IconPlus size={16} /> {t.food.finder.manual}
         </Button>
         <Button variant="subtle" size="sm" block onClick={() => setAiOpen(true)}>
-          <IconSparkle size={16} /> Analyser IA
+          <IconSparkle size={16} /> {t.food.finder.analyzeAi}
         </Button>
       </div>
 
       <div className="min-h-24 space-y-1">
         {debounced.length < 3 && (
-          <p className="px-1 py-4 text-center text-xs text-marble-dim">
-            Saisis au moins 3 caractères, scanne un code-barres, ou décris ton repas à l'IA.
-          </p>
+          <p className="px-1 py-4 text-center text-xs text-marble-dim">{t.food.finder.hint}</p>
         )}
         {results.isLoading && (
           <>
@@ -95,7 +95,7 @@ export function FoodFinder({ onPick }: Props) {
           </>
         )}
         {results.data?.length === 0 && debounced.length >= 3 && (
-          <EmptyState title="Aucun résultat" hint="Essaie un autre terme ou la base Ciqual." />
+          <EmptyState title={t.food.finder.emptyTitle} hint={t.food.finder.emptyHint} />
         )}
         {results.data?.map((food) => (
           <button
@@ -105,7 +105,7 @@ export function FoodFinder({ onPick }: Props) {
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-marble">{food.name}</p>
-              <p className="text-xs text-marble-dim">{round(food.kcal100g)} kcal / 100g</p>
+              <p className="text-xs text-marble-dim">{t.food.finder.per100(round(food.kcal100g))}</p>
             </div>
             <span className="text-[0.6rem] font-medium text-gold/70">{food.source}</span>
           </button>
@@ -132,12 +132,13 @@ function ManualFoodModal({
   onClose: () => void;
   onCreated: (f: FoodItemResponse) => void;
 }) {
+  const t = useT();
   const toast = useToast();
   const [form, setForm] = useState({ name: "", kcal: "", prot: "", carbs: "", fats: "" });
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
-    if (!form.name.trim()) return toast("Nom requis", "error");
+    if (!form.name.trim()) return toast(t.food.manual.nameRequired, "error");
     setSaving(true);
     try {
       const food = await foodItemApi.createManual({
@@ -151,28 +152,28 @@ function ManualFoodModal({
       onClose();
       setForm({ name: "", kcal: "", prot: "", carbs: "", fats: "" });
     } catch {
-      toast("Échec de la création", "error");
+      toast(t.food.manual.createError, "error");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Aliment manuel (valeurs / 100g)">
+    <Modal open={open} onClose={onClose} title={t.food.manual.title}>
       <div className="space-y-3">
         <Input
-          label="Nom"
+          label={t.food.manual.name}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Calories" type="number" inputMode="decimal" value={form.kcal} onChange={(e) => setForm({ ...form, kcal: e.target.value })} />
-          <Input label="Protéines" type="number" inputMode="decimal" value={form.prot} onChange={(e) => setForm({ ...form, prot: e.target.value })} />
-          <Input label="Glucides" type="number" inputMode="decimal" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
-          <Input label="Lipides" type="number" inputMode="decimal" value={form.fats} onChange={(e) => setForm({ ...form, fats: e.target.value })} />
+          <Input label={t.food.manual.calories} type="number" inputMode="decimal" value={form.kcal} onChange={(e) => setForm({ ...form, kcal: e.target.value })} />
+          <Input label={t.food.manual.proteins} type="number" inputMode="decimal" value={form.prot} onChange={(e) => setForm({ ...form, prot: e.target.value })} />
+          <Input label={t.food.manual.carbs} type="number" inputMode="decimal" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
+          <Input label={t.food.manual.fats} type="number" inputMode="decimal" value={form.fats} onChange={(e) => setForm({ ...form, fats: e.target.value })} />
         </div>
         <Button block loading={saving} onClick={submit}>
-          Créer l'aliment
+          {t.food.manual.create}
         </Button>
       </div>
     </Modal>
@@ -188,11 +189,12 @@ function AiFoodModal({
   onClose: () => void;
   onAnalyzed: (f: FoodItemResponse) => void;
 }) {
+  const t = useT();
   const toast = useToast();
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const { listening, supported, toggle } = useSpeech((t) =>
-    setDescription((prev) => (prev ? `${prev} ${t}` : t)),
+  const { listening, supported, toggle } = useSpeech((text) =>
+    setDescription((prev) => (prev ? `${prev} ${text}` : text)),
   );
 
   const analyze = async () => {
@@ -203,40 +205,38 @@ function AiFoodModal({
       onAnalyzed(food);
       onClose();
       setDescription("");
-      toast("Repas estimé par l'Oracle", "success");
+      toast(t.food.ai.success, "success");
     } catch {
-      toast("L'analyse a échoué", "error");
+      toast(t.food.ai.error, "error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Analyser un repas avec l'IA">
+    <Modal open={open} onClose={onClose} title={t.food.ai.title}>
       <div className="space-y-3">
-        <p className="text-xs text-marble-dim">
-          Décris ce que tu as mangé ; l'Oracle estime les calories et macros.
-        </p>
+        <p className="text-xs text-marble-dim">{t.food.ai.desc}</p>
         <div className="relative">
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            placeholder="ex. une assiette de pâtes carbonara avec 200g de pâtes"
+            placeholder={t.food.ai.placeholder}
             className="w-full resize-none rounded-[var(--radius)] border border-outline/60 bg-surface-lowest p-4 pr-12 text-marble outline-none focus:border-gold"
           />
           {supported && (
             <button
               onClick={toggle}
               className={`absolute right-3 top-3 ${listening ? "text-gold" : "text-marble-dim"}`}
-              aria-label="Dicter"
+              aria-label={t.food.ai.dictate}
             >
               <IconMic size={20} />
             </button>
           )}
         </div>
         <Button block loading={loading} onClick={analyze}>
-          <IconSearch size={16} /> Analyser
+          <IconSearch size={16} /> {t.food.ai.analyze}
         </Button>
       </div>
     </Modal>

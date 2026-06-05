@@ -3,6 +3,7 @@ import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LanguageProvider } from "@/lib/i18n";
 import { router } from "./router";
 
 const queryClient = new QueryClient({
@@ -17,17 +18,19 @@ const queryClient = new QueryClient({
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
-          <ErrorBoundary>
-            {/* v7_startTransition : enveloppe les navigations dans React.startTransition.
-                Indispensable avec des pages React.lazy + Suspense, sinon React lève l'erreur
-                #426 (suspension sur input synchrone) lors d'une navigation. */}
-            <RouterProvider router={router} future={{ v7_startTransition: true }} />
-          </ErrorBoundary>
-        </AuthProvider>
-      </ToastProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <AuthProvider>
+            <ErrorBoundary>
+              {/* v7_startTransition : enveloppe les navigations dans React.startTransition.
+                  Indispensable avec des pages React.lazy + Suspense, sinon React lève l'erreur
+                  #426 (suspension sur input synchrone) lors d'une navigation. */}
+              <RouterProvider router={router} future={{ v7_startTransition: true }} />
+            </ErrorBoundary>
+          </AuthProvider>
+        </ToastProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 }

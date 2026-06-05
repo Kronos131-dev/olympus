@@ -12,6 +12,7 @@ import { EmptyState, Spinner } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
 import { IconBack, IconTrash } from "@/components/icons";
 import { macrosFor, round } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type { FoodItemResponse } from "@/types/api";
 
 interface DraftIngredient {
@@ -22,6 +23,7 @@ interface DraftIngredient {
 export default function MealEditorPage() {
   const { id } = useParams();
   const editId = id ? Number(id) : undefined;
+  const t = useT();
   const navigate = useNavigate();
   const toast = useToast();
   const qc = useQueryClient();
@@ -44,9 +46,9 @@ export default function MealEditorPage() {
           p.ingredients.map((i) => ({ foodItem: i.foodItem, quantityGrams: i.quantityGrams })),
         );
       })
-      .catch(() => toast("Repas introuvable", "error"))
+      .catch(() => toast(t.mealEditor.notFound, "error"))
       .finally(() => setLoading(false));
-  }, [editId, toast]);
+  }, [editId, toast, t]);
 
   const totals = ingredients.reduce(
     (acc, i) => {
@@ -68,8 +70,8 @@ export default function MealEditorPage() {
   };
 
   const submit = () => {
-    if (!name.trim()) return toast("Donne un nom au repas", "error");
-    if (ingredients.length === 0) return toast("Ajoute au moins un ingrédient", "error");
+    if (!name.trim()) return toast(t.mealEditor.errName, "error");
+    if (ingredients.length === 0) return toast(t.mealEditor.errIngredient, "error");
     save.mutate(
       {
         id: editId,
@@ -83,11 +85,11 @@ export default function MealEditorPage() {
       },
       {
         onSuccess: () => {
-          toast(editId ? "Repas mis à jour" : "Repas créé", "success");
+          toast(editId ? t.mealEditor.updated : t.mealEditor.created, "success");
           qc.invalidateQueries({ queryKey: ["presets"] });
           navigate("/meals");
         },
-        onError: (e) => toast(errorMessage(e, "Échec de l'enregistrement"), "error"),
+        onError: (e) => toast(errorMessage(e, t.mealEditor.saveError), "error"),
       },
     );
   };
@@ -97,23 +99,23 @@ export default function MealEditorPage() {
   return (
     <div className="page-enter mx-auto max-w-lg px-5 pb-32">
       <header className="flex items-center gap-3 py-5">
-        <button onClick={() => navigate(-1)} className="text-marble-dim hover:text-marble" aria-label="Retour">
+        <button onClick={() => navigate(-1)} className="text-marble-dim hover:text-marble" aria-label={t.common.back}>
           <IconBack size={24} />
         </button>
-        <h1 className="text-2xl text-marble">{editId ? "Modifier le repas" : "Nouveau repas"}</h1>
+        <h1 className="text-2xl text-marble">{editId ? t.mealEditor.editTitle : t.mealEditor.newTitle}</h1>
       </header>
 
-      <Input label="Nom du repas" value={name} onChange={(e) => setName(e.target.value)} placeholder="ex. Bol protéiné" />
+      <Input label={t.mealEditor.nameLabel} value={name} onChange={(e) => setName(e.target.value)} placeholder={t.mealEditor.namePlaceholder} />
 
       <section className="mt-6">
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold text-marble">Ingrédients</h2>
+          <h2 className="text-sm font-semibold text-marble">{t.mealEditor.ingredients}</h2>
           <span className="text-xs text-gold">
-            {round(totals.kcal)} kcal · {round(totals.p)}P / {round(totals.c)}G / {round(totals.f)}L
+            {t.mealEditor.macroLine(round(totals.kcal), round(totals.p), round(totals.c), round(totals.f))}
           </span>
         </div>
         {ingredients.length === 0 ? (
-          <EmptyState title="Aucun ingrédient" hint="Recherche, scanne ou crée un aliment ci-dessous." />
+          <EmptyState title={t.mealEditor.emptyTitle} hint={t.mealEditor.emptyHint} />
         ) : (
           <ul className="space-y-1">
             {ingredients.map((i, idx) => {
@@ -123,13 +125,13 @@ export default function MealEditorPage() {
                   <div className="min-w-0">
                     <p className="truncate text-sm text-marble">{i.foodItem.name}</p>
                     <p className="text-xs text-marble-dim">
-                      {round(i.quantityGrams)} g · {round(m.kcal)} kcal
+                      {round(i.quantityGrams)} g · {round(m.kcal)} {t.common.kcal}
                     </p>
                   </div>
                   <button
                     onClick={() => setIngredients((list) => list.filter((_, j) => j !== idx))}
                     className="text-marble-dim hover:text-[var(--color-danger)]"
-                    aria-label="Retirer"
+                    aria-label={t.mealEditor.remove}
                   >
                     <IconTrash size={18} />
                   </button>
@@ -146,14 +148,14 @@ export default function MealEditorPage() {
 
       <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-lg p-4" style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
         <Button block size="lg" loading={save.isPending} onClick={submit} className="shadow-[0px_24px_48px_rgba(0,0,0,0.5)]">
-          {editId ? "Enregistrer" : "Créer le repas"}
+          {editId ? t.mealEditor.save : t.mealEditor.create}
         </Button>
       </div>
 
       <Modal open={!!pending} onClose={() => setPending(null)} title={pending?.name}>
         <div className="space-y-4">
           <Input
-            label="Quantité (g)"
+            label={t.common.quantityG}
             type="number"
             inputMode="decimal"
             value={pendingGrams}
@@ -161,7 +163,7 @@ export default function MealEditorPage() {
             autoFocus
           />
           <Button block onClick={addPending}>
-            Ajouter l'ingrédient
+            {t.mealEditor.addIngredient}
           </Button>
         </div>
       </Modal>
