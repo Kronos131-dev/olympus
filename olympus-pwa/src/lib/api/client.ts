@@ -108,7 +108,10 @@ async function rawRequest<T>(path: string, opts: RequestOptions, retry = true): 
     try {
       parsed = await res.json();
       if (parsed && typeof parsed === "object") {
-        const m = (parsed as Record<string, unknown>).message;
+        // Spring renvoie un ProblemDetail (RFC 7807) : le texte lisible est dans `detail`.
+        // On accepte aussi `message` au cas où (autres formats d'erreur).
+        const p = parsed as Record<string, unknown>;
+        const m = p.detail ?? p.message;
         if (typeof m === "string") message = m;
       }
     } catch {
