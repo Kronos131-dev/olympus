@@ -76,6 +76,14 @@ public class UserService {
             user.setAiProvider(request.getAiProvider());
         }
 
+        if (request.getRecoveryEmail() != null && !request.getRecoveryEmail().isBlank()
+                && !request.getRecoveryEmail().equals(user.getRecoveryEmail())) {
+            userRepository.findByRecoveryEmail(request.getRecoveryEmail())
+                    .filter(other -> !other.getId().equals(user.getId()))
+                    .ifPresent(other -> { throw new IllegalArgumentException("Cet email est déjà utilisé"); });
+            user.setRecoveryEmail(request.getRecoveryEmail());
+        }
+
         if (request.getAutoCalculateTargets() != null) {
             user.setAutoCalculateTargets(request.getAutoCalculateTargets());
             

@@ -3,6 +3,7 @@ package com.kronos.olympus.dto.request;
 import com.kronos.olympus.model.enums.ActivityLevel;
 import com.kronos.olympus.model.enums.Gender;
 import com.kronos.olympus.model.enums.Goal;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -23,6 +24,11 @@ public class RegisterRequest {
     // Utilisé comme Pseudo, on retire l'annotation @Email
     @NotBlank(message = "Le pseudo est obligatoire")
     private String email;
+
+    // Adresse email réelle, pour la récupération de mot de passe.
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "Email invalide")
+    private String recoveryEmail;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
     @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")

@@ -11,6 +11,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     // Recherche par email pour Spring Security et la vérification de compte existant
     Optional<User> findByEmail(String email);
-    
+
     boolean existsByEmail(String email);
+
+    // Recherche par adresse email de récupération (mot de passe oublié)
+    Optional<User> findByRecoveryEmail(String recoveryEmail);
 }

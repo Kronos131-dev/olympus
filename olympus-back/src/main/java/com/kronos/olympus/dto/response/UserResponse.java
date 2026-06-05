@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class UserResponse {
     private Long id;
     private String email;
+    private String recoveryEmail;
     private Gender gender;
     private Double heightCm;
     private Double currentWeightKg;

@@ -29,6 +29,7 @@ export interface AuthRequest {
 
 export interface RegisterRequest {
   email: string;
+  recoveryEmail: string;
   password: string;
   gender: Gender;
   heightCm: number;
@@ -49,6 +50,7 @@ export interface AuthResponse {
 export interface UserResponse {
   id: number;
   email: string;
+  recoveryEmail?: string | null;
   gender: Gender;
   heightCm: number;
   currentWeightKg: number;
@@ -70,6 +72,7 @@ export interface UserResponse {
 
 export interface UpdateProfileRequest {
   currentWeightKg?: number;
+  recoveryEmail?: string;
   heightCm?: number;
   gender?: Gender;
   birthDate?: string;

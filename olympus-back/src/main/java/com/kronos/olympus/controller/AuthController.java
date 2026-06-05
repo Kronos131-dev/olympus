@@ -1,11 +1,14 @@
 package com.kronos.olympus.controller;
 
 import com.kronos.olympus.dto.request.AuthRequest;
+import com.kronos.olympus.dto.request.ForgotPasswordRequest;
 import com.kronos.olympus.dto.request.LogoutRequest;
 import com.kronos.olympus.dto.request.RefreshTokenRequest;
 import com.kronos.olympus.dto.request.RegisterRequest;
+import com.kronos.olympus.dto.request.ResetPasswordRequest;
 import com.kronos.olympus.dto.response.AuthResponse;
 import com.kronos.olympus.service.AuthService;
+import com.kronos.olympus.service.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -44,5 +48,17 @@ public class AuthController {
     public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequest request) {
         authService.logout(request.getRefreshToken());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok().build();
     }
 }

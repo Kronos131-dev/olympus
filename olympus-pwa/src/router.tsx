@@ -7,6 +7,8 @@ import { lazyWithReload } from "@/lib/lazyWithReload";
 
 const LoginPage = lazyWithReload(() => import("@/pages/LoginPage"));
 const RegisterPage = lazyWithReload(() => import("@/pages/RegisterPage"));
+const ForgotPasswordPage = lazyWithReload(() => import("@/pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazyWithReload(() => import("@/pages/ResetPasswordPage"));
 const DashboardPage = lazyWithReload(() => import("@/pages/DashboardPage"));
 const OraclePage = lazyWithReload(() => import("@/pages/OraclePage"));
 const MealsPage = lazyWithReload(() => import("@/pages/MealsPage"));
@@ -43,6 +45,8 @@ export const router = createBrowserRouter(
           children: [
             { path: "/login", element: <LoginPage /> },
             { path: "/register", element: <RegisterPage /> },
+            { path: "/forgot-password", element: <ForgotPasswordPage /> },
+            { path: "/reset-password", element: <ResetPasswordPage /> },
           ],
         },
         {

@@ -4,6 +4,7 @@ import com.kronos.olympus.model.enums.ActivityLevel;
 import com.kronos.olympus.model.enums.AiProvider;
 import com.kronos.olympus.model.enums.Gender;
 import com.kronos.olympus.model.enums.Goal;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -11,6 +12,11 @@ import java.time.LocalDate;
 @Data
 public class UpdateProfileRequest {
     private Double currentWeightKg;
+
+    // Email de récupération (mot de passe oublié). Optionnel à la mise à jour.
+    @Email(message = "Email invalide")
+    private String recoveryEmail;
+
     private Double heightCm;
     private Gender gender;
     private LocalDate birthDate;

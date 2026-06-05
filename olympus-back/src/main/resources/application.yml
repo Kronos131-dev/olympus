@@ -36,8 +36,27 @@ spring:
       max-file-size: 10MB
       max-request-size: 12MB
 
+  # Envoi d'emails (réinitialisation de mot de passe). Mêmes identifiants Gmail que Chiron.
+  # Vide = pas d'envoi possible (la demande de reset reste silencieuse).
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${GMAIL_USERNAME:}
+    password: ${GMAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
 # Configuration de l'agent IA conversationnel
 olympus:
+  # URL publique de la PWA, utilisée pour construire le lien de réinitialisation de mot de passe.
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
   agent:
     mistral-model: ${OLYMPUS_AGENT_MISTRAL_MODEL:mistral-small-latest}
     # Clé d'API Google Gemini (Generative Language API). Vide = Gemini désactivé, Mistral utilisé par défaut.

@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const [form, setForm] = useState({
     email: "",
+    recoveryEmail: "",
     password: "",
     gender: "MALE" as Gender,
     heightCm: "",
@@ -33,6 +34,7 @@ export default function RegisterPage() {
     try {
       await register({
         email: form.email.trim(),
+        recoveryEmail: form.recoveryEmail.trim(),
         password: form.password,
         gender: form.gender,
         heightCm: Number(form.heightCm),
@@ -59,6 +61,14 @@ export default function RegisterPage() {
 
       <form onSubmit={submit} className="space-y-4">
         <Input label="Pseudo" value={form.email} onChange={(e) => set("email", e.target.value)} required />
+        <Input
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={form.recoveryEmail}
+          onChange={(e) => set("recoveryEmail", e.target.value)}
+          required
+        />
         <Input
           label="Mot de passe"
           type="password"

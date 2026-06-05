@@ -100,6 +100,7 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
   const [birthDate, setBirthDate] = useState("");
   const [goal, setGoal] = useState<Goal>("MAINTAIN");
   const [activity, setActivity] = useState<ActivityLevel>("MODERATE");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
 
   useEffect(() => {
     if (open && profile.data) {
@@ -109,6 +110,7 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
       setBirthDate(profile.data.birthDate ?? "");
       setGoal(profile.data.goal);
       setActivity(profile.data.activityLevel);
+      setRecoveryEmail(profile.data.recoveryEmail ?? "");
     }
   }, [open, profile.data]);
 
@@ -121,6 +123,7 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
         birthDate: birthDate || undefined,
         goal,
         activityLevel: activity,
+        recoveryEmail: recoveryEmail.trim() || undefined,
       },
       {
         onSuccess: () => {
@@ -145,6 +148,7 @@ function EditProfileModal({ open, onClose }: { open: boolean; onClose: () => voi
         </div>
         <Select label="Objectif" value={goal} onChange={(e) => setGoal(e.target.value as Goal)} options={optionsFrom(GOAL_LABELS)} />
         <Select label="Niveau d'activité" value={activity} onChange={(e) => setActivity(e.target.value as ActivityLevel)} options={optionsFrom(ACTIVITY_LABELS)} />
+        <Input label="Email (récupération de mot de passe)" type="email" autoComplete="email" value={recoveryEmail} onChange={(e) => setRecoveryEmail(e.target.value)} />
         <Button block loading={update.isPending} onClick={save}>
           Enregistrer
         </Button>
