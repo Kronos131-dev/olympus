@@ -40,6 +40,10 @@ public class AuthService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Ce pseudo est déjà utilisé");
         }
+        if (request.getRecoveryEmail() != null
+                && userRepository.findByRecoveryEmail(request.getRecoveryEmail()).isPresent()) {
+            throw new IllegalArgumentException("Cet email est déjà utilisé");
+        }
 
         // Création de l'utilisateur
         User user = userMapper.toEntity(request);

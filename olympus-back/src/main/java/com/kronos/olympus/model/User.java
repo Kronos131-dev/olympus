@@ -27,6 +27,10 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    // Adresse email réelle (distincte du pseudo) servant à la récupération de mot de passe. Nullable.
+    @Column(name = "recovery_email", unique = true)
+    private String recoveryEmail;
+
     @Column(nullable = false)
     private String passwordHash;
 

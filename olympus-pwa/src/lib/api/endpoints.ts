@@ -28,6 +28,10 @@ export const authApi = {
     api.post<AuthResponse>("/auth/register", body, { auth: false }),
   logout: (refreshToken: string) =>
     api.post<void>("/auth/logout", { refreshToken }, { auth: false }),
+  requestPasswordReset: (email: string) =>
+    api.post<void>("/auth/forgot-password", { email }, { auth: false }),
+  resetPassword: (token: string, newPassword: string) =>
+    api.post<void>("/auth/reset-password", { token, newPassword }, { auth: false }),
 };
 
 // L'échange d'un token de liaison Chiron a besoin de l'en-tête X-Integration-Token :

@@ -58,7 +58,13 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-marble-dim">
+      <p className="mt-4 text-center text-sm">
+        <Link to="/forgot-password" className="text-marble-dim hover:text-gold hover:underline">
+          Mot de passe oublié ?
+        </Link>
+      </p>
+
+      <p className="mt-6 text-center text-sm text-marble-dim">
         Pas encore de compte ?{" "}
         <Link to="/register" className="text-gold hover:underline">
           Rejoindre Olympus
