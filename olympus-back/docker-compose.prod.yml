@@ -21,6 +21,11 @@ services:
       - SPRING_DATASOURCE_PASSWORD=olympus_password
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      # Envoi d'emails (mot de passe oublié) — mêmes identifiants Gmail que Chiron.
+      - GMAIL_USERNAME=${GMAIL_USERNAME:-}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD:-}
+      # URL publique de la PWA, pour le lien de réinitialisation dans l'email.
+      - FRONTEND_URL=${FRONTEND_URL:-https://olympus.chiron-sanctuaire.fr}
     volumes:
       # Le JAR déposé par la pipeline Chiron (scp).
       - ./olympus.jar:/app/olympus.jar

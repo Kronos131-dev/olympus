@@ -20,6 +20,11 @@ public class EmailService {
     private String fromAddress;
 
     public void sendPasswordResetEmail(String toEmail, String resetLink) {
+        if (fromAddress == null || fromAddress.isBlank()) {
+            // Sans expéditeur, JavaMail échoue avec un opaque « Could not parse mail ».
+            throw new IllegalStateException(
+                    "Envoi d'email non configuré : GMAIL_USERNAME / GMAIL_APP_PASSWORD manquants côté serveur.");
+        }
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
         message.setTo(toEmail);
