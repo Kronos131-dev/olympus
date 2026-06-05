@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { isRecoverableLoadError, maybeReloadOnce } from "@/lib/chunkReload";
+import { getDict } from "@/lib/i18n";
 
 interface Props {
   children: ReactNode;
@@ -27,16 +28,17 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.hasError) return this.props.children;
 
+    const t = getDict();
     return (
       <div className="grid min-h-dvh place-items-center px-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-sm font-semibold text-marble">Une erreur est survenue</p>
-          <p className="max-w-xs text-xs text-marble-dim/70">Rechargez la page pour continuer.</p>
+          <p className="text-sm font-semibold text-marble">{t.routeError.title}</p>
+          <p className="max-w-xs text-xs text-marble-dim/70">{t.routeError.hint}</p>
           <button
             onClick={() => window.location.reload()}
             className="rounded-full bg-gold px-5 py-2 text-xs font-semibold text-[var(--color-on-gold)]"
           >
-            Recharger
+            {t.routeError.reload}
           </button>
         </div>
       </div>

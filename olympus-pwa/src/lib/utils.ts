@@ -18,16 +18,6 @@ export function shiftIso(iso: string, days: number): string {
   return d.toLocaleDateString("en-CA");
 }
 
-const DAY_LABELS_FR: Record<string, string> = {
-  MONDAY: "Lundi",
-  TUESDAY: "Mardi",
-  WEDNESDAY: "Mercredi",
-  THURSDAY: "Jeudi",
-  FRIDAY: "Vendredi",
-  SATURDAY: "Samedi",
-  SUNDAY: "Dimanche",
-};
-
 export const WEEK_DAYS = [
   "MONDAY",
   "TUESDAY",
@@ -38,12 +28,9 @@ export const WEEK_DAYS = [
   "SUNDAY",
 ] as const;
 
-export function dayLabel(day: string): string {
-  return DAY_LABELS_FR[day] ?? day;
-}
-
-export function formatDateLong(iso: string): string {
-  return isoToDate(iso).toLocaleDateString("fr-FR", {
+// Les libellés de jours sont désormais traduits via le dictionnaire i18n (t.days).
+export function formatDateLong(iso: string, locale = "fr-FR"): string {
+  return isoToDate(iso).toLocaleDateString(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",

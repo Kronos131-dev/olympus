@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Modal } from "./ui/Modal";
 import { Spinner } from "./ui/misc";
+import { useT } from "@/lib/i18n";
 
 interface Props {
   open: boolean;
@@ -11,6 +12,7 @@ interface Props {
 
 // Scanner de code-barres : BarcodeDetector natif si dispo, sinon @zxing/browser.
 export function BarcodeScanner({ open, onClose, onDetected }: Props) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -68,7 +70,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
           stopZxing = () => controls.stop();
         }
       } catch {
-        setError("Caméra inaccessible. Vérifie les autorisations.");
+        setError(t.food.barcode.cameraError);
       }
     })();
 
@@ -79,10 +81,10 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       stream?.getTracks().forEach((t) => t.stop());
       setReady(false);
     };
-  }, [open, onClose, onDetected]);
+  }, [open, onClose, onDetected, t]);
 
   return (
-    <Modal open={open} onClose={onClose} title="Scanner un code-barres">
+    <Modal open={open} onClose={onClose} title={t.food.barcode.title}>
       {error ? (
         <p className="text-sm text-[var(--color-danger)]">{error}</p>
       ) : (

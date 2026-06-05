@@ -11,10 +11,12 @@ import { errorMessage } from "@/lib/api/client";
 import { IconEdit, IconPlus, IconSparkle, IconTrash } from "@/components/icons";
 import { useAddLogEntry, useDeletePreset, usePresets } from "@/hooks/queries";
 import { round, todayIso } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type { MealPresetResponse } from "@/types/api";
 
 // Liste des repas prédéfinis : consommer, éditer, supprimer, créer (manuel ou IA).
 export default function MealsPage() {
+  const t = useT();
   const navigate = useNavigate();
   const toast = useToast();
   const presets = usePresets();
@@ -33,8 +35,8 @@ export default function MealsPage() {
     addEntry.mutate(
       { targetDate: todayIso(), mealPresetId: preset.id },
       {
-        onSuccess: () => toast(`${preset.name} consommé`, "success"),
-        onError: (e) => toast(errorMessage(e, "Impossible de consommer"), "error"),
+        onSuccess: () => toast(t.meals.consumed(preset.name), "success"),
+        onError: (e) => toast(errorMessage(e, t.meals.consumeError), "error"),
       },
     );
   };
@@ -42,11 +44,11 @@ export default function MealsPage() {
   return (
     <div>
       <PageHeader
-        overline="Mon arsenal"
-        title="Repas"
+        overline={t.meals.overline}
+        title={t.meals.title}
         action={
           <Button size="sm" onClick={() => navigate("/meals/new")}>
-            <IconPlus size={16} /> Nouveau
+            <IconPlus size={16} /> {t.meals.new}
           </Button>
         }
       />
@@ -54,10 +56,10 @@ export default function MealsPage() {
       <div className="px-5">
         <div className="mb-4 flex gap-2">
           <div className="flex-1">
-            <Input placeholder="Rechercher un repas…" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder={t.meals.searchPlaceholder} value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <Button variant="ghost" onClick={() => navigate("/meals/new?ai=1")}>
-            <IconSparkle size={16} /> IA
+            <IconSparkle size={16} /> {t.meals.ai}
           </Button>
         </div>
 
@@ -68,8 +70,8 @@ export default function MealsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            title="Aucun repas enregistré"
-            hint="Crée ton premier repas pour le consommer en un geste."
+            title={t.meals.emptyTitle}
+            hint={t.meals.emptyHint}
           />
         ) : (
           <div className="space-y-3">
@@ -79,30 +81,30 @@ export default function MealsPage() {
                   <div className="min-w-0">
                     <h3 className="truncate text-lg text-marble">{preset.name}</h3>
                     <p className="text-xs text-marble-dim">
-                      {round(preset.totalKcal)} kcal · {round(preset.totalProteins)}P /{" "}
+                      {round(preset.totalKcal)} {t.common.kcal} · {round(preset.totalProteins)}P /{" "}
                       {round(preset.totalCarbs)}G / {round(preset.totalFats)}L ·{" "}
-                      {preset.ingredients.length} ingrédient{preset.ingredients.length > 1 ? "s" : ""}
+                      {t.meals.ingredientCount(preset.ingredients.length)}
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-1">
                     <button
                       onClick={() => navigate(`/meals/${preset.id}/edit`)}
                       className="p-1.5 text-marble-dim hover:text-gold"
-                      aria-label="Éditer"
+                      aria-label={t.meals.edit}
                     >
                       <IconEdit size={18} />
                     </button>
                     <button
                       onClick={() => setToDelete(preset)}
                       className="p-1.5 text-marble-dim hover:text-[var(--color-danger)]"
-                      aria-label="Supprimer"
+                      aria-label={t.meals.delete}
                     >
                       <IconTrash size={18} />
                     </button>
                   </div>
                 </div>
                 <Button block size="sm" className="mt-3" loading={addEntry.isPending} onClick={() => consume(preset)}>
-                  Consommer
+                  {t.meals.consume}
                 </Button>
               </Card>
             ))}
@@ -110,13 +112,13 @@ export default function MealsPage() {
         )}
       </div>
 
-      <Modal open={!!toDelete} onClose={() => setToDelete(null)} title="Supprimer ce repas ?">
+      <Modal open={!!toDelete} onClose={() => setToDelete(null)} title={t.meals.deleteTitle}>
         <p className="mb-5 text-sm text-marble-dim">
-          « {toDelete?.name} » sera définitivement retiré de ton arsenal.
+          {toDelete ? t.meals.deleteConfirm(toDelete.name) : ""}
         </p>
         <div className="flex gap-3">
           <Button block variant="ghost" onClick={() => setToDelete(null)}>
-            Annuler
+            {t.common.cancel}
           </Button>
           <Button
             block
@@ -126,14 +128,14 @@ export default function MealsPage() {
               toDelete &&
               deletePreset.mutate(toDelete.id, {
                 onSuccess: () => {
-                  toast("Repas supprimé", "success");
+                  toast(t.meals.deleted, "success");
                   setToDelete(null);
                 },
-                onError: (e) => toast(errorMessage(e, "Suppression impossible"), "error"),
+                onError: (e) => toast(errorMessage(e, t.meals.deleteError), "error"),
               })
             }
           >
-            Supprimer
+            {t.common.delete}
           </Button>
         </div>
       </Modal>

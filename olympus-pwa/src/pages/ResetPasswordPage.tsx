@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { authApi } from "@/lib/api/endpoints";
 import { errorMessage } from "@/lib/api/client";
+import { useT } from "@/lib/i18n";
 
 export default function ResetPasswordPage() {
+  const t = useT();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get("token") ?? "";
@@ -20,15 +22,15 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError(null);
     if (!token) {
-      setError("Lien de réinitialisation invalide ou manquant.");
+      setError(t.auth.reset.invalidLink);
       return;
     }
     if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères.");
+      setError(t.auth.reset.tooShort);
       return;
     }
     if (password !== confirm) {
-      setError("Les mots de passe ne correspondent pas.");
+      setError(t.auth.reset.mismatch);
       return;
     }
     setLoading(true);
@@ -37,7 +39,7 @@ export default function ResetPasswordPage() {
       setDone(true);
       setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
-      setError(errorMessage(err, "Lien invalide ou expiré. Demande un nouveau lien."));
+      setError(errorMessage(err, t.auth.reset.error));
     } finally {
       setLoading(false);
     }
@@ -46,18 +48,18 @@ export default function ResetPasswordPage() {
   return (
     <div className="page-enter mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
       <div className="mb-10 text-center">
-        <p className="lapidary text-[0.65rem] tracking-[0.4em] text-gold">Le Panthéon</p>
-        <h1 className="text-3xl text-marble">Nouveau mot de passe</h1>
+        <p className="lapidary text-[0.65rem] tracking-[0.4em] text-gold">{t.auth.login.overline}</p>
+        <h1 className="text-3xl text-marble">{t.auth.reset.title}</h1>
       </div>
 
       {done ? (
         <p className="rounded-[var(--radius)] bg-surface-high px-4 py-3 text-center text-sm text-marble">
-          Mot de passe réinitialisé. Redirection vers la connexion…
+          {t.auth.reset.done}
         </p>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <Input
-            label="Nouveau mot de passe"
+            label={t.auth.reset.newPassword}
             type="password"
             autoComplete="new-password"
             minLength={6}
@@ -66,7 +68,7 @@ export default function ResetPasswordPage() {
             required
           />
           <Input
-            label="Confirmer le mot de passe"
+            label={t.auth.reset.confirm}
             type="password"
             autoComplete="new-password"
             minLength={6}
@@ -76,14 +78,14 @@ export default function ResetPasswordPage() {
           />
           {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
           <Button type="submit" block size="lg" loading={loading}>
-            Réinitialiser
+            {t.auth.reset.submit}
           </Button>
         </form>
       )}
 
       <p className="mt-8 text-center text-sm text-marble-dim">
         <Link to="/login" className="text-gold hover:underline">
-          Retour à la connexion
+          {t.auth.reset.back}
         </Link>
       </p>
     </div>

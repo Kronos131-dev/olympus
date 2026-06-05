@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { IconCamera, IconClose, IconMic, IconSend, IconSparkle, IconTrash } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type { AiProvider, ChatMessageDto } from "@/types/api";
 
 interface LocalMessage {
@@ -24,6 +25,7 @@ interface LocalMessage {
 const PROVIDER_LABEL: Record<AiProvider, string> = { MISTRAL: "Mistral", GEMINI: "Gemini" };
 
 export default function OraclePage() {
+  const tr = useT();
   const toast = useToast();
   const qc = useQueryClient();
   const profile = useProfile();
@@ -74,7 +76,7 @@ export default function OraclePage() {
     const tempId = `tmp-${Date.now()}`;
     setMessages((m) => [
       ...m,
-      { id: tempId, role: "USER", content: text || "📷 Photo" },
+      { id: tempId, role: "USER", content: text || `📷 ${tr.oracle.photo}` },
       { id: `${tempId}-a`, role: "ASSISTANT", content: "", pending: true },
     ]);
     setInput("");
@@ -94,14 +96,14 @@ export default function OraclePage() {
       // Si on voulait Gemini mais que le serveur a répondu avec un autre fournisseur.
       const wanted = profile.data?.aiProvider;
       if (wanted && res.provider && res.provider !== wanted) {
-        toast(`${PROVIDER_LABEL[wanted]} indisponible · réponse via ${PROVIDER_LABEL[res.provider]}`, "info");
+        toast(tr.oracle.providerUnavailable(PROVIDER_LABEL[wanted], PROVIDER_LABEL[res.provider]), "info");
       }
       if (res.actionsTaken?.length) toast(res.actionsTaken.join(" · "), "success");
       qc.invalidateQueries({ queryKey: ["conversations"] });
       qc.invalidateQueries({ queryKey: ["dailyLog"] });
     } catch (e) {
       // Afficher la vraie cause (ex. erreur Gemini) au lieu d'un message générique muet.
-      const msg = errorMessage(e, "L'Oracle est resté silencieux. Réessaie.");
+      const msg = errorMessage(e, tr.oracle.silent);
       setMessages((m) =>
         m.map((mm) =>
           mm.id === `${tempId}-a` ? { ...mm, content: msg, pending: false } : mm,
@@ -119,7 +121,7 @@ export default function OraclePage() {
     if (profile.data) qc.setQueryData(qk.profile, { ...profile.data, aiProvider: p });
     updateProfile.mutate(
       { aiProvider: p },
-      { onError: (e) => toast(errorMessage(e, "Impossible de changer de fournisseur d'IA"), "error") },
+      { onError: (e) => toast(errorMessage(e, tr.oracle.providerError), "error") },
     );
   };
 
@@ -138,9 +140,9 @@ export default function OraclePage() {
       setMessages([]);
       qc.invalidateQueries({ queryKey: ["conversations"] });
       setConfirmClear(false);
-      toast("Historique effacé · nouvelle conversation", "success");
+      toast(tr.oracle.cleared, "success");
     } catch (e) {
-      toast(errorMessage(e, "Impossible d'effacer l'historique"), "error");
+      toast(errorMessage(e, tr.oracle.clearError), "error");
     } finally {
       setClearing(false);
     }
@@ -155,8 +157,8 @@ export default function OraclePage() {
     >
       <header className="flex flex-none items-center justify-between px-5 pt-7 pb-3">
         <div>
-          <p className="text-xs font-semibold tracking-wide text-gold">L'Oracle</p>
-          <h1 className="text-2xl text-marble">Conseil divin</h1>
+          <p className="text-xs font-semibold tracking-wide text-gold">{tr.oracle.overline}</p>
+          <h1 className="text-2xl text-marble">{tr.oracle.title}</h1>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-full bg-surface-high p-0.5 text-xs font-semibold">
@@ -177,14 +179,14 @@ export default function OraclePage() {
             onClick={() => setConfirmClear(true)}
             disabled={messages.length === 0}
             className="rounded-full p-2 text-marble-dim hover:text-[var(--color-danger)] disabled:opacity-40 disabled:hover:text-marble-dim"
-            aria-label="Effacer l'historique"
+            aria-label={tr.oracle.clearHistory}
           >
             <IconTrash size={20} />
           </button>
           <button
             onClick={startNew}
             className="rounded-full p-2 text-marble-dim hover:text-marble"
-            aria-label="Nouvelle conversation"
+            aria-label={tr.oracle.newConv}
           >
             <IconSparkle size={20} />
           </button>
@@ -195,10 +197,8 @@ export default function OraclePage() {
         {messages.length === 0 && (
           <div className="grid h-full place-items-center text-center">
             <div>
-              <p className="text-base font-semibold text-marble">Interroge l'Oracle</p>
-              <p className="mt-2 max-w-xs text-sm text-marble-dim/80">
-                « Quels sont mes macros aujourd'hui ? » · « J'ai mangé un burger, ajoute-le. »
-              </p>
+              <p className="text-base font-semibold text-marble">{tr.oracle.emptyTitle}</p>
+              <p className="mt-2 max-w-xs text-sm text-marble-dim/80">{tr.oracle.emptyHint}</p>
             </div>
           </div>
         )}
@@ -219,7 +219,7 @@ export default function OraclePage() {
             </div>
             {m.role === "ASSISTANT" && m.provider && !m.pending && (
               <span className="mt-1 px-1 text-[0.65rem] text-marble-dim">
-                via {PROVIDER_LABEL[m.provider]}
+                {tr.oracle.via(PROVIDER_LABEL[m.provider])}
               </span>
             )}
           </div>
@@ -248,14 +248,14 @@ export default function OraclePage() {
             className="hidden"
             onChange={(e) => setImage(e.target.files?.[0] ?? null)}
           />
-          <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-marble-dim hover:text-gold" aria-label="Photo">
+          <button onClick={() => fileRef.current?.click()} className="rounded-full p-2 text-marble-dim hover:text-gold" aria-label={tr.oracle.photo}>
             <IconCamera size={22} />
           </button>
           {supported && (
             <button
               onClick={toggle}
               className={cn("rounded-full p-2", listening ? "text-gold" : "text-marble-dim hover:text-gold")}
-              aria-label="Dicter"
+              aria-label={tr.oracle.dictate}
             >
               <IconMic size={22} />
             </button>
@@ -270,7 +270,7 @@ export default function OraclePage() {
               }
             }}
             rows={1}
-            placeholder="Parle à l'Oracle…"
+            placeholder={tr.oracle.placeholder}
             className="max-h-28 min-h-[2.75rem] flex-1 resize-none rounded-[var(--radius)] border border-outline/60 bg-surface-lowest px-3 py-2.5 text-sm text-marble outline-none focus:border-gold"
           />
           <button
@@ -287,18 +287,15 @@ export default function OraclePage() {
       <Modal
         open={confirmClear}
         onClose={() => !clearing && setConfirmClear(false)}
-        title="Effacer l'historique ?"
+        title={tr.oracle.clearTitle}
       >
-        <p className="mb-5 text-sm text-marble-dim">
-          La conversation en cours sera définitivement supprimée et l'Oracle repartira sur un
-          contexte vierge.
-        </p>
+        <p className="mb-5 text-sm text-marble-dim">{tr.oracle.clearConfirm}</p>
         <div className="flex gap-3">
           <Button block variant="ghost" onClick={() => setConfirmClear(false)} disabled={clearing}>
-            Annuler
+            {tr.common.cancel}
           </Button>
           <Button block variant="danger" loading={clearing} onClick={clearHistory}>
-            Effacer
+            {tr.oracle.clear}
           </Button>
         </div>
       </Modal>

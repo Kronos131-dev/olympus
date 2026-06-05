@@ -11,7 +11,8 @@ import { useToast } from "@/components/ui/Toast";
 import { FoodFinder } from "@/components/FoodFinder";
 import { usePresets, useWeeklyPlan } from "@/hooks/queries";
 import { IconPlus, IconSparkle, IconTrash } from "@/components/icons";
-import { dayLabel, macrosFor, round, WEEK_DAYS } from "@/lib/utils";
+import { macrosFor, round, WEEK_DAYS } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type {
   DayOfWeek,
   FoodItemResponse,
@@ -34,6 +35,7 @@ function entryKcal(e: WorkEntry): number {
 }
 
 export default function PlanPage() {
+  const t = useT();
   const toast = useToast();
   const qc = useQueryClient();
   const plan = useWeeklyPlan();
@@ -72,7 +74,7 @@ export default function PlanPage() {
     try {
       await mealPlanApi.saveWeekly(body);
     } catch {
-      toast("Sauvegarde du planning échouée", "error");
+      toast(t.plan.saveError, "error");
     } finally {
       setSaving(false);
     }
@@ -103,21 +105,21 @@ export default function PlanPage() {
       const generated = await mealPlanApi.generate({ prompt: prompt || undefined });
       setEntries(generated.entries.map((e) => ({ ...e, localId: localId() })));
       qc.setQueryData(["weeklyPlan"], generated);
-      toast("Planning généré par l'Oracle", "success");
+      toast(t.plan.generated, "success");
       setGenOpen(false);
     } catch {
-      toast("La génération a échoué", "error");
+      toast(t.plan.genError, "error");
     }
   };
 
   return (
     <div>
       <PageHeader
-        overline="La semaine"
-        title="Planning"
+        overline={t.plan.overline}
+        title={t.plan.title}
         action={
           <Button size="sm" variant="ghost" onClick={() => setGenOpen(true)}>
-            <IconSparkle size={16} /> Oracle
+            <IconSparkle size={16} /> {t.plan.oracle}
           </Button>
         }
       />
@@ -125,7 +127,7 @@ export default function PlanPage() {
       <div className="px-5">
         {saving && (
           <p className="mb-2 flex items-center gap-2 text-xs text-marble-dim">
-            <Spinner className="size-3" /> Sauvegarde…
+            <Spinner className="size-3" /> {t.plan.saving}
           </p>
         )}
         {plan.isLoading ? (
@@ -141,8 +143,8 @@ export default function PlanPage() {
               return (
                 <Card key={day} tone="low">
                   <div className="mb-3 flex items-baseline justify-between">
-                    <h3 className="lapidary text-sm tracking-[0.12em] text-gold">{dayLabel(day)}</h3>
-                    <span className="text-xs text-marble-dim">{round(total)} kcal</span>
+                    <h3 className="lapidary text-sm tracking-[0.12em] text-gold">{t.days[day]}</h3>
+                    <span className="text-xs text-marble-dim">{round(total)} {t.common.kcal}</span>
                   </div>
                   <ul className="space-y-1">
                     {dayEntries.map((e) => (
@@ -153,13 +155,13 @@ export default function PlanPage() {
                           </p>
                           <p className="text-xs text-marble-dim">
                             {e.foodItem ? `${round(e.quantityGrams)} g · ` : ""}
-                            {round(entryKcal(e))} kcal
+                            {round(entryKcal(e))} {t.common.kcal}
                           </p>
                         </div>
                         <button
                           onClick={() => removeEntry(e.localId)}
                           className="text-marble-dim hover:text-[var(--color-danger)]"
-                          aria-label="Retirer"
+                          aria-label={t.plan.remove}
                         >
                           <IconTrash size={16} />
                         </button>
@@ -167,7 +169,7 @@ export default function PlanPage() {
                     ))}
                   </ul>
                   <Button variant="subtle" size="sm" block className="mt-3" onClick={() => setAddDay(day)}>
-                    <IconPlus size={14} /> Ajouter
+                    <IconPlus size={14} /> {t.plan.add}
                   </Button>
                 </Card>
               );
@@ -200,19 +202,20 @@ function AddToDayModal({
   onAddPreset: (day: DayOfWeek, presetId: number) => void;
   onAddFood: (day: DayOfWeek, food: FoodItemResponse, grams: number) => void;
 }) {
+  const t = useT();
   const presets = usePresets();
   const [tab, setTab] = useState<"presets" | "food">("presets");
   const [pendingFood, setPendingFood] = useState<FoodItemResponse | null>(null);
   const [grams, setGrams] = useState("100");
 
   return (
-    <Modal open onClose={onClose} title={`Ajouter — ${dayLabel(day)}`}>
+    <Modal open onClose={onClose} title={t.plan.addModalTitle(t.days[day])}>
       <div className="mb-4 flex gap-2">
         <Chip active={tab === "presets"} onClick={() => setTab("presets")}>
-          Mes repas
+          {t.plan.chipMeals}
         </Chip>
         <Chip active={tab === "food"} onClick={() => setTab("food")}>
-          Aliment
+          {t.plan.chipFood}
         </Chip>
       </div>
 
@@ -225,19 +228,19 @@ function AddToDayModal({
               className="flex w-full items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3 text-left hover:bg-surface-high"
             >
               <span className="truncate text-sm text-marble">{p.name}</span>
-              <span className="text-xs text-marble-dim">{round(p.totalKcal)} kcal</span>
+              <span className="text-xs text-marble-dim">{round(p.totalKcal)} {t.common.kcal}</span>
             </button>
           ))}
           {presets.data?.length === 0 && (
-            <p className="py-6 text-center text-xs text-marble-dim">Aucun repas enregistré.</p>
+            <p className="py-6 text-center text-xs text-marble-dim">{t.plan.noMeals}</p>
           )}
         </div>
       ) : pendingFood ? (
         <div className="space-y-4">
           <p className="text-sm text-marble">{pendingFood.name}</p>
-          <Input label="Quantité (g)" type="number" inputMode="decimal" value={grams} onChange={(e) => setGrams(e.target.value)} autoFocus />
+          <Input label={t.common.quantityG} type="number" inputMode="decimal" value={grams} onChange={(e) => setGrams(e.target.value)} autoFocus />
           <Button block onClick={() => onAddFood(day, pendingFood, Number(grams) || 0)}>
-            Ajouter au {dayLabel(day).toLowerCase()}
+            {t.plan.addToDay(t.days[day].toLowerCase())}
           </Button>
         </div>
       ) : (
@@ -256,6 +259,7 @@ function GenerateModal({
   onClose: () => void;
   onGenerate: (prompt: string) => Promise<void>;
 }) {
+  const t = useT();
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -266,20 +270,18 @@ function GenerateModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Générer un planning">
+    <Modal open={open} onClose={onClose} title={t.plan.genTitle}>
       <div className="space-y-4">
-        <p className="text-xs text-marble-dim">
-          Précise tes préférences, allergies ou objectifs ; l'Oracle compose ta semaine.
-        </p>
+        <p className="text-xs text-marble-dim">{t.plan.genDesc}</p>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           rows={3}
-          placeholder="ex. riche en protéines, sans porc, 3 repas/jour"
+          placeholder={t.plan.genPlaceholder}
           className="w-full resize-none rounded-[var(--radius)] border border-outline/60 bg-surface-lowest p-4 text-marble outline-none focus:border-gold"
         />
         <Button block loading={loading} onClick={run}>
-          <IconSparkle size={16} /> Générer
+          <IconSparkle size={16} /> {t.plan.generate}
         </Button>
       </div>
     </Modal>
