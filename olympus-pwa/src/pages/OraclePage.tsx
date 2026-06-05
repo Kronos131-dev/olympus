@@ -7,7 +7,9 @@ import { useToast } from "@/components/ui/Toast";
 import { useSpeech } from "@/hooks/useSpeech";
 import { compressImage } from "@/lib/image";
 import { Spinner } from "@/components/ui/misc";
-import { IconCamera, IconClose, IconMic, IconSend, IconSparkle } from "@/components/icons";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { IconCamera, IconClose, IconMic, IconSend, IconSparkle, IconTrash } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { AiProvider, ChatMessageDto } from "@/types/api";
 
@@ -32,6 +34,8 @@ export default function OraclePage() {
   const [input, setInput] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -124,6 +128,24 @@ export default function OraclePage() {
     setMessages([]);
   };
 
+  // Supprime la conversation courante (donc l'historique envoyé à l'IA) puis repart à zéro,
+  // pour ne pas polluer le contexte de l'Oracle.
+  const clearHistory = async () => {
+    setClearing(true);
+    try {
+      if (conversationId != null) await agentApi.deleteConversation(conversationId);
+      setConversationId(undefined);
+      setMessages([]);
+      qc.invalidateQueries({ queryKey: ["conversations"] });
+      setConfirmClear(false);
+      toast("Historique effacé · nouvelle conversation", "success");
+    } catch (e) {
+      toast(errorMessage(e, "Impossible d'effacer l'historique"), "error");
+    } finally {
+      setClearing(false);
+    }
+  };
+
   return (
     // Colonne de hauteur fixe : viewport moins la barre d'app (3.5rem), la BottomNav (5.5rem)
     // et l'encoche haute. La saisie reste ainsi au-dessus de la barre de navigation.
@@ -151,6 +173,14 @@ export default function OraclePage() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setConfirmClear(true)}
+            disabled={messages.length === 0}
+            className="rounded-full p-2 text-marble-dim hover:text-[var(--color-danger)] disabled:opacity-40 disabled:hover:text-marble-dim"
+            aria-label="Effacer l'historique"
+          >
+            <IconTrash size={20} />
+          </button>
           <button
             onClick={startNew}
             className="rounded-full p-2 text-marble-dim hover:text-marble"
@@ -253,6 +283,25 @@ export default function OraclePage() {
           </button>
         </div>
       </div>
+
+      <Modal
+        open={confirmClear}
+        onClose={() => !clearing && setConfirmClear(false)}
+        title="Effacer l'historique ?"
+      >
+        <p className="mb-5 text-sm text-marble-dim">
+          La conversation en cours sera définitivement supprimée et l'Oracle repartira sur un
+          contexte vierge.
+        </p>
+        <div className="flex gap-3">
+          <Button block variant="ghost" onClick={() => setConfirmClear(false)} disabled={clearing}>
+            Annuler
+          </Button>
+          <Button block variant="danger" loading={clearing} onClick={clearHistory}>
+            Effacer
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

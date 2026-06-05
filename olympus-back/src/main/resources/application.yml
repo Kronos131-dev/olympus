@@ -42,7 +42,7 @@ olympus:
     mistral-model: ${OLYMPUS_AGENT_MISTRAL_MODEL:mistral-small-latest}
     # Clé d'API Google Gemini (Generative Language API). Vide = Gemini désactivé, Mistral utilisé par défaut.
     gemini-api-key: ${GEMINI_API_KEY:}
-    gemini-model: ${OLYMPUS_AGENT_GEMINI_MODEL:gemini-2.0-flash}
+    gemini-model: ${OLYMPUS_AGENT_GEMINI_MODEL:gemini-3.5-flash}
     # Nombre maximum d'allers-retours d'outils par message (limite les appels LLM).
     max-tool-rounds: ${OLYMPUS_AGENT_MAX_TOOL_ROUNDS:3}
     # Cadence et résilience des appels aux API LLM (clé Mistral gratuite ≈ 1 req/s).

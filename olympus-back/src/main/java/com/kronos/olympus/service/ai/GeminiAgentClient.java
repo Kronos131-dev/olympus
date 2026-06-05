@@ -40,7 +40,7 @@ public class GeminiAgentClient implements AgentClient {
     @Value("${olympus.agent.gemini-api-key:}")
     private String apiKey;
 
-    @Value("${olympus.agent.gemini-model:gemini-2.0-flash}")
+    @Value("${olympus.agent.gemini-model:gemini-3.5-flash}")
     private String model;
 
     @Value("${olympus.agent.max-tool-rounds:3}")
