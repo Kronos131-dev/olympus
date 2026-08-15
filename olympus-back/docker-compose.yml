@@ -16,7 +16,8 @@ services:
       - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD:-}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
     depends_on:
-      - olympus-db
+      olympus-db:
+        condition: service_healthy
     restart: always
     volumes:
       # On va chercher le jar là où Maven le compile.
@@ -41,6 +42,11 @@ services:
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
     # `default` : usage interne Olympus. `chiron-olympus` : permet à chiron-backend
     # de lire directement la base (nutrition/poids) via jdbc:postgresql://olympus-db:5432.
