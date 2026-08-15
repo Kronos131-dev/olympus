@@ -1,7 +1,7 @@
 services:
 
   olympus-api:
-    image: eclipse-temurin:17-jre-alpine
+    image: eclipse-temurin:25-jre-alpine
     container_name: olympus-api
     ports:
       - "8081:8080"
@@ -56,7 +56,7 @@ services:
 
   # Front PWA React servi par nginx, qui relaie aussi /olympus/api vers olympus-api
   # (même origine -> pas de CORS). Exposé pour que le reverse-proxy Chiron route
-  # chiron-sanctuaire.duckdns.org/olympus vers ce service.
+  # olympus.chiron-sanctuaire.fr vers ce service.
   olympus-pwa:
     build:
       context: ../olympus-pwa

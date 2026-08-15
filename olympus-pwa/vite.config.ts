@@ -5,7 +5,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import { fileURLToPath, URL } from "node:url";
 
 // La PWA Olympus est servie à la RACINE de son propre sous-domaine
-// (olympus.chiron-sanctuaire.duckdns.org).
+// (olympus.chiron-sanctuaire.fr).
 const BASE = "/";
 
 export default defineConfig({
