@@ -1,6 +1,6 @@
 package com.kronos.olympus.service.ai;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.kronos.olympus.dto.request.LogEntryRequest;
 import com.kronos.olympus.dto.request.MealIngredientRequest;
 import com.kronos.olympus.dto.request.MealPresetRequest;

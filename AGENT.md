@@ -4,8 +4,8 @@ Le projet est une API RESTful pour une application mobile de suivi nutritionnel 
 L'objectif principal est de fournir des endpoints performants pour tracker la nutrition quotidienne, gérer des presets de repas, suivre l'évolution pondérale de l'utilisateur et servir des données formatées pour des graphiques d'évolution (jours, semaines, mois).
 
 # STACK TECHNIQUE
-* Langage : Java 17+
-* Framework : Spring Boot 3.x
+* Langage : Java 25
+* Framework : Spring Boot 4.x
 * Base de données : PostgreSQL (Dockerisée)
 * ORM : Spring Data JPA / Hibernate
 * Migration DB : application.yml hibernate

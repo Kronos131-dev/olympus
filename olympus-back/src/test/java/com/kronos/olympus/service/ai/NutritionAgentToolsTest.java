@@ -1,6 +1,6 @@
 package com.kronos.olympus.service.ai;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import com.kronos.olympus.model.DailyLog;

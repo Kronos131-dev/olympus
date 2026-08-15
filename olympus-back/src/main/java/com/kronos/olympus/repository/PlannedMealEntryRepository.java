@@ -14,7 +14,9 @@ public interface PlannedMealEntryRepository extends JpaRepository<PlannedMealEnt
     @Query("DELETE FROM PlannedMealEntry p WHERE p.mealPlan.id = :mealPlanId")
     void deleteByMealPlanId(@Param("mealPlanId") Long mealPlanId);
 
-    @Modifying
+    // Même raison que detachMealPreset : la suppression en masse contourne le contexte, qui
+    // garderait des PlannedMealEntry référençant un preset disparu.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM PlannedMealEntry p WHERE p.mealPreset.id = :id")
     void deleteByMealPresetId(@Param("id") Long id);
 }

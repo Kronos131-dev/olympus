@@ -1,7 +1,7 @@
 package com.kronos.olympus.service.mealplan;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.kronos.olympus.dto.request.PlannedMealEntryRequest;
 import com.kronos.olympus.dto.request.WeeklyPlanRequest;
 import com.kronos.olympus.dto.response.MealPlanResponse;

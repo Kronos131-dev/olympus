@@ -13,7 +13,12 @@ public interface LogEntryRepository extends JpaRepository<LogEntry, Long> {
 
     // Détache un repas pré-enregistré de l'historique avant sa suppression.
     // Les totaux sont déjà agrégés sur daily_log → préservés.
-    @Modifying
+    //
+    // flush + clear obligatoires : la requête est exécutée en base sans passer par le contexte
+    // de persistance. Sans le clear, les LogEntry déjà chargés continuent de pointer vers le
+    // preset qu'on s'apprête à supprimer, et Hibernate 7 refuse ce flush avec une
+    // TransientPropertyValueException.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE LogEntry e SET e.mealPreset = null WHERE e.mealPreset.id = :id")
     void detachMealPreset(@Param("id") Long id);
 }
