@@ -1,5 +1,5 @@
 # Étape 1 : Build de l'application (Multi-Stage Build)
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /app
 
 # Copier le pom.xml et télécharger les dépendances (mise en cache)
@@ -13,7 +13,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Étape 2 : Création de l'image de production (JRE uniquement)
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Copier le JAR généré depuis l'étape 1 vers l'étape 2
