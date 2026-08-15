@@ -1,7 +1,7 @@
 # Olympus PWA
 
 Front React (Vite + TypeScript) d'Olympus, conçu comme une **PWA** et servi sous
-`https://chiron-sanctuaire.duckdns.org/olympus`, intégré à l'application **Chiron**.
+`https://olympus.chiron-sanctuaire.fr`, intégré à l'application **Chiron**.
 
 Design « Digital Pantheon » (cf. `../DESIGN.md`) : pourpre impérial, or, marbre, angles vifs.
 
@@ -32,7 +32,7 @@ npm run lint    # typecheck seul
 
 > **À faire côté Chiron (hors de ce dépôt)** : quand un lien actif existe, l'entrée de menu
 > « Olympus » doit pointer vers `…/olympus/#ctk=<linkToken>`. Et le reverse-proxy de Chiron
-> (Nginx Proxy Manager) doit router `chiron-sanctuaire.duckdns.org/olympus` vers le service
+> (Nginx Proxy Manager) doit router `olympus.chiron-sanctuaire.fr` vers le service
 > `olympus-pwa:80`.
 
 ## Déploiement
