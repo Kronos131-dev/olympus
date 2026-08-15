@@ -21,6 +21,9 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    # V1_1 (tables cœur) est insérée sous des migrations déjà appliquées sur les bases
+    # de dev existantes : autoriser l'application hors ordre pour ne pas casser leur démarrage.
+    out-of-order: true
 
   ai:
     mistralai:

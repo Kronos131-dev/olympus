@@ -6,7 +6,7 @@
 #   olympus.jar               -> le JAR backend (target/olympus-0.0.1-SNAPSHOT.jar renommé)
 #   olympus-pwa-dist/         -> le build de la PWA (olympus-pwa/dist)
 #   olympus-pwa-nginx.conf    -> la conf nginx de la PWA (olympus-pwa/nginx.conf)
-#   .env                      -> MISTRAL_API_KEY, GEMINI_API_KEY, ...
+#   .env                      -> POSTGRES_USER, POSTGRES_PASSWORD, MISTRAL_API_KEY, GEMINI_API_KEY, ...
 services:
 
   olympus-api:
@@ -17,8 +17,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://olympus-db:5432/olympus_db
-      - SPRING_DATASOURCE_USERNAME=olympus_user
-      - SPRING_DATASOURCE_PASSWORD=olympus_password
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       # Envoi d'emails (mot de passe oublié) — mêmes identifiants Gmail que Chiron.
@@ -31,7 +31,8 @@ services:
       - ./olympus.jar:/app/olympus.jar
     command: ["java", "-jar", "/app/olympus.jar"]
     depends_on:
-      - olympus-db
+      olympus-db:
+        condition: service_healthy
     restart: always
     # `default` : communication interne avec olympus-db.
     # `chiron-olympus` : réseau partagé permettant à chiron-backend d'atteindre
@@ -62,11 +63,16 @@ services:
     image: postgres:16-alpine
     container_name: olympus-db
     environment:
-      POSTGRES_USER: olympus_user
-      POSTGRES_PASSWORD: olympus_password
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: olympus_db
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: always
     # Réseau partagé pour que chiron-backend lise directement la base (nutrition/poids).
     networks:
