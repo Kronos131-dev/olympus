@@ -36,6 +36,9 @@ public class LogEntry {
     @Column(nullable = true)
     private Double quantityGrams;
 
+    private String unit;
+    private Double amount;
+
     @Column(nullable = false)
     private LocalDateTime consumedAt;
 

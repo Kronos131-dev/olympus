@@ -16,6 +16,7 @@ import type {
   MealPresetResponse,
   RegisterRequest,
   UpdateActivityRequest,
+  UpdateLogEntryRequest,
   UpdateProfileRequest,
   UserResponse,
   WeeklyPlanRequest,
@@ -54,6 +55,8 @@ export const userApi = {
 export const dailyLogApi = {
   get: (date: string) => api.get<DailyLogResponse>(`/daily-logs/${date}`),
   addEntry: (body: LogEntryRequest) => api.post<DailyLogResponse>("/daily-logs/entries", body),
+  updateEntry: (entryId: number, body: UpdateLogEntryRequest) =>
+    api.put<DailyLogResponse>(`/daily-logs/entries/${entryId}`, body),
   deleteEntry: (entryId: number) =>
     api.del<DailyLogResponse>(`/daily-logs/entries/${entryId}`),
   updateActivity: (body: UpdateActivityRequest) =>

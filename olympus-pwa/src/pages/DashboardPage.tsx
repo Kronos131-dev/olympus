@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/AppLayout";
 import { SectionTitle } from "@/components/ui/Card";
@@ -7,10 +7,12 @@ import { ProgressRing } from "@/components/ui/ProgressRing";
 import { MacroBar } from "@/components/ui/MacroBar";
 import { EmptyState, Skeleton } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
+import { QuantitySheet } from "@/components/QuantitySheet";
 import { errorMessage } from "@/lib/api/client";
 import { IconPlus, IconTrash } from "@/components/icons";
-import { useDailyLog, useDeleteLogEntry, useProfile } from "@/hooks/queries";
+import { useDailyLog, useDeleteLogEntry, useProfile, useUpdateLogEntry } from "@/hooks/queries";
 import { formatDateLong, macrosFor, round, todayIso } from "@/lib/utils";
+import type { Unit } from "@/lib/units";
 import { localeFor, useLang, useT, type Dict } from "@/lib/i18n";
 import type { LogEntryResponse } from "@/types/api";
 
@@ -38,6 +40,8 @@ export default function DashboardPage() {
   const profile = useProfile();
   const log = useDailyLog(today);
   const deleteEntry = useDeleteLogEntry(today);
+  const updateEntry = useUpdateLogEntry(today);
+  const [editEntry, setEditEntry] = useState<LogEntryResponse | null>(null);
 
   const targetKcal = profile.data?.targetKcal ?? 2000;
   const effectiveTarget = round(targetKcal);
@@ -112,20 +116,30 @@ export default function DashboardPage() {
                     key={e.id}
                     className="flex items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3"
                   >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm text-marble">{m.name}</p>
-                      <p className="text-xs text-marble-dim">
-                        {m.detail} · {round(m.kcal)} {t.common.kcal}
-                        {e.fromPlan && <span className="text-gold/70"> · plan</span>}
-                      </p>
-                    </div>
+                    {e.foodItem ? (
+                      <button onClick={() => setEditEntry(e)} className="min-w-0 flex-1 text-left">
+                        <p className="truncate text-sm text-marble">{m.name}</p>
+                        <p className="text-xs text-marble-dim">
+                          {m.detail} · {round(m.kcal)} {t.common.kcal}
+                          {e.fromPlan && <span className="text-gold/70"> · plan</span>}
+                        </p>
+                      </button>
+                    ) : (
+                      <div className="min-w-0">
+                        <p className="truncate text-sm text-marble">{m.name}</p>
+                        <p className="text-xs text-marble-dim">
+                          {m.detail} · {round(m.kcal)} {t.common.kcal}
+                          {e.fromPlan && <span className="text-gold/70"> · plan</span>}
+                        </p>
+                      </div>
+                    )}
                     <button
                       onClick={() =>
                         deleteEntry.mutate(e.id, {
                           onError: (e) => toast(errorMessage(e, t.dashboard.deleteError), "error"),
                         })
                       }
-                      className="text-marble-dim transition-colors hover:text-[var(--color-danger)]"
+                      className="ml-2 text-marble-dim transition-colors hover:text-[var(--color-danger)]"
                       aria-label={t.common.delete}
                     >
                       <IconTrash size={18} />
@@ -137,6 +151,27 @@ export default function DashboardPage() {
           )}
         </section>
       </div>
+
+      <QuantitySheet
+        open={!!editEntry}
+        onClose={() => setEditEntry(null)}
+        food={editEntry?.foodItem ?? null}
+        initialGrams={editEntry?.quantityGrams ?? 100}
+        initialUnit={editEntry?.unit as Unit | undefined}
+        initialAmount={editEntry?.amount}
+        confirmLabel={t.common.save}
+        loading={updateEntry.isPending}
+        onConfirm={({ quantityGrams, unit, amount }) => {
+          if (!editEntry) return;
+          updateEntry.mutate(
+            { entryId: editEntry.id, body: { quantityGrams, unit, amount } },
+            {
+              onSuccess: () => setEditEntry(null),
+              onError: (e) => toast(errorMessage(e, t.dashboard.updateError), "error"),
+            },
+          );
+        }}
+      />
     </div>
   );
 }

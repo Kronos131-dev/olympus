@@ -13,4 +13,6 @@ public class MealIngredientResponse {
     private Long id;
     private FoodItemResponse foodItem;
     private Double quantityGrams;
+    private String unit;
+    private Double amount;
 }

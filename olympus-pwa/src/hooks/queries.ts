@@ -11,6 +11,7 @@ import type {
   LogEntryRequest,
   MealPresetRequest,
   UpdateActivityRequest,
+  UpdateLogEntryRequest,
   UpdateProfileRequest,
 } from "@/types/api";
 
@@ -47,6 +48,15 @@ export function useAddLogEntry(date: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: LogEntryRequest) => dailyLogApi.addEntry(body),
+    onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
+  });
+}
+
+export function useUpdateLogEntry(date: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ entryId, body }: { entryId: number; body: UpdateLogEntryRequest }) =>
+      dailyLogApi.updateEntry(entryId, body),
     onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
   });
 }

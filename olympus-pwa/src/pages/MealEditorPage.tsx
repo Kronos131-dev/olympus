@@ -5,19 +5,22 @@ import { mealPresetApi } from "@/lib/api/endpoints";
 import { errorMessage } from "@/lib/api/client";
 import { useSavePreset } from "@/hooks/queries";
 import { FoodFinder } from "@/components/FoodFinder";
+import { QuantitySheet } from "@/components/QuantitySheet";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
 import { EmptyState, Spinner } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
 import { IconBack, IconTrash } from "@/components/icons";
 import { macrosFor, round } from "@/lib/utils";
+import type { Unit } from "@/lib/units";
 import { useT } from "@/lib/i18n";
 import type { FoodItemResponse } from "@/types/api";
 
 interface DraftIngredient {
   foodItem: FoodItemResponse;
   quantityGrams: number;
+  unit?: Unit;
+  amount?: number;
 }
 
 export default function MealEditorPage() {
@@ -33,7 +36,7 @@ export default function MealEditorPage() {
   const [ingredients, setIngredients] = useState<DraftIngredient[]>([]);
   const [loading, setLoading] = useState(!!editId);
   const [pending, setPending] = useState<FoodItemResponse | null>(null);
-  const [pendingGrams, setPendingGrams] = useState("100");
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   // Charge le preset existant en mode édition.
   useEffect(() => {
@@ -62,11 +65,20 @@ export default function MealEditorPage() {
     { kcal: 0, p: 0, c: 0, f: 0 },
   );
 
-  const addPending = () => {
-    if (!pending) return;
-    setIngredients((list) => [...list, { foodItem: pending, quantityGrams: Number(pendingGrams) || 0 }]);
+  const closeSheet = () => {
     setPending(null);
-    setPendingGrams("100");
+    setEditIndex(null);
+  };
+
+  const confirmSheet = (result: { quantityGrams: number; unit: Unit; amount: number }) => {
+    if (editIndex != null) {
+      setIngredients((list) =>
+        list.map((ing, j) => (j === editIndex ? { ...ing, ...result } : ing)),
+      );
+    } else if (pending) {
+      setIngredients((list) => [...list, { foodItem: pending, ...result }]);
+    }
+    closeSheet();
   };
 
   const submit = () => {
@@ -122,15 +134,18 @@ export default function MealEditorPage() {
               const m = macrosFor(i.foodItem, i.quantityGrams);
               return (
                 <li key={idx} className="flex items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3">
-                  <div className="min-w-0">
+                  <button
+                    onClick={() => setEditIndex(idx)}
+                    className="min-w-0 flex-1 text-left"
+                  >
                     <p className="truncate text-sm text-marble">{i.foodItem.name}</p>
                     <p className="text-xs text-marble-dim">
                       {round(i.quantityGrams)} g · {round(m.kcal)} {t.common.kcal}
                     </p>
-                  </div>
+                  </button>
                   <button
                     onClick={() => setIngredients((list) => list.filter((_, j) => j !== idx))}
-                    className="text-marble-dim hover:text-[var(--color-danger)]"
+                    className="ml-2 text-marble-dim hover:text-[var(--color-danger)]"
                     aria-label={t.mealEditor.remove}
                   >
                     <IconTrash size={18} />
@@ -143,7 +158,7 @@ export default function MealEditorPage() {
       </section>
 
       <section className="mt-6">
-        <FoodFinder onPick={(f) => { setPending(f); setPendingGrams(f.estimatedWeightGrams ? String(round(f.estimatedWeightGrams)) : "100"); }} />
+        <FoodFinder onPick={(f) => setPending(f)} />
       </section>
 
       <div className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-lg p-4" style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}>
@@ -152,21 +167,20 @@ export default function MealEditorPage() {
         </Button>
       </div>
 
-      <Modal open={!!pending} onClose={() => setPending(null)} title={pending?.name}>
-        <div className="space-y-4">
-          <Input
-            label={t.common.quantityG}
-            type="number"
-            inputMode="decimal"
-            value={pendingGrams}
-            onChange={(e) => setPendingGrams(e.target.value)}
-            autoFocus
-          />
-          <Button block onClick={addPending}>
-            {t.mealEditor.addIngredient}
-          </Button>
-        </div>
-      </Modal>
+      <QuantitySheet
+        open={!!pending || editIndex != null}
+        onClose={closeSheet}
+        food={editIndex != null ? ingredients[editIndex].foodItem : pending}
+        initialGrams={
+          editIndex != null
+            ? ingredients[editIndex].quantityGrams
+            : (pending?.estimatedWeightGrams ?? 100)
+        }
+        initialUnit={editIndex != null ? ingredients[editIndex].unit : undefined}
+        initialAmount={editIndex != null ? ingredients[editIndex].amount : undefined}
+        confirmLabel={editIndex != null ? t.common.save : t.mealEditor.addIngredient}
+        onConfirm={confirmSheet}
+      />
     </div>
   );
 }

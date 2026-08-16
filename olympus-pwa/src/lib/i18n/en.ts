@@ -13,10 +13,14 @@ export const en: Dict = {
     back: "Back",
     consume: "Log",
     quantityG: "Quantity (g)",
+    micDenied: "Microphone denied. Allow it in your browser settings.",
+    micError: "Speech recognition failed.",
     reload: "Reload",
     kcal: "kcal",
     macros: { proteins: "Protein", carbs: "Carbs", fats: "Fat" },
     macrosShort: { proteins: "Prot", carbs: "Carb", fats: "Fat" },
+    units: { g: "g", tsp: "tsp", tbsp: "tbsp", piece: "piece" },
+    approxGrams: (g: number) => `≈ ${g} g`,
   },
 
   nav: {
@@ -89,6 +93,7 @@ export const en: Dict = {
     emptyTitle: "Nothing logged",
     emptyHint: "Add a food or a meal to get started.",
     deleteError: "Could not delete",
+    updateError: "Could not update",
   },
 
   food: {

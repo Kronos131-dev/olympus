@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { aiApi, foodItemApi } from "@/lib/api/endpoints";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -193,9 +193,14 @@ function AiFoodModal({
   const toast = useToast();
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const { listening, supported, toggle } = useSpeech((text) =>
+  const { listening, supported, error: speechError, toggle } = useSpeech((text) =>
     setDescription((prev) => (prev ? `${prev} ${text}` : text)),
   );
+
+  useEffect(() => {
+    if (!speechError) return;
+    toast(speechError === "denied" ? t.common.micDenied : t.common.micError, "error");
+  }, [speechError, toast, t]);
 
   const analyze = async () => {
     if (!description.trim()) return;

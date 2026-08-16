@@ -19,4 +19,7 @@ public class MealIngredientRequest {
     @NotNull(message = "La quantité est obligatoire")
     @Positive(message = "La quantité doit être positive")
     private Double quantityGrams;
+
+    private String unit;
+    private Double amount;
 }

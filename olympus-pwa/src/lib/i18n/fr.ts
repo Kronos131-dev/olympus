@@ -12,10 +12,14 @@ export const fr = {
     back: "Retour",
     consume: "Consommer",
     quantityG: "Quantité (g)",
+    micDenied: "Micro refusé. Autorise-le dans les réglages du navigateur.",
+    micError: "La reconnaissance vocale a échoué.",
     reload: "Recharger",
     kcal: "kcal",
     macros: { proteins: "Protéines", carbs: "Glucides", fats: "Lipides" },
     macrosShort: { proteins: "Prot", carbs: "Gluc", fats: "Lip" },
+    units: { g: "g", tsp: "c.à.c", tbsp: "c.à.s", piece: "pièce" },
+    approxGrams: (g: number) => `≈ ${g} g`,
   },
 
   nav: {
@@ -88,6 +92,7 @@ export const fr = {
     emptyTitle: "Rien de consommé",
     emptyHint: "Ajoute un aliment ou un repas pour commencer.",
     deleteError: "Suppression impossible",
+    updateError: "Mise à jour impossible",
   },
 
   food: {

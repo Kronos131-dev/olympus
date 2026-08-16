@@ -2,6 +2,7 @@ package com.kronos.olympus.controller;
 
 import com.kronos.olympus.dto.request.LogEntryRequest;
 import com.kronos.olympus.dto.request.UpdateActivityRequest;
+import com.kronos.olympus.dto.request.UpdateLogEntryRequest;
 import com.kronos.olympus.dto.response.DailyLogResponse;
 import com.kronos.olympus.security.UserDetailsImpl;
 import com.kronos.olympus.service.DailyLogService;
@@ -38,6 +39,16 @@ public class DailyLogController {
             @Valid @RequestBody LogEntryRequest request) {
         
         DailyLogResponse response = dailyLogService.addLogEntry(userDetails.getUser(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/entries/{entryId}")
+    public ResponseEntity<DailyLogResponse> updateLogEntry(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable Long entryId,
+            @Valid @RequestBody UpdateLogEntryRequest request) {
+
+        DailyLogResponse response = dailyLogService.updateLogEntry(userDetails.getUser(), entryId, request);
         return ResponseEntity.ok(response);
     }
 

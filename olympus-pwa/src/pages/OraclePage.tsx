@@ -41,9 +41,14 @@ export default function OraclePage() {
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const { listening, supported, toggle } = useSpeech((t) =>
+  const { listening, supported, error: speechError, toggle } = useSpeech((t) =>
     setInput((prev) => (prev ? `${prev} ${t}` : t)),
   );
+
+  useEffect(() => {
+    if (!speechError) return;
+    toast(speechError === "denied" ? tr.common.micDenied : tr.common.micError, "error");
+  }, [speechError, toast, tr]);
 
   // Charge la conversation la plus récente au montage.
   const conversations = useQuery({

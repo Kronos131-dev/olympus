@@ -52,6 +52,8 @@ public class MealPresetService {
                     .mealPreset(mealPreset)
                     .foodItem(foodItem)
                     .quantityGrams(ingReq.getQuantityGrams())
+                    .unit(ingReq.getUnit())
+                    .amount(ingReq.getAmount())
                     .build();
         }).collect(Collectors.toList());
 
@@ -87,6 +89,8 @@ public class MealPresetService {
                     .mealPreset(mealPreset)
                     .foodItem(foodItem)
                     .quantityGrams(ingReq.getQuantityGrams())
+                    .unit(ingReq.getUnit())
+                    .amount(ingReq.getAmount())
                     .build();
         }).collect(Collectors.toList());
 

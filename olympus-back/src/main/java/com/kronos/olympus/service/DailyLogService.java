@@ -2,6 +2,7 @@ package com.kronos.olympus.service;
 
 import com.kronos.olympus.dto.request.LogEntryRequest;
 import com.kronos.olympus.dto.request.UpdateActivityRequest;
+import com.kronos.olympus.dto.request.UpdateLogEntryRequest;
 import com.kronos.olympus.dto.response.DailyLogResponse;
 import com.kronos.olympus.exception.EntityNotFoundException;
 import com.kronos.olympus.mapper.DailyLogMapper;
@@ -110,7 +111,8 @@ public class DailyLogService {
             }
         }
 
-        LogEntry logEntry = buildLogEntry(dailyLog, foodItem, mealPreset, request.getQuantityGrams());
+        LogEntry logEntry = buildLogEntry(dailyLog, foodItem, mealPreset, request.getQuantityGrams(),
+                request.getUnit(), request.getAmount());
 
         // Une journée commencée manuellement ne doit plus être écrasée par le plan de repas
         if (Boolean.FALSE.equals(dailyLog.getPlanApplied())) {
@@ -159,6 +161,33 @@ public class DailyLogService {
         return toResponseWithTotals(dailyLog);
     }
 
+    @Transactional
+    public DailyLogResponse updateLogEntry(User user, Long entryId, UpdateLogEntryRequest request) {
+        log.info("Mise à jour de la quantité de l'entrée ID: {} par l'utilisateur ID: {}", entryId, user.getId());
+
+        LogEntry logEntry = logEntryRepository.findById(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("Entrée introuvable avec l'ID: " + entryId));
+
+        DailyLog dailyLog = logEntry.getDailyLog();
+
+        if (!dailyLog.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Vous n'êtes pas autorisé à modifier ce journal");
+        }
+        if (logEntry.getMealPreset() != null) {
+            throw new IllegalArgumentException("La quantité d'un repas pré-enregistré n'est pas modifiable (toujours 1 portion)");
+        }
+
+        logEntry.setQuantityGrams(request.getQuantityGrams());
+        logEntry.setUnit(request.getUnit());
+        logEntry.setAmount(request.getAmount());
+        logEntryRepository.save(logEntry);
+
+        recalculateTotals(dailyLog);
+        dailyLogRepository.save(dailyLog);
+
+        return toResponseWithTotals(dailyLog);
+    }
+
     /**
      * Matérialise les repas planifiés dans la journée si elle est encore vierge.
      * Ne fait rien si la journée a déjà été initialisée (planApplied) ou contient déjà des entrées.
@@ -194,7 +223,8 @@ public class DailyLogService {
                         && planned.getDayOfWeek() != dailyLog.getTargetDate().getDayOfWeek()) {
                     continue;
                 }
-                LogEntry entry = buildLogEntry(dailyLog, planned.getFoodItem(), planned.getMealPreset(), planned.getQuantityGrams());
+                LogEntry entry = buildLogEntry(dailyLog, planned.getFoodItem(), planned.getMealPreset(),
+                        planned.getQuantityGrams(), null, null);
                 entry.setFromPlan(true);
                 entry.setConsumedAt(planned.getPlannedTime() != null
                         ? dailyLog.getTargetDate().atTime(planned.getPlannedTime())
@@ -245,7 +275,8 @@ public class DailyLogService {
      * jour ne sont PAS mutés ici : ils sont recalculés depuis les entrées via
      * {@link #recalculateTotals(DailyLog)} (source de vérité unique, anti-désynchronisation).
      */
-    private LogEntry buildLogEntry(DailyLog dailyLog, FoodItem foodItem, MealPreset mealPreset, Double quantityGrams) {
+    private LogEntry buildLogEntry(DailyLog dailyLog, FoodItem foodItem, MealPreset mealPreset, Double quantityGrams,
+            String unit, Double amount) {
         LogEntry logEntry = LogEntry.builder()
                 .dailyLog(dailyLog)
                 .consumedAt(LocalDateTime.now())
@@ -257,6 +288,8 @@ public class DailyLogService {
             }
             logEntry.setFoodItem(foodItem);
             logEntry.setQuantityGrams(quantityGrams);
+            logEntry.setUnit(unit);
+            logEntry.setAmount(amount);
         } else if (mealPreset != null) {
             logEntry.setMealPreset(mealPreset);
             logEntry.setQuantityGrams(1.0); // 1 portion du repas

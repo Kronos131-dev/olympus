@@ -116,11 +116,15 @@ export interface MealIngredientResponse {
   id: number;
   foodItem: FoodItemResponse;
   quantityGrams: number;
+  unit?: string | null;
+  amount?: number | null;
 }
 
 export interface MealIngredientRequest {
   foodItemId: number;
   quantityGrams: number;
+  unit?: string;
+  amount?: number;
 }
 
 export interface MealPresetResponse {
@@ -144,6 +148,8 @@ export interface LogEntryResponse {
   foodItem?: FoodItemResponse | null;
   mealPreset?: MealPresetResponse | null;
   quantityGrams: number;
+  unit?: string | null;
+  amount?: number | null;
   consumedAt?: string;
   fromPlan?: boolean;
 }
@@ -153,6 +159,14 @@ export interface LogEntryRequest {
   foodItemId?: number;
   mealPresetId?: number;
   quantityGrams?: number;
+  unit?: string;
+  amount?: number;
+}
+
+export interface UpdateLogEntryRequest {
+  quantityGrams: number;
+  unit?: string;
+  amount?: number;
 }
 
 export interface UpdateActivityRequest {

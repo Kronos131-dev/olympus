@@ -4,11 +4,11 @@ import { mealPlanApi } from "@/lib/api/endpoints";
 import { PageHeader } from "@/components/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Chip, Skeleton, Spinner } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
 import { FoodFinder } from "@/components/FoodFinder";
+import { QuantitySheet } from "@/components/QuantitySheet";
 import { usePresets, useWeeklyPlan } from "@/hooks/queries";
 import { IconPlus, IconSparkle, IconTrash } from "@/components/icons";
 import { macrosFor, round, WEEK_DAYS } from "@/lib/utils";
@@ -45,6 +45,7 @@ export default function PlanPage() {
   const [saving, setSaving] = useState(false);
   const [addDay, setAddDay] = useState<DayOfWeek | null>(null);
   const [genOpen, setGenOpen] = useState(false);
+  const [editEntry, setEditEntry] = useState<WorkEntry | null>(null);
 
   // Hydrate l'état local depuis le serveur.
   useEffect(() => {
@@ -81,6 +82,9 @@ export default function PlanPage() {
   };
 
   const removeEntry = (lid: string) => persist(entries.filter((e) => e.localId !== lid));
+
+  const updateEntryGrams = (lid: string, quantityGrams: number) =>
+    persist(entries.map((e) => (e.localId === lid ? { ...e, quantityGrams } : e)));
 
   const addPreset = (day: DayOfWeek, presetId: number) => {
     const preset = presets.data?.find((p) => p.id === presetId);
@@ -149,18 +153,24 @@ export default function PlanPage() {
                   <ul className="space-y-1">
                     {dayEntries.map((e) => (
                       <li key={e.localId} className="flex items-center justify-between bg-surface px-3 py-2">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm text-marble">
-                            {e.mealPreset?.name ?? e.foodItem?.name}
-                          </p>
-                          <p className="text-xs text-marble-dim">
-                            {e.foodItem ? `${round(e.quantityGrams)} g · ` : ""}
-                            {round(entryKcal(e))} {t.common.kcal}
-                          </p>
-                        </div>
+                        {e.foodItem ? (
+                          <button onClick={() => setEditEntry(e)} className="min-w-0 flex-1 text-left">
+                            <p className="truncate text-sm text-marble">{e.foodItem.name}</p>
+                            <p className="text-xs text-marble-dim">
+                              {round(e.quantityGrams)} g · {round(entryKcal(e))} {t.common.kcal}
+                            </p>
+                          </button>
+                        ) : (
+                          <div className="min-w-0">
+                            <p className="truncate text-sm text-marble">{e.mealPreset?.name}</p>
+                            <p className="text-xs text-marble-dim">
+                              {round(entryKcal(e))} {t.common.kcal}
+                            </p>
+                          </div>
+                        )}
                         <button
                           onClick={() => removeEntry(e.localId)}
-                          className="text-marble-dim hover:text-[var(--color-danger)]"
+                          className="ml-2 text-marble-dim hover:text-[var(--color-danger)]"
                           aria-label={t.plan.remove}
                         >
                           <IconTrash size={16} />
@@ -187,6 +197,19 @@ export default function PlanPage() {
         />
       )}
       <GenerateModal open={genOpen} onClose={() => setGenOpen(false)} onGenerate={generate} />
+
+      <QuantitySheet
+        open={!!editEntry}
+        onClose={() => setEditEntry(null)}
+        food={editEntry?.foodItem ?? null}
+        initialGrams={editEntry?.quantityGrams ?? 100}
+        confirmLabel={t.common.save}
+        loading={saving}
+        onConfirm={({ quantityGrams }) => {
+          if (editEntry) updateEntryGrams(editEntry.localId, quantityGrams);
+          setEditEntry(null);
+        }}
+      />
     </div>
   );
 }
@@ -206,7 +229,6 @@ function AddToDayModal({
   const presets = usePresets();
   const [tab, setTab] = useState<"presets" | "food">("presets");
   const [pendingFood, setPendingFood] = useState<FoodItemResponse | null>(null);
-  const [grams, setGrams] = useState("100");
 
   return (
     <Modal open onClose={onClose} title={t.plan.addModalTitle(t.days[day])}>
@@ -235,17 +257,20 @@ function AddToDayModal({
             <p className="py-6 text-center text-xs text-marble-dim">{t.plan.noMeals}</p>
           )}
         </div>
-      ) : pendingFood ? (
-        <div className="space-y-4">
-          <p className="text-sm text-marble">{pendingFood.name}</p>
-          <Input label={t.common.quantityG} type="number" inputMode="decimal" value={grams} onChange={(e) => setGrams(e.target.value)} autoFocus />
-          <Button block onClick={() => onAddFood(day, pendingFood, Number(grams) || 0)}>
-            {t.plan.addToDay(t.days[day].toLowerCase())}
-          </Button>
-        </div>
       ) : (
         <FoodFinder onPick={setPendingFood} />
       )}
+
+      <QuantitySheet
+        open={!!pendingFood}
+        onClose={() => setPendingFood(null)}
+        food={pendingFood}
+        initialGrams={pendingFood?.estimatedWeightGrams ?? 100}
+        confirmLabel={t.plan.addToDay(t.days[day].toLowerCase())}
+        onConfirm={({ quantityGrams }) => {
+          if (pendingFood) onAddFood(day, pendingFood, quantityGrams);
+        }}
+      />
     </Modal>
   );
 }
