@@ -10,8 +10,17 @@ import java.util.Map;
 @NoArgsConstructor
 public class OpenFoodFactsProduct {
     private String code;
+
+    // WHY: l'API Open Food Facts renvoie ces clés en snake_case ; sans @JsonProperty,
+    // Jackson les mappe sur productName/genericName (camelCase) qui n'existent jamais dans
+    // la réponse, et les deux champs restent null — d'où "Produit Inconnu" au scan et une
+    // recherche texte qui ne renvoie jamais rien (isValidProduct exige un productName).
+    @JsonProperty("product_name")
     private String productName;
+
+    @JsonProperty("generic_name")
     private String genericName;
+
     private String quantity; // Ex: "500g"
     private String brands;
 
