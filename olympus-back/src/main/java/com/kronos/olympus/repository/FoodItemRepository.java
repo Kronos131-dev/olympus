@@ -20,6 +20,11 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, Long> {
     // L'import CIQUAL est rejouable : il retrouve chaque aliment par son alim_code ANSES et met
     // sa ligne à jour, plutôt que d'en créer une seconde.
     List<FoodItem> findByCiqualCodeIsNotNull();
+
+    // Lignes CIQUAL antérieures à l'alim_code, à adopter par leur nom. Requête ciblée : charger
+    // tout le catalogue dans le contexte de persistance pour n'en garder que celles-ci coûte
+    // cher et expose des entités qu'on n'a aucune raison de gérer.
+    List<FoodItem> findBySourceAndCiqualCodeIsNull(FoodSource source);
     
     // Recherche d'aliments par nom avec tri par longueur pour avoir les correspondances exactes en premier
     @Query("SELECT f FROM FoodItem f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY LENGTH(f.name) ASC")
