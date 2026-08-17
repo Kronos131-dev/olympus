@@ -15,6 +15,18 @@ on:
     branches: [main]
 
 jobs:
+  # Bloque toute clé, token ou mot de passe en clair avant qu'il n'atteigne main — c'est ce
+  # contrôle qui manquait quand une clé Mistral réelle a été committée dans .env.example.
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     runs-on: ubuntu-latest
     services:
