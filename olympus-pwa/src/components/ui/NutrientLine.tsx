@@ -8,9 +8,6 @@ interface Props {
   color: string;
 }
 
-// Jauge en ligne pour un repas : contrairement à NutrientGauge (qui rougit sous 50% de la
-// référence), la couleur ici est TOUJOURS fixe. Un repas ne pèse qu'une fraction de la journée —
-// le remplir par rapport à la cible journalière donnerait cinq barres rouges sur un repas normal.
 export function NutrientLine({
   label,
   value,

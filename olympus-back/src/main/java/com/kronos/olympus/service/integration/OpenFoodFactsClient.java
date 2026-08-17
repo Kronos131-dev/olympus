@@ -95,8 +95,6 @@ public class OpenFoodFactsClient {
                 .proteins100g(product.getNutriments().getProteins100g() != null ? product.getNutriments().getProteins100g() : 0.0)
                 .carbs100g(product.getNutriments().getCarbohydrates100g() != null ? product.getNutriments().getCarbohydrates100g() : 0.0)
                 .fats100g(product.getNutriments().getFat100g() != null ? product.getNutriments().getFat100g() : 0.0)
-                // Laissés à null quand le producteur ne les déclare pas : « non renseigné » et
-                // « zéro » ne doivent pas se confondre, sinon les totaux du jour sous-estiment.
                 .fibers100g(product.getNutriments().getFiber100g())
                 .sugars100g(product.getNutriments().getSugars100g())
                 .saturatedFat100g(product.getNutriments().getSaturatedFat100g())

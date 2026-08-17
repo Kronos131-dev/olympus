@@ -6,13 +6,10 @@ interface Props {
   value: number;
   reference: number;
   unit: string;
-  /** Part des calories du jour provenant d'aliments qui renseignent ce nutriment, entre 0 et 1. */
   coverage?: number;
   coverageLabel?: (percent: number) => string;
 }
 
-// En dessous de ce seuil, l'apport calculé repose sur une trop petite part de la journée pour
-// qu'une couleur d'alerte veuille dire quoi que ce soit : la jauge reste neutre et le dit.
 const RELIABLE_COVERAGE = 0.5;
 
 function barColor(ratio: number, reliable: boolean): string {
@@ -22,8 +19,6 @@ function barColor(ratio: number, reliable: boolean): string {
   return "var(--color-danger)";
 }
 
-// Jauge d'un micronutriment rapportée à sa référence ANSES, doublée d'un indicateur de fiabilité :
-// un apport « faible » calculé sur 20 % de la journée ne signale pas une carence.
 export function NutrientGauge({
   label,
   value,

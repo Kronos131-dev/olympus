@@ -4,15 +4,7 @@ import com.kronos.olympus.dto.response.MealPresetResponse;
 import com.kronos.olympus.model.DailyLog;
 import com.kronos.olympus.model.FoodItem;
 
-/**
- * Accumulateur du palier A (kcal, macros, fibres, sucres, AG saturés, sel) à partir d'aliments et
- * de leur grammage. Partagé par {@link DailyLogService} (totaux du jour) et
- * {@link MealPresetTotalsCalculator} (totaux d'un repas pré-enregistré) : les deux faisaient
- * exactement la même mise à l'échelle « grammes / 100 », avec un arrondi qui ne différait que par
- * accident (1 décimale ici, 2 là).
- */
 public class NutrientTotals {
-
     private double kcal;
     private double proteins;
     private double carbs;
@@ -28,8 +20,6 @@ public class NutrientTotals {
         proteins += nz(food.getProteins100g()) * ratio;
         carbs += nz(food.getCarbs100g()) * ratio;
         fats += nz(food.getFats100g()) * ratio;
-        // Une valeur absente compte pour zéro dans le total : c'est le taux de couverture,
-        // calculé par MicronutrientService, qui dit à l'utilisateur ce que ce total ignore.
         fibers += nz(food.getFibers100g()) * ratio;
         sugars += nz(food.getSugars100g()) * ratio;
         saturatedFat += nz(food.getSaturatedFat100g()) * ratio;

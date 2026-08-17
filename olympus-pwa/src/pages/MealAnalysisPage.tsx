@@ -54,8 +54,6 @@ export default function MealAnalysisPage() {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
-  // La dictée suit la langue de l'application : les deux autres appelants du hook laissent
-  // encore le fr-FR câblé en dur.
   const {
     listening,
     supported,
@@ -183,8 +181,6 @@ export default function MealAnalysisPage() {
         </div>
       </header>
 
-      {/* Deux entrées distinctes : `capture` force l'appareil photo, son absence ouvre la
-          galerie. Un seul input portant `capture` interdisait de choisir une photo existante. */}
       <input
         ref={cameraRef}
         type="file"
@@ -448,7 +444,6 @@ function SourceBadge({ source }: { source: FoodSource }) {
   );
 }
 
-/** Remet un aliment à l'échelle d'une nouvelle quantité, sans repasser par le serveur. */
 function rescale(
   item: AnalyzedFoodResponse,
   grams: number,
@@ -474,7 +469,6 @@ function rescale(
   };
 }
 
-/** Recalcule les totaux affichés après une édition locale (retrait ou changement de quantité). */
 function recompute(
   analysis: MealAnalysisResponse,
   items: AnalyzedFoodResponse[],

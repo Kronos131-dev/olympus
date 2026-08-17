@@ -1,19 +1,26 @@
 package com.kronos.olympus.dto.response;
 
 import com.kronos.olympus.model.enums.FoodSource;
+import com.kronos.olympus.model.enums.Nutrient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FoodItemResponse {
+public class FoodItemDetailResponse {
     private Long id;
     private String barcode;
     private String name;
+    private FoodSource source;
+    private String foodGroup;
+    private String foodSubGroup;
+
     private Double kcal100g;
     private Double proteins100g;
     private Double carbs100g;
@@ -24,6 +31,6 @@ public class FoodItemResponse {
     private Double saturatedFat100g;
     private Double salt100g;
 
-    private FoodSource source;
-    private Double estimatedWeightGrams; // Utilisé par l'IA pour renvoyer le poids estimé
+    @Builder.Default
+    private Map<Nutrient, Double> micros100g = Map.of();
 }

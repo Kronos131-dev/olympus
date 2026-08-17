@@ -20,8 +20,6 @@ public class DailyLogResponse {
     private Double totalCarbs;
     private Double totalFats;
 
-    // Nutriments fournis aussi bien par CIQUAL que par Open Food Facts, donc totalisables ici au
-    // même titre que les macros. Les micronutriments, eux, passent par MicronutrientService.
     private Double totalFibers;
     private Double totalSugars;
     private Double totalSaturatedFat;

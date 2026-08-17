@@ -26,16 +26,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Le taux de couverture est ce qui distingue « tu manques de magnésium » de « on ne sait pas ce
- * que tu as mangé ». Ces tests fixent ce comportement : un aliment sans micronutriments connus
- * ne doit pas fausser l'apport calculé, mais doit faire baisser la couverture affichée.
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
 class MicronutrientServiceTest {
-
     @Autowired
     private MicronutrientService micronutrientService;
     @Autowired
@@ -65,14 +59,11 @@ class MicronutrientServiceTest {
 
     @Test
     void getDailyMicronutrients_foodWithKnownMicros_reportsFullCoverage() {
-        // Given : 200 g d'un aliment à 50 mg de magnésium pour 100 g
         logFood(knownFood(50.0), 200);
 
-        // When
         MicronutrientResponse magnesium = magnesiumOf(
                 micronutrientService.getDailyMicronutrients(user, today));
 
-        // Then
         assertThat(magnesium.getConsumed()).isEqualTo(100.0);
         assertThat(magnesium.getCoverage()).isEqualTo(1.0);
         assertThat(magnesium.getReference()).isEqualTo(380.0);
@@ -81,25 +72,20 @@ class MicronutrientServiceTest {
 
     @Test
     void getDailyMicronutrients_foodWithoutMicros_lowersCoverageWithoutSkewingTotal() {
-        // Given : autant de calories renseignées que de calories inconnues
         logFood(knownFood(50.0), 100);
         logFood(foodWithoutMicros(), 100);
 
-        // When
         MicronutrientResponse magnesium = magnesiumOf(
                 micronutrientService.getDailyMicronutrients(user, today));
 
-        // Then : l'apport reste celui du seul aliment documenté, mais la couverture tombe à 50 %
         assertThat(magnesium.getConsumed()).isEqualTo(50.0);
         assertThat(magnesium.getCoverage()).isEqualTo(0.5);
     }
 
     @Test
     void getDailyMicronutrients_emptyDay_returnsEveryNutrientAtZero() {
-        // When
         DailyMicronutrientsResponse response = micronutrientService.getDailyMicronutrients(user, today);
 
-        // Then
         assertThat(response.getNutrients()).hasSize(Nutrient.values().length);
         assertThat(response.getNutrients()).allMatch(n -> n.getConsumed() == 0.0);
         assertThat(response.getOverallCoverage()).isZero();
@@ -107,18 +93,15 @@ class MicronutrientServiceTest {
 
     @Test
     void getDailyMicronutrients_female_usesTheFemaleReference() {
-        // Given
         user.setGender(Gender.FEMALE);
         userRepository.save(user);
 
-        // When
         MicronutrientResponse iron = micronutrientService.getDailyMicronutrients(user, today)
                 .getNutrients().stream()
                 .filter(n -> n.getNutrient() == Nutrient.IRON)
                 .findFirst()
                 .orElseThrow();
 
-        // Then : 16 mg pour une femme, contre 11 mg pour un homme
         assertThat(iron.getReference()).isEqualTo(16.0);
     }
 

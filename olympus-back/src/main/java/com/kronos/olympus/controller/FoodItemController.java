@@ -1,6 +1,7 @@
 package com.kronos.olympus.controller;
 
 import com.kronos.olympus.dto.request.FoodItemRequest;
+import com.kronos.olympus.dto.response.FoodItemDetailResponse;
 import com.kronos.olympus.dto.response.FoodItemResponse;
 import com.kronos.olympus.model.FoodItem;
 import com.kronos.olympus.model.enums.FoodSource;
@@ -26,6 +27,11 @@ public class FoodItemController {
     public ResponseEntity<FoodItemResponse> getFoodItemByBarcode(@PathVariable String barcode) {
         FoodItemResponse response = foodItemService.getFoodItemByBarcode(barcode);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FoodItemDetailResponse> getFoodItemDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(foodItemService.getFoodItemDetail(id));
     }
 
     @GetMapping("/search")

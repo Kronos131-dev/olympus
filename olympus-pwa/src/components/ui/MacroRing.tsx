@@ -9,8 +9,6 @@ interface Props {
   color: string;
 }
 
-// Petit anneau de macronutriment : la déclinaison compacte de ProgressRing utilisée en rangée
-// sous l'anneau des calories, sur l'accueil comme sur l'écran d'analyse.
 export function MacroRing({ label, value, target, unit = "g", color }: Props) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-1.5">

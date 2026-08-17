@@ -47,8 +47,6 @@ export default function MicronutrientsPage() {
           <EmptyState title={t.micros.emptyTitle} hint={t.micros.emptyHint} />
         ) : (
           <>
-            {/* Sans ce chiffre, une journée où l'on a scanné un produit industriel afficherait
-                des carences qui n'existent pas : les micros n'y sont tout simplement pas connus. */}
             <section className="rounded-[var(--radius)] bg-surface-low px-4 py-3">
               <p className="text-sm font-semibold text-marble">
                 {t.micros.coverage(coverage)}

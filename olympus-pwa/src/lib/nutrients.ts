@@ -3,14 +3,10 @@ import type { Gender, Nutrient, NutrientCategory } from "@/types/api";
 interface NutrientSpec {
   unit: string;
   category: NutrientCategory;
-  /** Références Nutritionnelles pour la Population (ANSES), homme puis femme. */
   male: number;
   female: number;
 }
 
-// Miroir de l'enum Nutrient du backend. L'écran des micronutriments reçoit ces valeurs du
-// serveur ; l'écran d'analyse, qui ne voit qu'un repas, s'appuie sur cette table locale pour
-// situer l'apport du repas dans la journée.
 const NUTRIENTS: Record<Nutrient, NutrientSpec> = {
   CALCIUM: { unit: "mg", category: "MINERAL", male: 950, female: 950 },
   IRON: { unit: "mg", category: "MINERAL", male: 11, female: 16 },
@@ -28,7 +24,6 @@ const NUTRIENTS: Record<Nutrient, NutrientSpec> = {
   OMEGA3_EPA_DHA: { unit: "g", category: "FATTY_ACID", male: 0.5, female: 0.5 },
 };
 
-/** Ordre d'affichage : minéraux, vitamines, acides gras. */
 export const NUTRIENT_ORDER = Object.keys(NUTRIENTS) as Nutrient[];
 
 export const NUTRIENT_CATEGORIES: NutrientCategory[] = [

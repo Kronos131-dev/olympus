@@ -22,13 +22,9 @@ export interface NutritionTargets {
 interface Props {
   totals: NutritionTotals;
   targets: NutritionTargets;
-  /** Ligne optionnelle sous la cible calorique — « 458 restantes » sur l'accueil. */
   caption?: React.ReactNode;
 }
 
-// Grande roue calories + rangée de 4 petites roues macros (protéines / glucides / lipides /
-// fibres). Extrait de DashboardPage et MealAnalysisPage, qui dupliquaient exactement ce JSX —
-// et où seul l'accueil affichait la roue fibres.
 export function NutritionRings({ totals, targets, caption }: Props) {
   const t = useT();
   const consumed = round(totals.kcal);

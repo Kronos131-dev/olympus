@@ -9,6 +9,7 @@ import type {
   ConversationSummaryDto,
   DailyLogResponse,
   DailyMicronutrientsResponse,
+  FoodItemDetailResponse,
   FoodItemRequest,
   FoodItemResponse,
   LogEntryRequest,
@@ -100,6 +101,7 @@ export const mealPlanApi = {
 };
 
 export const foodItemApi = {
+  detail: (id: number) => api.get<FoodItemDetailResponse>(`/food-items/${id}`),
   search: (query: string, signal?: AbortSignal) =>
     api.get<FoodItemResponse[]>("/food-items/search", {
       query: { query },
@@ -124,7 +126,6 @@ export const aiApi = {
 };
 
 export const mealAnalysisApi = {
-  // Multipart : la photo voyage en pièce jointe, comme pour le chat de l'Oracle.
   photo: (image: Blob, note?: string) => {
     const form = new FormData();
     form.append("image", image, "repas.jpg");

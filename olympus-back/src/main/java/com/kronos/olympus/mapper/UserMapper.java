@@ -27,8 +27,6 @@ public abstract class UserMapper {
     // Filet de sécurité : profil trop incomplet pour tout calcul.
     private static final double DEFAULT_KCAL = 2000.0;
 
-    // Apport satisfaisant ANSES, identique pour tous les adultes : ni le poids ni l'objectif ne
-    // le font varier, contrairement aux macronutriments.
     private static final double TARGET_FIBERS_G = 30.0;
 
     @AfterMapping

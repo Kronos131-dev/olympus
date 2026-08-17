@@ -100,6 +100,24 @@ export interface FoodItemResponse {
   estimatedWeightGrams?: number | null;
 }
 
+export interface FoodItemDetailResponse {
+  id: number;
+  barcode?: string | null;
+  name: string;
+  source: FoodSource;
+  foodGroup?: string | null;
+  foodSubGroup?: string | null;
+  kcal100g: number;
+  proteins100g: number;
+  carbs100g: number;
+  fats100g: number;
+  fibers100g?: number | null;
+  sugars100g?: number | null;
+  saturatedFat100g?: number | null;
+  salt100g?: number | null;
+  micros100g: Partial<Record<Nutrient, number>>;
+}
+
 export interface FoodItemRequest {
   name: string;
   kcal100g: number;
@@ -112,7 +130,6 @@ export interface AiMealRequest {
   description: string;
 }
 
-// ---- Micronutriments ----
 export type Nutrient =
   | "CALCIUM"
   | "IRON"
@@ -146,7 +163,6 @@ export interface DailyMicronutrientsResponse {
   overallCoverage: number;
 }
 
-// ---- Analyse d'un repas ----
 export interface AnalyzedFoodResponse {
   name: string;
   quantityGrams: number;

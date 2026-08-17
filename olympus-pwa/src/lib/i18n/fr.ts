@@ -185,6 +185,8 @@ export const fr = {
     addTitle: "Ajouter un aliment",
     added: (name: string) => `${name} ajouté`,
     addError: "Ajout impossible",
+    showMicros: "Voir les micronutriments",
+    hideMicros: "Masquer les micronutriments",
     finder: {
       label: "Rechercher un aliment",
       placeholder: "ex. poulet, riz, banane…",

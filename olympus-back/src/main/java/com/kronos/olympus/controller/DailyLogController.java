@@ -35,8 +35,6 @@ public class DailyLogController {
         return ResponseEntity.ok(response);
     }
 
-    // Bilan des micronutriments du jour, calculé à la volée : ils ne sont connus que pour les
-    // aliments issus de CIQUAL, d'où le taux de couverture renvoyé avec chaque nutriment.
     @GetMapping("/{date}/micronutrients")
     public ResponseEntity<DailyMicronutrientsResponse> getDailyMicronutrients(
             @AuthenticationPrincipal UserDetailsImpl userDetails,

@@ -9,13 +9,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/** Correction d'une analyse en langage naturel : « le riz c'est plutôt 200 g, il n'y a pas de beurre ». */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MealCorrectionRequest {
-
     @NotBlank(message = "La correction ne peut pas être vide")
     private String correction;
 

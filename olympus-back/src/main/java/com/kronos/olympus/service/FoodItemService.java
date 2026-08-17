@@ -1,5 +1,6 @@
 package com.kronos.olympus.service;
 
+import com.kronos.olympus.dto.response.FoodItemDetailResponse;
 import com.kronos.olympus.dto.response.FoodItemResponse;
 import com.kronos.olympus.exception.EntityNotFoundException;
 import com.kronos.olympus.mapper.FoodItemMapper;
@@ -9,8 +10,10 @@ import com.kronos.olympus.service.integration.OpenFoodFactsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.kronos.olympus.model.enums.FoodSource;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -97,5 +100,29 @@ public class FoodItemService {
                 .limit(50)
                 .map(foodItemMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public FoodItemDetailResponse getFoodItemDetail(Long id) {
+        FoodItem food = foodItemRepository.findWithMicrosById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aliment introuvable avec l'ID: " + id));
+
+        return FoodItemDetailResponse.builder()
+                .id(food.getId())
+                .barcode(food.getBarcode())
+                .name(food.getName())
+                .source(food.getSource())
+                .foodGroup(food.getFoodGroup())
+                .foodSubGroup(food.getFoodSubGroup())
+                .kcal100g(food.getKcal100g())
+                .proteins100g(food.getProteins100g())
+                .carbs100g(food.getCarbs100g())
+                .fats100g(food.getFats100g())
+                .fibers100g(food.getFibers100g())
+                .sugars100g(food.getSugars100g())
+                .saturatedFat100g(food.getSaturatedFat100g())
+                .salt100g(food.getSalt100g())
+                .micros100g(new LinkedHashMap<>(food.getMicros100g()))
+                .build();
     }
 }

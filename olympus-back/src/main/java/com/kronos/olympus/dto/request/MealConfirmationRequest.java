@@ -9,13 +9,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Validation d'une analyse : chaque aliment retenu devient une entrée du journal du jour. */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MealConfirmationRequest {
-
     private LocalDate targetDate;
 
     @NotEmpty(message = "Aucun aliment à enregistrer")

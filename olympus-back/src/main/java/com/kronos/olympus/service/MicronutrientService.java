@@ -19,19 +19,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Bilan quotidien des micronutriments, calculé à la volée depuis les entrées du journal.
- *
- * <p>Contrairement aux macronutriments, ces valeurs ne sont pas stockées sur {@code DailyLog} :
- * elles ne sont connues que pour les aliments issus de CIQUAL, si bien qu'un total seul serait
- * trompeur. Le service renvoie donc, pour chaque nutriment, la part des calories du jour
- * provenant d'aliments qui le renseignent — un produit scanné ou une estimation de l'IA fait
- * baisser cette couverture, et l'écran peut alors nuancer au lieu d'annoncer une carence.
- */
 @Service
 @RequiredArgsConstructor
 public class MicronutrientService {
-
     private final DailyLogRepository dailyLogRepository;
 
     @Transactional(readOnly = true)
@@ -78,7 +68,6 @@ public class MicronutrientService {
                 .build();
     }
 
-    /** Ajoute la contribution d'un aliment et renvoie les calories qu'il apporte. */
     private double accumulate(FoodItem food, double grams,
                               Map<Nutrient, Double> consumed, Map<Nutrient, Double> coveredKcal) {
         double ratio = grams / 100.0;

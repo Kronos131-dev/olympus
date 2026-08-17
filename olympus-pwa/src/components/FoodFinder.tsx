@@ -24,10 +24,6 @@ interface Props {
   onPick: (food: FoodItemResponse) => void;
 }
 
-// Recherche/scan/manuel d'un aliment. Appelle onPick avec le FoodItem choisi.
-// L'analyse IA n'est plus une modale ici : elle a sa propre page (/food/analyze), qui affiche
-// le détail par aliment, les roues et les micronutriments — inutile de dupliquer ce flux dans
-// une fenêtre modale qui ne pouvait montrer qu'un aliment agrégé.
 export function FoodFinder({ onPick }: Props) {
   const t = useT();
   const toast = useToast();

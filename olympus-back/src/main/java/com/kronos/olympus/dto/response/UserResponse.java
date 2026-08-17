@@ -39,7 +39,6 @@ public class UserResponse {
     private Double targetCarbs;
     private Double targetFats;
 
-    /** Apport satisfaisant ANSES : 30 g par jour, indépendant du gabarit et de l'objectif. */
     private Double targetFibers;
 
     // Fournisseur d'IA préféré pour l'agent conversationnel

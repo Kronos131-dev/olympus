@@ -31,8 +31,6 @@ export default function MealsPage() {
   const addEntry = useAddLogEntry(todayIso());
   const [search, setSearch] = useState("");
   const [toDelete, setToDelete] = useState<MealPresetResponse | null>(null);
-  // addEntry.isPending est partagé par toutes les cartes : sans cet id, consommer un repas
-  // fait tourner le spinner du bouton de tous les autres repas de la liste.
   const [consumingId, setConsumingId] = useState<number | null>(null);
 
   const filtered = useMemo(() => {

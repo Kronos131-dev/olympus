@@ -25,16 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Charge la table de composition nutritionnelle de l'ANSES au démarrage.
- *
- * <p>Le fichier est produit par {@code scripts/build-ciqual-csv.py} : aliments bruts uniquement,
- * valeurs pour 100 g, cellule vide quand l'ANSES n'a pas déterminé la valeur.
- *
- * <p>L'import est rejouable. Chaque aliment est retrouvé par son {@code alim_code}, si bien qu'un
- * CSV enrichi met à jour les lignes existantes au lieu d'en créer de nouvelles, et que les
- * {@code LogEntry} de l'historique continuent de pointer vers le bon aliment.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -43,14 +33,11 @@ public class CiqualImportService implements CommandLineRunner {
     private static final String VERSION_KEY = "ciqual.version";
     private static final String RESOURCE = "ciqual.csv";
 
-    // Découpe sur les virgules situées hors guillemets.
     private static final String CSV_SPLIT = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
 
     private final FoodItemRepository foodItemRepository;
     private final AppMetadataRepository appMetadataRepository;
     private final JdbcTemplate jdbcTemplate;
-    // Transaction pilotée explicitement plutôt que @Transactional : run() doit pouvoir rattraper
-    // un échec APRÈS le rollback, ce qu'une méthode annotée ne permet pas depuis l'intérieur.
     private final TransactionTemplate transactionTemplate;
 
     @Value("${olympus.ciqual.version}")
@@ -65,9 +52,6 @@ public class CiqualImportService implements CommandLineRunner {
         try {
             transactionTemplate.executeWithoutResult(status -> importReferential());
         } catch (Exception e) {
-            // Un référentiel qui ne se charge pas ne doit JAMAIS empêcher l'API de démarrer :
-            // l'application reste utilisable avec les aliments déjà en base, et l'import sera
-            // retenté au prochain démarrage.
             log.error("Import du référentiel CIQUAL échoué : l'application démarre sans mise à jour.", e);
         }
     }
@@ -96,8 +80,6 @@ public class CiqualImportService implements CommandLineRunner {
 
             FoodItem item = existing.get(code);
             if (item == null) {
-                // Bases antérieures à l'alim_code : on adopte la ligne homonyme plutôt que d'en
-                // créer un doublon, pour ne pas orpheliner l'historique qui la référence.
                 item = legacyByName.remove(normalize(name));
                 if (item != null) {
                     adopted++;
@@ -110,10 +92,6 @@ public class CiqualImportService implements CommandLineRunner {
             toSave.add(item);
         }
 
-        // Flush AVANT la suppression : celle-ci s'exécute en SQL brut, hors contexte de
-        // persistance. Sans ce flush, les lignes adoptées ont encore ciqual_code NULL en base
-        // (il n'est posé qu'en mémoire), le DELETE les emporte, et le commit échoue ensuite en
-        // tentant de mettre à jour des lignes disparues.
         foodItemRepository.saveAllAndFlush(toSave);
         int removed = deleteUnreferencedLegacyFoods();
         markApplied();
@@ -129,8 +107,6 @@ public class CiqualImportService implements CommandLineRunner {
         item.setFoodSubGroup(emptyToNull(row.get("sous_groupe")));
         item.setSource(FoodSource.CIQUAL);
 
-        // Les macros sont déclarées non nulles en base : une valeur manquante y vaut zéro, ce qui
-        // est acceptable pour elles (renseignées à plus de 95 %) mais jamais pour les micros.
         item.setKcal100g(orZero(row.get("kcal")));
         item.setProteins100g(orZero(row.get("proteines")));
         item.setCarbs100g(orZero(row.get("glucides")));
@@ -183,7 +159,6 @@ public class CiqualImportService implements CommandLineRunner {
         return rows;
     }
 
-    /** Retire les guillemets d'échappement CSV, que l'ancien import laissait dans les noms. */
     private String[] split(String line) {
         String[] columns = line.split(CSV_SPLIT, -1);
         for (int i = 0; i < columns.length; i++) {
@@ -196,12 +171,6 @@ public class CiqualImportService implements CommandLineRunner {
         return columns;
     }
 
-    /**
-     * Valeur pour 100 g, ou {@code null} quand la cellule est vide.
-     *
-     * <p>La distinction est essentielle sur les micronutriments : confondre « non déterminé » et
-     * « zéro » ferait afficher des carences imaginaires dès qu'un aliment n'a pas été analysé.
-     */
     private Double parseValue(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;
@@ -235,9 +204,6 @@ public class CiqualImportService implements CommandLineRunner {
     }
 
     /**
-     * Supprime les aliments CIQUAL de l'ancien import qui n'ont pas trouvé d'équivalent dans le
-     * nouveau fichier — pour l'essentiel les plats composés préemballés, désormais écartés. Ceux
-     * qu'un journal, un repas ou un planning référence encore sont conservés.
      */
     private int deleteUnreferencedLegacyFoods() {
         return jdbcTemplate.update("""

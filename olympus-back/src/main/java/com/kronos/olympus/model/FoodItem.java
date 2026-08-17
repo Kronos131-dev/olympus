@@ -24,7 +24,6 @@ public class FoodItem {
     @Column(unique = true)
     private String barcode;
 
-    /** Identifiant ANSES (alim_code), présent uniquement sur les aliments issus de CIQUAL. */
     @Column(unique = true)
     private Integer ciqualCode;
 
@@ -47,9 +46,6 @@ public class FoodItem {
     @Column(nullable = false)
     private Double fats100g;
 
-    // Nutriments fournis à la fois par CIQUAL et par Open Food Facts, donc totalisables sur une
-    // journée même lorsqu'un produit scanné est intervenu. Nullables : une valeur absente signifie
-    // « non déterminé », ce qui n'est pas la même chose que zéro.
     private Double fibers100g;
 
     private Double sugars100g;
@@ -58,11 +54,6 @@ public class FoodItem {
 
     private Double salt100g;
 
-    /**
-     * Micronutriments pour 100 g, renseignés par CIQUAL seulement. Une entrée absente de la table
-     * signifie « valeur inconnue pour cet aliment » et non « zéro » : c'est ce qui permet de
-     * calculer un taux de couverture honnête sur l'écran des micronutriments.
-     */
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "food_item_nutrients", joinColumns = @JoinColumn(name = "food_item_id"))
     @MapKeyEnumerated(EnumType.STRING)

@@ -91,7 +91,6 @@ export const IconCamera = (p: P) => (
   </Svg>
 );
 
-// Galerie : choisir une photo déjà prise, par opposition à IconCamera qui déclenche l'appareil.
 export const IconImage = (p: P) => (
   <Svg {...p}>
     <rect x="3" y="4" width="18" height="16" rx="1" />

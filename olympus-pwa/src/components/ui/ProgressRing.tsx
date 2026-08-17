@@ -6,7 +6,6 @@ interface Props {
   max: number;
   size?: number;
   stroke?: number;
-  /** Couleur de l'arc. Par défaut le dégradé doré. */
   color?: string;
   children?: React.ReactNode;
   className?: string;
@@ -22,9 +21,6 @@ export function ProgressRing({
   children,
   className,
 }: Props) {
-  // WHY: l'id du dégradé doit être unique par instance. Avec un id constant, plusieurs anneaux
-  // sur la même page déclarent le même <linearGradient> et le navigateur applique le premier
-  // rencontré à tous — les quatre roues macros de l'accueil viraient toutes à l'or.
   const gradientId = useId().replace(/:/g, "");
 
   const radius = (size - stroke) / 2;

@@ -34,23 +34,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Analyse structurée d'un repas, à partir d'une photo ou d'une description.
- *
- * <p>Le modèle ne fournit que ce qu'il sait vraiment faire : nommer les aliments visibles et
- * estimer leur poids. Les valeurs nutritionnelles viennent ensuite du référentiel CIQUAL, ce qui
- * les rend reproductibles et apporte les micronutriments — un LLM interrogé sur le magnésium d'une
- * assiette invente un chiffre différent à chaque appel. L'estimation par le modèle ne sert que de
- * repli, pour les aliments introuvables en base, et n'apporte alors aucun micronutriment.
- *
- * <p>Distinct de l'agent conversationnel : {@link AgentService} tient une conversation et répond
- * en prose, ce service rend un objet exploitable par l'écran d'analyse.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MealAnalysisService {
-
     private static final int MAX_ITEMS = 20;
 
     private static final String DETECTION_PROMPT = """
@@ -98,8 +85,6 @@ public class MealAnalysisService {
         if (image == null || image.isEmpty()) {
             throw new IllegalArgumentException("Aucune photo reçue.");
         }
-        // Le modèle Mistral configuré n'est pas multimodal : sans Gemini, mieux vaut refuser que
-        // renvoyer une analyse muette ou inventée à partir du seul commentaire.
         if (!geminiAgentClient.isConfigured()) {
             throw new ExternalApiException(
                     "L'analyse par photo nécessite Gemini, qui n'est pas configuré sur ce serveur. "
@@ -142,7 +127,6 @@ public class MealAnalysisService {
         return resolve(readAnalysis(result.getReply()), user);
     }
 
-    /** Enregistre une entrée de journal par aliment retenu, plutôt qu'un unique bloc agrégé. */
     @Transactional
     public DailyLogResponse confirm(User user, MealConfirmationRequest request) {
         LocalDate date = request.getTargetDate() != null ? request.getTargetDate() : LocalDate.now();
@@ -163,13 +147,6 @@ public class MealAnalysisService {
         return log;
     }
 
-    // ---- Résolution des aliments détectés ----
-
-    /**
-     * Associe chaque aliment détecté à une ligne du référentiel, puis met ses valeurs à l'échelle
-     * du poids estimé. Les aliments sans correspondance partent en une seule requête d'estimation
-     * groupée, pour ne pas multiplier les allers-retours avec le modèle.
-     */
     private MealAnalysisResponse resolve(DetectedMeal meal, User user) {
         Map<String, FoodItem> resolved = new LinkedHashMap<>();
         List<String> unmatched = new ArrayList<>();
@@ -201,13 +178,10 @@ public class MealAnalysisService {
         if (!ciqual.isEmpty()) {
             return ciqual.get(0);
         }
-        // Repli sur le cache Open Food Facts déjà constitué : moins riche en micronutriments,
-        // mais plus fiable que de laisser le modèle inventer les macros.
         List<FoodItem> cached = foodItemRepository.searchByNameOrderedByLength(name);
         return cached.isEmpty() ? null : cached.get(0);
     }
 
-    /** Demande au modèle les valeurs pour 100 g des aliments absents du référentiel. */
     private Map<String, FoodItem> estimateMissing(List<String> names, User user) {
         Map<String, FoodItem> estimated = new LinkedHashMap<>();
         AgentResult result = pickClient(user).run(
@@ -289,8 +263,6 @@ public class MealAnalysisService {
                 .build();
     }
 
-    // ---- Lecture de la réponse du modèle ----
-
     private DetectedMeal readAnalysis(String reply) {
         JsonNode root = parseJson(reply);
         JsonNode itemsNode = root.isArray() ? root : root.path("items");
@@ -311,7 +283,6 @@ public class MealAnalysisService {
         return new DetectedMeal(mealName.isBlank() ? "Repas" : mealName, items);
     }
 
-    /** Parse la réponse texte du LLM en JSON, en tolérant markdown et texte parasite. */
     private JsonNode parseJson(String reply) {
         String text = reply == null ? "" : reply.trim();
         if (text.startsWith("```")) {
@@ -368,8 +339,6 @@ public class MealAnalysisService {
         }
         throw new ExternalApiException("Aucun fournisseur d'IA n'est configuré côté serveur.");
     }
-
-    // ---- Utilitaires ----
 
     private double sum(List<AnalyzedFoodResponse> items,
                        java.util.function.Function<AnalyzedFoodResponse, Double> field) {

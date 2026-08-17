@@ -1,16 +1,4 @@
 #!/usr/bin/env python3
-"""Génère olympus-back/src/main/resources/ciqual.csv depuis la Table Ciqual de l'ANSES.
-
-    python3 scripts/build-ciqual-csv.py "~/Téléchargements/Table Ciqual 2025_FR_2025_11_03.xlsx"
-
-Le classeur source fait 84 colonnes ; on n'en garde que 26, et on ne garde que les aliments
-bruts : les plats composés préemballés sont retirés parce qu'ils empêchent l'analyse photo de
-décomposer une assiette en ingrédients (le matcher s'accroche à « Bœuf bourguignon, préemballé »
-et on perd à la fois les micronutriments réels et la possibilité de corriger un ingrédient).
-
-Aucune dépendance : un .xlsx est une archive zip de XML, lue ici avec la bibliothèque standard.
-"""
-
 import csv
 import re
 import sys
@@ -23,31 +11,27 @@ NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 DEFAULT_SOURCE = "~/Téléchargements/Table Ciqual 2025_FR_2025_11_03.xlsx"
 DEFAULT_OUTPUT = Path(__file__).resolve().parent.parent / "olympus-back/src/main/resources/ciqual.csv"
 
-# Groupes retirés : plats composés préemballés, sandwichs, pizzas, soupes, salades toutes faites
-# d'un côté ; petits pots et laits infantiles de l'autre, hors sujet pour l'application.
 EXCLUDED_GROUPS = {"entrées et plats composés", "aliments infantiles"}
 
-# Index 0-based des colonnes de la feuille « composition nutritionnelle ».
 COL_GROUP, COL_SUBGROUP = 3, 4
 COL_CODE, COL_NAME = 6, 7
 COL_RETINOL, COL_BETA_CAROTENE = 63, 64
 COL_B9_FOLATES_TOTAUX = 79
 COL_EPA, COL_DHA = 46, 47
 
-# (en-tête de sortie, index source). Les colonnes calculées valent None et sont traitées à part.
 COLUMNS = [
     ("code", COL_CODE),
     ("nom", COL_NAME),
     ("groupe", COL_GROUP),
     ("sous_groupe", COL_SUBGROUP),
-    ("kcal", 10),               # Energie, Règlement UE N° 1169/2011
-    ("proteines", 14),          # Protéines, N x facteur de Jones
+    ("kcal", 10),
+    ("proteines", 14),
     ("glucides", 16),
     ("lipides", 17),
     ("fibres_g", 26),
     ("sucres_g", 18),
     ("ags_g", 31),
-    ("sel_g", 49),              # « Sel chlorure de sodium », mieux renseigné que la colonne sodium
+    ("sel_g", 49),
     ("calcium_mg", 50),
     ("fer_mg", 53),
     ("magnesium_mg", 55),
@@ -55,13 +39,13 @@ COLUMNS = [
     ("zinc_mg", 61),
     ("selenium_ug", 59),
     ("iode_ug", 54),
-    ("vit_a_er_ug", 62),        # complétée par rétinol + β-carotène/12, voir vitamin_a_equivalent
+    ("vit_a_er_ug", 62),
     ("vit_c_mg", 72),
     ("vit_d_ug", 65),
-    ("vit_b9_ug", 78),          # DFE, complétée par les folates totaux
+    ("vit_b9_ug", 78),
     ("vit_b12_ug", 82),
     ("omega3_ala_g", 44),
-    ("omega3_epadha_g", None),  # somme EPA + DHA
+    ("omega3_epadha_g", None),
 ]
 
 LESS_THAN = re.compile(r"^<\s*")
@@ -76,7 +60,6 @@ def column_index(cell_ref):
 
 
 def read_sheet(xlsx_path):
-    """Renvoie la liste des lignes de la première feuille, chacune sous forme {index: texte}."""
     with zipfile.ZipFile(xlsx_path) as archive:
         shared = [
             "".join(node.text or "" for node in item.iter(NS + "t"))
@@ -99,18 +82,12 @@ def read_sheet(xlsx_path):
 
 
 def parse_value(raw):
-    """Convertit une cellule CIQUAL en nombre, ou en None quand la valeur est inconnue.
-
-    La distinction est le point qui décide de la crédibilité de tout l'écran micronutriments :
-    « - » et une cellule vide signifient « non déterminé », pas « zéro ». Les confondre ferait
-    afficher des carences imaginaires dès qu'un aliment n'a pas été analysé pour un nutriment.
-    """
     text = (raw or "").strip().replace("\xa0", " ")
     if text in ("", "-"):
         return None
-    if "race" in text.lower():          # « traces » : sous le seuil de détection
+    if "race" in text.lower():
         return 0.0
-    if text.startswith("<"):            # « < 0,5 » : censure à gauche, convention EFSA
+    if text.startswith("<"):
         text = LESS_THAN.sub("", text)
         divisor = 2.0
     else:
@@ -122,11 +99,6 @@ def parse_value(raw):
 
 
 def vitamin_a_equivalent(row):
-    """Équivalents rétinol, en complétant la colonne pré-calculée quand elle est vide.
-
-    Elle n'est renseignée que sur 56 % des aliments, alors que le rétinol seul l'est sur 77 % :
-    recalculer rétinol + β-carotène/12 fait passer la couverture à 80 %.
-    """
     precomputed = parse_value(row.get(62))
     if precomputed is not None:
         return precomputed
@@ -138,7 +110,6 @@ def vitamin_a_equivalent(row):
 
 
 def folates(row):
-    """Folates en µg, DFE d'abord puis folates totaux : 29 % de couverture deviennent 71 %."""
     dfe = parse_value(row.get(78))
     return dfe if dfe is not None else parse_value(row.get(COL_B9_FOLATES_TOTAUX))
 

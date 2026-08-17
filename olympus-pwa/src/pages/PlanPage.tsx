@@ -40,9 +40,6 @@ interface EntryTotals {
   fibers: number;
 }
 
-// Totaux calculés côté client, jamais par l'API : la page ne persiste le plan qu'au clic sur
-// une action (PUT /meal-plans/weekly), donc un total serveur serait périmé dès qu'une
-// modification locale n'a pas encore été enregistrée.
 function entryTotals(e: WorkEntry): EntryTotals {
   if (e.mealPreset) {
     return {

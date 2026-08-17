@@ -187,6 +187,8 @@ export const en: Dict = {
     addTitle: "Add a food",
     added: (name: string) => `${name} added`,
     addError: "Could not add",
+    showMicros: "Show micronutrients",
+    hideMicros: "Hide micronutrients",
     finder: {
       label: "Search a food",
       placeholder: "e.g. chicken, rice, banana…",
