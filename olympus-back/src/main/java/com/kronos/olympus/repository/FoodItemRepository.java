@@ -16,6 +16,10 @@ public interface FoodItemRepository extends JpaRepository<FoodItem, Long> {
     // Pour vérifier si l'aliment est déjà dans notre base locale (Fallback cache) via le scan
     Optional<FoodItem> findByBarcode(String barcode);
     boolean existsBySource(FoodSource source);
+
+    // L'import CIQUAL est rejouable : il retrouve chaque aliment par son alim_code ANSES et met
+    // sa ligne à jour, plutôt que d'en créer une seconde.
+    List<FoodItem> findByCiqualCodeIsNotNull();
     
     // Recherche d'aliments par nom avec tri par longueur pour avoir les correspondances exactes en premier
     @Query("SELECT f FROM FoodItem f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY LENGTH(f.name) ASC")

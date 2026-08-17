@@ -44,6 +44,22 @@ public class DailyLog {
     @Column(nullable = false)
     private Double totalFats = 0.0;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Double totalFibers = 0.0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Double totalSugars = 0.0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Double totalSaturatedFat = 0.0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Double totalSalt = 0.0;
+
     // Nouveaux champs pour tracker l'activité physique du jour
     @Builder.Default
     @Column(nullable = false)
