@@ -13,7 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -49,18 +49,30 @@ public class CiqualImportService implements CommandLineRunner {
     private final FoodItemRepository foodItemRepository;
     private final AppMetadataRepository appMetadataRepository;
     private final JdbcTemplate jdbcTemplate;
+    // Transaction pilotée explicitement plutôt que @Transactional : run() doit pouvoir rattraper
+    // un échec APRÈS le rollback, ce qu'une méthode annotée ne permet pas depuis l'intérieur.
+    private final TransactionTemplate transactionTemplate;
 
     @Value("${olympus.ciqual.version}")
     private String csvVersion;
 
     @Override
-    @Transactional
     public void run(String... args) {
         if (csvVersion.equals(appliedVersion())) {
             log.info("Référentiel CIQUAL déjà en version {}. Import ignoré.", csvVersion);
             return;
         }
+        try {
+            transactionTemplate.executeWithoutResult(status -> importReferential());
+        } catch (Exception e) {
+            // Un référentiel qui ne se charge pas ne doit JAMAIS empêcher l'API de démarrer :
+            // l'application reste utilisable avec les aliments déjà en base, et l'import sera
+            // retenté au prochain démarrage.
+            log.error("Import du référentiel CIQUAL échoué : l'application démarre sans mise à jour.", e);
+        }
+    }
 
+    private void importReferential() {
         log.info("Import du référentiel CIQUAL en version {}...", csvVersion);
         List<Map<String, String>> rows = readCsv();
         if (rows.isEmpty()) {
@@ -98,7 +110,11 @@ public class CiqualImportService implements CommandLineRunner {
             toSave.add(item);
         }
 
-        foodItemRepository.saveAll(toSave);
+        // Flush AVANT la suppression : celle-ci s'exécute en SQL brut, hors contexte de
+        // persistance. Sans ce flush, les lignes adoptées ont encore ciqual_code NULL en base
+        // (il n'est posé qu'en mémoire), le DELETE les emporte, et le commit échoue ensuite en
+        // tentant de mettre à jour des lignes disparues.
+        foodItemRepository.saveAllAndFlush(toSave);
         int removed = deleteUnreferencedLegacyFoods();
         markApplied();
 
@@ -214,8 +230,7 @@ public class CiqualImportService implements CommandLineRunner {
     }
 
     private Map<String, FoodItem> legacyCiqualFoodsByName() {
-        return foodItemRepository.findAll().stream()
-                .filter(item -> item.getSource() == FoodSource.CIQUAL && item.getCiqualCode() == null)
+        return foodItemRepository.findBySourceAndCiqualCodeIsNull(FoodSource.CIQUAL).stream()
                 .collect(Collectors.toMap(item -> normalize(item.getName()), item -> item, (a, b) -> a));
     }
 
