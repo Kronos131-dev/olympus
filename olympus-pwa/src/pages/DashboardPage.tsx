@@ -3,14 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/AppLayout";
 import { SectionTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { ProgressRing } from "@/components/ui/ProgressRing";
-import { MacroBar } from "@/components/ui/MacroBar";
+import { NutritionRings } from "@/components/ui/NutritionRings";
 import { EmptyState, Skeleton } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
 import { QuantitySheet } from "@/components/QuantitySheet";
 import { errorMessage } from "@/lib/api/client";
-import { IconPlus, IconTrash } from "@/components/icons";
-import { useDailyLog, useDeleteLogEntry, useProfile, useUpdateLogEntry } from "@/hooks/queries";
+import { IconPlus, IconSparkle, IconTrash } from "@/components/icons";
+import {
+  useDailyLog,
+  useDeleteLogEntry,
+  useProfile,
+  useUpdateLogEntry,
+} from "@/hooks/queries";
 import { formatDateLong, macrosFor, round, todayIso } from "@/lib/utils";
 import type { Unit } from "@/lib/units";
 import { localeFor, useLang, useT, type Dict } from "@/lib/i18n";
@@ -26,7 +30,11 @@ function entryMacros(e: LogEntryResponse, t: Dict) {
   }
   if (e.foodItem) {
     const m = macrosFor(e.foodItem, e.quantityGrams);
-    return { name: e.foodItem.name, kcal: m.kcal, detail: `${round(e.quantityGrams)} g` };
+    return {
+      name: e.foodItem.name,
+      kcal: m.kcal,
+      detail: `${round(e.quantityGrams)} g`,
+    };
   }
   return { name: "—", kcal: 0, detail: "" };
 }
@@ -55,39 +63,42 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader overline={formatDateLong(today, localeFor(lang))} title={t.dashboard.title} />
+      <PageHeader
+        overline={formatDateLong(today, localeFor(lang))}
+        title={t.dashboard.title}
+      />
 
       <div className="px-5">
         {log.isLoading || profile.isLoading ? (
           <Skeleton className="mx-auto h-56 w-56 rounded-full" />
         ) : (
-          <div className="flex flex-col items-center">
-            <ProgressRing value={consumed} max={effectiveTarget || 1}>
-              <div>
-                <p
-                  className="font-extrabold leading-none tracking-tight text-marble"
-                  style={{ fontSize: "clamp(2.5rem, 14vw, 3.75rem)" }}
-                >
-                  {consumed}
-                </p>
-                <p className="text-xs font-medium text-marble-dim">
-                  / {effectiveTarget} {t.common.kcal}
-                </p>
-                <p
-                  className={`mt-1 text-xs ${remaining >= 0 ? "text-gold" : "text-[var(--color-danger)]"}`}
-                >
-                  {remaining >= 0 ? t.dashboard.remaining(remaining) : t.dashboard.over(-remaining)}
-                </p>
-              </div>
-            </ProgressRing>
-          </div>
+          <NutritionRings
+            totals={{
+              kcal: log.data?.totalKcal ?? 0,
+              proteins: log.data?.totalProteins ?? 0,
+              carbs: log.data?.totalCarbs ?? 0,
+              fats: log.data?.totalFats ?? 0,
+              fibers: log.data?.totalFibers ?? 0,
+            }}
+            targets={profile.data ?? {}}
+            caption={
+              <p
+                className={`mt-1 text-xs ${remaining >= 0 ? "text-gold" : "text-[var(--color-danger)]"}`}
+              >
+                {remaining >= 0
+                  ? t.dashboard.remaining(remaining)
+                  : t.dashboard.over(-remaining)}
+              </p>
+            }
+          />
         )}
 
-        <div className="mt-6 grid grid-cols-3 gap-2">
-          <MacroBar label={t.common.macros.proteins} value={log.data?.totalProteins ?? 0} target={profile.data?.targetProteins} color="var(--color-purple-bright)" />
-          <MacroBar label={t.common.macros.carbs} value={log.data?.totalCarbs ?? 0} target={profile.data?.targetCarbs} color="var(--color-gold)" />
-          <MacroBar label={t.common.macros.fats} value={log.data?.totalFats ?? 0} target={profile.data?.targetFats} color="var(--color-pink)" />
-        </div>
+        <button
+          onClick={() => navigate("/micros")}
+          className="mt-3 w-full text-center text-xs font-medium text-gold/80 hover:text-gold"
+        >
+          {t.dashboard.seeMicros} →
+        </button>
 
         <div className="mt-5 flex gap-3">
           <Button block onClick={() => navigate("/food/add")}>
@@ -98,6 +109,15 @@ export default function DashboardPage() {
           </Button>
         </div>
 
+        <Button
+          block
+          variant="subtle"
+          className="mt-3"
+          onClick={() => navigate("/food/analyze")}
+        >
+          <IconSparkle size={16} /> {t.dashboard.analyze}
+        </Button>
+
         <section className="mt-6">
           <SectionTitle>{t.dashboard.recent}</SectionTitle>
           {log.isLoading ? (
@@ -106,7 +126,10 @@ export default function DashboardPage() {
               <Skeleton className="h-14 w-full" />
             </div>
           ) : sortedEntries.length === 0 ? (
-            <EmptyState title={t.dashboard.emptyTitle} hint={t.dashboard.emptyHint} />
+            <EmptyState
+              title={t.dashboard.emptyTitle}
+              hint={t.dashboard.emptyHint}
+            />
           ) : (
             <ul className="space-y-1">
               {sortedEntries.map((e) => {
@@ -117,11 +140,16 @@ export default function DashboardPage() {
                     className="flex items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3"
                   >
                     {e.foodItem ? (
-                      <button onClick={() => setEditEntry(e)} className="min-w-0 flex-1 text-left">
+                      <button
+                        onClick={() => setEditEntry(e)}
+                        className="min-w-0 flex-1 text-left"
+                      >
                         <p className="truncate text-sm text-marble">{m.name}</p>
                         <p className="text-xs text-marble-dim">
                           {m.detail} · {round(m.kcal)} {t.common.kcal}
-                          {e.fromPlan && <span className="text-gold/70"> · plan</span>}
+                          {e.fromPlan && (
+                            <span className="text-gold/70"> · plan</span>
+                          )}
                         </p>
                       </button>
                     ) : (
@@ -129,14 +157,20 @@ export default function DashboardPage() {
                         <p className="truncate text-sm text-marble">{m.name}</p>
                         <p className="text-xs text-marble-dim">
                           {m.detail} · {round(m.kcal)} {t.common.kcal}
-                          {e.fromPlan && <span className="text-gold/70"> · plan</span>}
+                          {e.fromPlan && (
+                            <span className="text-gold/70"> · plan</span>
+                          )}
                         </p>
                       </div>
                     )}
                     <button
                       onClick={() =>
                         deleteEntry.mutate(e.id, {
-                          onError: (e) => toast(errorMessage(e, t.dashboard.deleteError), "error"),
+                          onError: (e) =>
+                            toast(
+                              errorMessage(e, t.dashboard.deleteError),
+                              "error",
+                            ),
                         })
                       }
                       className="ml-2 text-marble-dim transition-colors hover:text-[var(--color-danger)]"
@@ -167,7 +201,8 @@ export default function DashboardPage() {
             { entryId: editEntry.id, body: { quantityGrams, unit, amount } },
             {
               onSuccess: () => setEditEntry(null),
-              onError: (e) => toast(errorMessage(e, t.dashboard.updateError), "error"),
+              onError: (e) =>
+                toast(errorMessage(e, t.dashboard.updateError), "error"),
             },
           );
         }}

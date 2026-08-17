@@ -15,11 +15,7 @@ export type DayOfWeek =
   | "SATURDAY"
   | "SUNDAY";
 export type RecurrenceType =
-  | "DAILY"
-  | "SPECIFIC_WEEKDAYS"
-  | "EVERY_OTHER_DAY"
-  | "CUSTOM"
-  | "WEEKLY";
+  "DAILY" | "SPECIFIC_WEEKDAYS" | "EVERY_OTHER_DAY" | "CUSTOM" | "WEEKLY";
 
 // ---- Auth ----
 export interface AuthRequest {
@@ -66,6 +62,7 @@ export interface UserResponse {
   targetProteins?: number | null;
   targetCarbs?: number | null;
   targetFats?: number | null;
+  targetFibers?: number | null;
   aiProvider: AiProvider;
   createdAt?: string;
 }
@@ -95,6 +92,10 @@ export interface FoodItemResponse {
   proteins100g: number;
   carbs100g: number;
   fats100g: number;
+  fibers100g?: number | null;
+  sugars100g?: number | null;
+  saturatedFat100g?: number | null;
+  salt100g?: number | null;
   source: FoodSource;
   estimatedWeightGrams?: number | null;
 }
@@ -109,6 +110,89 @@ export interface FoodItemRequest {
 
 export interface AiMealRequest {
   description: string;
+}
+
+// ---- Micronutriments ----
+export type Nutrient =
+  | "CALCIUM"
+  | "IRON"
+  | "MAGNESIUM"
+  | "POTASSIUM"
+  | "ZINC"
+  | "SELENIUM"
+  | "IODINE"
+  | "VITAMIN_A"
+  | "VITAMIN_C"
+  | "VITAMIN_D"
+  | "VITAMIN_B9"
+  | "VITAMIN_B12"
+  | "OMEGA3_ALA"
+  | "OMEGA3_EPA_DHA";
+
+export type NutrientCategory = "MINERAL" | "VITAMIN" | "FATTY_ACID";
+
+export interface MicronutrientResponse {
+  nutrient: Nutrient;
+  category: NutrientCategory;
+  unit: string;
+  consumed: number;
+  reference: number;
+  coverage: number;
+}
+
+export interface DailyMicronutrientsResponse {
+  targetDate: string;
+  nutrients: MicronutrientResponse[];
+  overallCoverage: number;
+}
+
+// ---- Analyse d'un repas ----
+export interface AnalyzedFoodResponse {
+  name: string;
+  quantityGrams: number;
+  source: FoodSource;
+  foodItemId?: number | null;
+  kcal: number;
+  proteins: number;
+  carbs: number;
+  fats: number;
+  fibers?: number | null;
+  sugars?: number | null;
+  saturatedFat?: number | null;
+  salt?: number | null;
+  micros: Partial<Record<Nutrient, number>>;
+}
+
+export interface MealAnalysisResponse {
+  mealName: string;
+  items: AnalyzedFoodResponse[];
+  totalKcal: number;
+  totalProteins: number;
+  totalCarbs: number;
+  totalFats: number;
+  totalFibers: number;
+  totalSugars: number;
+  totalSaturatedFat: number;
+  totalSalt: number;
+  micros: Partial<Record<Nutrient, number>>;
+  microCoverage: number;
+}
+
+export interface AnalyzedFoodRequest {
+  name: string;
+  quantityGrams: number;
+  foodItemId?: number | null;
+}
+
+export interface MealCorrectionRequest {
+  correction: string;
+  mealName?: string;
+  items: AnalyzedFoodRequest[];
+}
+
+export interface MealConfirmationRequest {
+  targetDate: string;
+  items: AnalyzedFoodRequest[];
 }
 
 // ---- Meal presets ----
@@ -135,6 +219,10 @@ export interface MealPresetResponse {
   totalProteins: number;
   totalCarbs: number;
   totalFats: number;
+  totalFibers: number;
+  totalSugars: number;
+  totalSaturatedFat: number;
+  totalSalt: number;
 }
 
 export interface MealPresetRequest {
@@ -183,6 +271,10 @@ export interface DailyLogResponse {
   totalProteins: number;
   totalCarbs: number;
   totalFats: number;
+  totalFibers: number;
+  totalSugars: number;
+  totalSaturatedFat: number;
+  totalSalt: number;
   stepCount?: number | null;
   workoutDurationMinutes?: number | null;
   manualKcalBurned?: number | null;

@@ -3,7 +3,11 @@ import type { SVGProps } from "react";
 // Icônes fines à trait unique, inspirées de motifs classiques. Couleur = currentColor.
 type P = SVGProps<SVGSVGElement> & { size?: number };
 
-function Svg({ size = 24, children, ...rest }: P & { children: React.ReactNode }) {
+function Svg({
+  size = 24,
+  children,
+  ...rest
+}: P & { children: React.ReactNode }) {
   return (
     <svg
       width={size}
@@ -84,6 +88,15 @@ export const IconCamera = (p: P) => (
   <Svg {...p}>
     <path d="M3 8h3l2-2h8l2 2h3v11H3z" />
     <circle cx="12" cy="13" r="3.5" />
+  </Svg>
+);
+
+// Galerie : choisir une photo déjà prise, par opposition à IconCamera qui déclenche l'appareil.
+export const IconImage = (p: P) => (
+  <Svg {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="1" />
+    <circle cx="8.5" cy="9" r="1.5" />
+    <path d="m3 16 5-4 4 3 3-2 6 5" />
   </Svg>
 );
 export const IconMic = (p: P) => (

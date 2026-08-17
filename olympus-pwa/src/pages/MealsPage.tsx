@@ -6,11 +6,17 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { EmptyState, Skeleton } from "@/components/ui/misc";
 import { Modal } from "@/components/ui/Modal";
+import { NutrientLine } from "@/components/ui/NutrientLine";
 import { useToast } from "@/components/ui/Toast";
 import { errorMessage } from "@/lib/api/client";
 import { IconEdit, IconPlus, IconSparkle, IconTrash } from "@/components/icons";
-import { useAddLogEntry, useDeletePreset, usePresets } from "@/hooks/queries";
-import { round, todayIso } from "@/lib/utils";
+import {
+  useAddLogEntry,
+  useDeletePreset,
+  usePresets,
+  useProfile,
+} from "@/hooks/queries";
+import { todayIso } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import type { MealPresetResponse } from "@/types/api";
 
@@ -20,10 +26,14 @@ export default function MealsPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const presets = usePresets();
+  const profile = useProfile();
   const deletePreset = useDeletePreset();
   const addEntry = useAddLogEntry(todayIso());
   const [search, setSearch] = useState("");
   const [toDelete, setToDelete] = useState<MealPresetResponse | null>(null);
+  // addEntry.isPending est partagé par toutes les cartes : sans cet id, consommer un repas
+  // fait tourner le spinner du bouton de tous les autres repas de la liste.
+  const [consumingId, setConsumingId] = useState<number | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -32,11 +42,13 @@ export default function MealsPage() {
   }, [presets.data, search]);
 
   const consume = (preset: MealPresetResponse) => {
+    setConsumingId(preset.id);
     addEntry.mutate(
       { targetDate: todayIso(), mealPresetId: preset.id },
       {
         onSuccess: () => toast(t.meals.consumed(preset.name), "success"),
         onError: (e) => toast(errorMessage(e, t.meals.consumeError), "error"),
+        onSettled: () => setConsumingId(null),
       },
     );
   };
@@ -56,7 +68,11 @@ export default function MealsPage() {
       <div className="px-5">
         <div className="mb-4 flex gap-2">
           <div className="flex-1">
-            <Input placeholder={t.meals.searchPlaceholder} value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input
+              placeholder={t.meals.searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
           <Button variant="ghost" onClick={() => navigate("/meals/new?ai=1")}>
             <IconSparkle size={16} /> {t.meals.ai}
@@ -69,20 +85,17 @@ export default function MealsPage() {
             <Skeleton className="h-24 w-full" />
           </div>
         ) : filtered.length === 0 ? (
-          <EmptyState
-            title={t.meals.emptyTitle}
-            hint={t.meals.emptyHint}
-          />
+          <EmptyState title={t.meals.emptyTitle} hint={t.meals.emptyHint} />
         ) : (
           <div className="space-y-3">
             {filtered.map((preset) => (
               <Card key={preset.id} tone="low" goldEdge>
                 <div className="flex items-start justify-between">
                   <div className="min-w-0">
-                    <h3 className="truncate text-lg text-marble">{preset.name}</h3>
+                    <h3 className="truncate text-lg text-marble">
+                      {preset.name}
+                    </h3>
                     <p className="text-xs text-marble-dim">
-                      {round(preset.totalKcal)} {t.common.kcal} · {round(preset.totalProteins)}P /{" "}
-                      {round(preset.totalCarbs)}G / {round(preset.totalFats)}L ·{" "}
                       {t.meals.ingredientCount(preset.ingredients.length)}
                     </p>
                   </div>
@@ -103,7 +116,48 @@ export default function MealsPage() {
                     </button>
                   </div>
                 </div>
-                <Button block size="sm" className="mt-3" loading={addEntry.isPending} onClick={() => consume(preset)}>
+
+                <div className="mt-2">
+                  <NutrientLine
+                    label={t.common.kcal}
+                    value={preset.totalKcal}
+                    target={profile.data?.targetKcal}
+                    unit=""
+                    color="var(--color-marble)"
+                  />
+                  <NutrientLine
+                    label={t.common.macros.proteins}
+                    value={preset.totalProteins}
+                    target={profile.data?.targetProteins}
+                    color="var(--color-purple-bright)"
+                  />
+                  <NutrientLine
+                    label={t.common.macros.carbs}
+                    value={preset.totalCarbs}
+                    target={profile.data?.targetCarbs}
+                    color="var(--color-gold)"
+                  />
+                  <NutrientLine
+                    label={t.common.macros.fats}
+                    value={preset.totalFats}
+                    target={profile.data?.targetFats}
+                    color="var(--color-pink)"
+                  />
+                  <NutrientLine
+                    label={t.common.macros.fibers}
+                    value={preset.totalFibers}
+                    target={profile.data?.targetFibers}
+                    color="var(--color-success)"
+                  />
+                </div>
+
+                <Button
+                  block
+                  size="sm"
+                  className="mt-3"
+                  loading={consumingId === preset.id}
+                  onClick={() => consume(preset)}
+                >
                   {t.meals.consume}
                 </Button>
               </Card>
@@ -112,7 +166,11 @@ export default function MealsPage() {
         )}
       </div>
 
-      <Modal open={!!toDelete} onClose={() => setToDelete(null)} title={t.meals.deleteTitle}>
+      <Modal
+        open={!!toDelete}
+        onClose={() => setToDelete(null)}
+        title={t.meals.deleteTitle}
+      >
         <p className="mb-5 text-sm text-marble-dim">
           {toDelete ? t.meals.deleteConfirm(toDelete.name) : ""}
         </p>
@@ -131,7 +189,8 @@ export default function MealsPage() {
                   toast(t.meals.deleted, "success");
                   setToDelete(null);
                 },
-                onError: (e) => toast(errorMessage(e, t.meals.deleteError), "error"),
+                onError: (e) =>
+                  toast(errorMessage(e, t.meals.deleteError), "error"),
               })
             }
           >
