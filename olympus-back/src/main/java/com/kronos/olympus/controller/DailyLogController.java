@@ -4,8 +4,10 @@ import com.kronos.olympus.dto.request.LogEntryRequest;
 import com.kronos.olympus.dto.request.UpdateActivityRequest;
 import com.kronos.olympus.dto.request.UpdateLogEntryRequest;
 import com.kronos.olympus.dto.response.DailyLogResponse;
+import com.kronos.olympus.dto.response.DailyMicronutrientsResponse;
 import com.kronos.olympus.security.UserDetailsImpl;
 import com.kronos.olympus.service.DailyLogService;
+import com.kronos.olympus.service.MicronutrientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,6 +23,7 @@ import java.time.LocalDate;
 public class DailyLogController {
 
     private final DailyLogService dailyLogService;
+    private final MicronutrientService micronutrientService;
 
     // Récupérer le journal d'une journée précise
     @GetMapping("/{date}")
@@ -30,6 +33,17 @@ public class DailyLogController {
         
         DailyLogResponse response = dailyLogService.getDailyLogByDate(userDetails.getUser(), date);
         return ResponseEntity.ok(response);
+    }
+
+    // Bilan des micronutriments du jour, calculé à la volée : ils ne sont connus que pour les
+    // aliments issus de CIQUAL, d'où le taux de couverture renvoyé avec chaque nutriment.
+    @GetMapping("/{date}/micronutrients")
+    public ResponseEntity<DailyMicronutrientsResponse> getDailyMicronutrients(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        return ResponseEntity.ok(
+                micronutrientService.getDailyMicronutrients(userDetails.getUser(), date));
     }
 
     // Ajouter une entrée (Aliment ou Repas) à une journée

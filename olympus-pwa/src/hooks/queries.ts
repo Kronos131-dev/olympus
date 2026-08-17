@@ -18,6 +18,7 @@ import type {
 export const qk = {
   profile: ["profile"] as const,
   dailyLog: (date: string) => ["dailyLog", date] as const,
+  micronutrients: (date: string) => ["micronutrients", date] as const,
   presets: ["presets"] as const,
   weeklyPlan: ["weeklyPlan"] as const,
   analytics: (start: string, end: string) => ["analytics", start, end] as const,
@@ -44,6 +45,13 @@ export function useDailyLog(date: string) {
   });
 }
 
+export function useMicronutrients(date: string) {
+  return useQuery({
+    queryKey: qk.micronutrients(date),
+    queryFn: () => dailyLogApi.micronutrients(date),
+  });
+}
+
 export function useAddLogEntry(date: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -55,8 +63,13 @@ export function useAddLogEntry(date: string) {
 export function useUpdateLogEntry(date: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ entryId, body }: { entryId: number; body: UpdateLogEntryRequest }) =>
-      dailyLogApi.updateEntry(entryId, body),
+    mutationFn: ({
+      entryId,
+      body,
+    }: {
+      entryId: number;
+      body: UpdateLogEntryRequest;
+    }) => dailyLogApi.updateEntry(entryId, body),
     onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
   });
 }
@@ -87,7 +100,8 @@ export function useDeleteLogEntry(date: string) {
 export function useUpdateActivity(date: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: UpdateActivityRequest) => dailyLogApi.updateActivity(body),
+    mutationFn: (body: UpdateActivityRequest) =>
+      dailyLogApi.updateActivity(body),
     onSuccess: (log) => qc.setQueryData(qk.dailyLog(date), log),
   });
 }

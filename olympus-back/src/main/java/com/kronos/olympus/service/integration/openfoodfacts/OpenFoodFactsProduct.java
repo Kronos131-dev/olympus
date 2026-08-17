@@ -41,5 +41,20 @@ public class OpenFoodFactsProduct {
 
         @JsonProperty("fat_100g")
         private Double fat100g;
+
+        // Nutriments de l'étiquetage réglementaire : présents sur la plupart des produits, et
+        // absents sans conséquence — isValidProduct ne les exige pas, un produit sans fibres
+        // déclarées reste utilisable, avec la valeur laissée à null (« non renseigné »).
+        @JsonProperty("fiber_100g")
+        private Double fiber100g;
+
+        @JsonProperty("sugars_100g")
+        private Double sugars100g;
+
+        @JsonProperty("saturated-fat_100g")
+        private Double saturatedFat100g;
+
+        @JsonProperty("salt_100g")
+        private Double salt100g;
     }
 }

@@ -5,11 +5,15 @@ import { PageHeader } from "@/components/AppLayout";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import {
+  NutritionRings,
+  type NutritionTargets,
+} from "@/components/ui/NutritionRings";
 import { Chip, Skeleton, Spinner } from "@/components/ui/misc";
 import { useToast } from "@/components/ui/Toast";
 import { FoodFinder } from "@/components/FoodFinder";
 import { QuantitySheet } from "@/components/QuantitySheet";
-import { usePresets, useWeeklyPlan } from "@/hooks/queries";
+import { usePresets, useProfile, useWeeklyPlan } from "@/hooks/queries";
 import { IconPlus, IconSparkle, IconTrash } from "@/components/icons";
 import { macrosFor, round, WEEK_DAYS } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -28,10 +32,54 @@ interface WorkEntry extends PlannedMealEntryResponse {
 let counter = 0;
 const localId = () => `e${counter++}`;
 
-function entryKcal(e: WorkEntry): number {
-  if (e.mealPreset) return e.mealPreset.totalKcal;
-  if (e.foodItem) return macrosFor(e.foodItem, e.quantityGrams).kcal;
-  return 0;
+interface EntryTotals {
+  kcal: number;
+  proteins: number;
+  carbs: number;
+  fats: number;
+  fibers: number;
+}
+
+// Totaux calculés côté client, jamais par l'API : la page ne persiste le plan qu'au clic sur
+// une action (PUT /meal-plans/weekly), donc un total serveur serait périmé dès qu'une
+// modification locale n'a pas encore été enregistrée.
+function entryTotals(e: WorkEntry): EntryTotals {
+  if (e.mealPreset) {
+    return {
+      kcal: e.mealPreset.totalKcal,
+      proteins: e.mealPreset.totalProteins,
+      carbs: e.mealPreset.totalCarbs,
+      fats: e.mealPreset.totalFats,
+      fibers: e.mealPreset.totalFibers,
+    };
+  }
+  if (e.foodItem) {
+    const m = macrosFor(e.foodItem, e.quantityGrams);
+    return {
+      kcal: m.kcal,
+      proteins: m.proteins,
+      carbs: m.carbs,
+      fats: m.fats,
+      fibers: m.fibers,
+    };
+  }
+  return { kcal: 0, proteins: 0, carbs: 0, fats: 0, fibers: 0 };
+}
+
+function sumTotals(entries: WorkEntry[]): EntryTotals {
+  return entries.reduce(
+    (acc, e) => {
+      const t = entryTotals(e);
+      return {
+        kcal: acc.kcal + t.kcal,
+        proteins: acc.proteins + t.proteins,
+        carbs: acc.carbs + t.carbs,
+        fats: acc.fats + t.fats,
+        fibers: acc.fibers + t.fibers,
+      };
+    },
+    { kcal: 0, proteins: 0, carbs: 0, fats: 0, fibers: 0 },
+  );
 }
 
 export default function PlanPage() {
@@ -40,12 +88,14 @@ export default function PlanPage() {
   const qc = useQueryClient();
   const plan = useWeeklyPlan();
   const presets = usePresets();
+  const profile = useProfile();
 
   const [entries, setEntries] = useState<WorkEntry[]>([]);
   const [saving, setSaving] = useState(false);
   const [addDay, setAddDay] = useState<DayOfWeek | null>(null);
   const [genOpen, setGenOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<WorkEntry | null>(null);
+  const [detailDay, setDetailDay] = useState<DayOfWeek | null>(null);
 
   // Hydrate l'état local depuis le serveur.
   useEffect(() => {
@@ -81,17 +131,26 @@ export default function PlanPage() {
     }
   };
 
-  const removeEntry = (lid: string) => persist(entries.filter((e) => e.localId !== lid));
+  const removeEntry = (lid: string) =>
+    persist(entries.filter((e) => e.localId !== lid));
 
   const updateEntryGrams = (lid: string, quantityGrams: number) =>
-    persist(entries.map((e) => (e.localId === lid ? { ...e, quantityGrams } : e)));
+    persist(
+      entries.map((e) => (e.localId === lid ? { ...e, quantityGrams } : e)),
+    );
 
   const addPreset = (day: DayOfWeek, presetId: number) => {
     const preset = presets.data?.find((p) => p.id === presetId);
     if (!preset) return;
     persist([
       ...entries,
-      { localId: localId(), id: 0, dayOfWeek: day, quantityGrams: 0, mealPreset: preset },
+      {
+        localId: localId(),
+        id: 0,
+        dayOfWeek: day,
+        quantityGrams: 0,
+        mealPreset: preset,
+      },
     ]);
     setAddDay(null);
   };
@@ -99,14 +158,22 @@ export default function PlanPage() {
   const addFood = (day: DayOfWeek, food: FoodItemResponse, grams: number) => {
     persist([
       ...entries,
-      { localId: localId(), id: 0, dayOfWeek: day, quantityGrams: grams, foodItem: food },
+      {
+        localId: localId(),
+        id: 0,
+        dayOfWeek: day,
+        quantityGrams: grams,
+        foodItem: food,
+      },
     ]);
     setAddDay(null);
   };
 
   const generate = async (prompt: string) => {
     try {
-      const generated = await mealPlanApi.generate({ prompt: prompt || undefined });
+      const generated = await mealPlanApi.generate({
+        prompt: prompt || undefined,
+      });
       setEntries(generated.entries.map((e) => ({ ...e, localId: localId() })));
       qc.setQueryData(["weeklyPlan"], generated);
       toast(t.plan.generated, "success");
@@ -143,28 +210,47 @@ export default function PlanPage() {
           <div className="space-y-4">
             {WEEK_DAYS.map((day) => {
               const dayEntries = byDay[day] ?? [];
-              const total = dayEntries.reduce((s, e) => s + entryKcal(e), 0);
+              const total = sumTotals(dayEntries);
               return (
                 <Card key={day} tone="low">
                   <div className="mb-3 flex items-baseline justify-between">
-                    <h3 className="lapidary text-sm tracking-[0.12em] text-gold">{t.days[day]}</h3>
-                    <span className="text-xs text-marble-dim">{round(total)} {t.common.kcal}</span>
+                    <h3 className="lapidary text-sm tracking-[0.12em] text-gold">
+                      {t.days[day]}
+                    </h3>
+                    <button
+                      onClick={() => setDetailDay(day)}
+                      className="text-xs text-gold/80 hover:text-gold"
+                      aria-label={t.plan.seeDayDetail}
+                    >
+                      {round(total.kcal)} {t.common.kcal}
+                    </button>
                   </div>
                   <ul className="space-y-1">
                     {dayEntries.map((e) => (
-                      <li key={e.localId} className="flex items-center justify-between bg-surface px-3 py-2">
+                      <li
+                        key={e.localId}
+                        className="flex items-center justify-between bg-surface px-3 py-2"
+                      >
                         {e.foodItem ? (
-                          <button onClick={() => setEditEntry(e)} className="min-w-0 flex-1 text-left">
-                            <p className="truncate text-sm text-marble">{e.foodItem.name}</p>
+                          <button
+                            onClick={() => setEditEntry(e)}
+                            className="min-w-0 flex-1 text-left"
+                          >
+                            <p className="truncate text-sm text-marble">
+                              {e.foodItem.name}
+                            </p>
                             <p className="text-xs text-marble-dim">
-                              {round(e.quantityGrams)} g · {round(entryKcal(e))} {t.common.kcal}
+                              {round(e.quantityGrams)} g ·{" "}
+                              {round(entryTotals(e).kcal)} {t.common.kcal}
                             </p>
                           </button>
                         ) : (
                           <div className="min-w-0">
-                            <p className="truncate text-sm text-marble">{e.mealPreset?.name}</p>
+                            <p className="truncate text-sm text-marble">
+                              {e.mealPreset?.name}
+                            </p>
                             <p className="text-xs text-marble-dim">
-                              {round(entryKcal(e))} {t.common.kcal}
+                              {round(entryTotals(e).kcal)} {t.common.kcal}
                             </p>
                           </div>
                         )}
@@ -178,7 +264,13 @@ export default function PlanPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button variant="subtle" size="sm" block className="mt-3" onClick={() => setAddDay(day)}>
+                  <Button
+                    variant="subtle"
+                    size="sm"
+                    block
+                    className="mt-3"
+                    onClick={() => setAddDay(day)}
+                  >
                     <IconPlus size={14} /> {t.plan.add}
                   </Button>
                 </Card>
@@ -196,7 +288,20 @@ export default function PlanPage() {
           onAddFood={addFood}
         />
       )}
-      <GenerateModal open={genOpen} onClose={() => setGenOpen(false)} onGenerate={generate} />
+      <GenerateModal
+        open={genOpen}
+        onClose={() => setGenOpen(false)}
+        onGenerate={generate}
+      />
+
+      {detailDay && (
+        <DayNutrientsModal
+          day={detailDay}
+          totals={sumTotals(byDay[detailDay] ?? [])}
+          targets={profile.data ?? {}}
+          onClose={() => setDetailDay(null)}
+        />
+      )}
 
       <QuantitySheet
         open={!!editEntry}
@@ -250,11 +355,15 @@ function AddToDayModal({
               className="flex w-full items-center justify-between rounded-[var(--radius)] bg-surface-low px-4 py-3 text-left hover:bg-surface-high"
             >
               <span className="truncate text-sm text-marble">{p.name}</span>
-              <span className="text-xs text-marble-dim">{round(p.totalKcal)} {t.common.kcal}</span>
+              <span className="text-xs text-marble-dim">
+                {round(p.totalKcal)} {t.common.kcal}
+              </span>
             </button>
           ))}
           {presets.data?.length === 0 && (
-            <p className="py-6 text-center text-xs text-marble-dim">{t.plan.noMeals}</p>
+            <p className="py-6 text-center text-xs text-marble-dim">
+              {t.plan.noMeals}
+            </p>
           )}
         </div>
       ) : (
@@ -271,6 +380,25 @@ function AddToDayModal({
           if (pendingFood) onAddFood(day, pendingFood, quantityGrams);
         }}
       />
+    </Modal>
+  );
+}
+
+function DayNutrientsModal({
+  day,
+  totals,
+  targets,
+  onClose,
+}: {
+  day: DayOfWeek;
+  totals: EntryTotals;
+  targets: NutritionTargets;
+  onClose: () => void;
+}) {
+  const t = useT();
+  return (
+    <Modal open onClose={onClose} title={t.days[day]}>
+      <NutritionRings totals={totals} targets={targets} />
     </Modal>
   );
 }

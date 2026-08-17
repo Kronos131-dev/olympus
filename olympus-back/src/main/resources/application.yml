@@ -60,6 +60,9 @@ spring:
 olympus:
   # URL publique de la PWA, utilisée pour construire le lien de réinitialisation de mot de passe.
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  ciqual:
+    # Incrémenter à chaque régénération de ciqual.csv : c'est ce qui déclenche le ré-import.
+    version: "2025.1"
   agent:
     mistral-model: ${OLYMPUS_AGENT_MISTRAL_MODEL:mistral-small-latest}
     # Clé d'API Google Gemini (Generative Language API). Vide = Gemini désactivé, Mistral utilisé par défaut.

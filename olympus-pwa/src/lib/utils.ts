@@ -45,7 +45,13 @@ export function round(n: number | null | undefined, digits = 0): number {
 
 // Macros d'un aliment pour une quantité donnée (valeurs /100g).
 export function macrosFor(
-  per100g: { kcal100g: number; proteins100g: number; carbs100g: number; fats100g: number },
+  per100g: {
+    kcal100g: number;
+    proteins100g: number;
+    carbs100g: number;
+    fats100g: number;
+    fibers100g?: number | null;
+  },
   grams: number,
 ) {
   const r = grams / 100;
@@ -54,5 +60,6 @@ export function macrosFor(
     proteins: per100g.proteins100g * r,
     carbs: per100g.carbs100g * r,
     fats: per100g.fats100g * r,
+    fibers: (per100g.fibers100g ?? 0) * r,
   };
 }

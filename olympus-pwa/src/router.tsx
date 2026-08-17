@@ -7,13 +7,23 @@ import { lazyWithReload } from "@/lib/lazyWithReload";
 
 const LoginPage = lazyWithReload(() => import("@/pages/LoginPage"));
 const RegisterPage = lazyWithReload(() => import("@/pages/RegisterPage"));
-const ForgotPasswordPage = lazyWithReload(() => import("@/pages/ForgotPasswordPage"));
-const ResetPasswordPage = lazyWithReload(() => import("@/pages/ResetPasswordPage"));
+const ForgotPasswordPage = lazyWithReload(
+  () => import("@/pages/ForgotPasswordPage"),
+);
+const ResetPasswordPage = lazyWithReload(
+  () => import("@/pages/ResetPasswordPage"),
+);
 const DashboardPage = lazyWithReload(() => import("@/pages/DashboardPage"));
 const OraclePage = lazyWithReload(() => import("@/pages/OraclePage"));
 const MealsPage = lazyWithReload(() => import("@/pages/MealsPage"));
 const MealEditorPage = lazyWithReload(() => import("@/pages/MealEditorPage"));
 const AddFoodPage = lazyWithReload(() => import("@/pages/AddFoodPage"));
+const MealAnalysisPage = lazyWithReload(
+  () => import("@/pages/MealAnalysisPage"),
+);
+const MicronutrientsPage = lazyWithReload(
+  () => import("@/pages/MicronutrientsPage"),
+);
 const PlanPage = lazyWithReload(() => import("@/pages/PlanPage"));
 const ProfilePage = lazyWithReload(() => import("@/pages/ProfilePage"));
 
@@ -56,6 +66,7 @@ export const router = createBrowserRouter(
             { path: "/meals/new", element: <MealEditorPage /> },
             { path: "/meals/:id/edit", element: <MealEditorPage /> },
             { path: "/food/add", element: <AddFoodPage /> },
+            { path: "/food/analyze", element: <MealAnalysisPage /> },
             {
               element: <AppLayout />,
               children: [
@@ -63,6 +74,7 @@ export const router = createBrowserRouter(
                 { path: "/oracle", element: <OraclePage /> },
                 { path: "/meals", element: <MealsPage /> },
                 { path: "/plan", element: <PlanPage /> },
+                { path: "/micros", element: <MicronutrientsPage /> },
                 { path: "/profile", element: <ProfilePage /> },
               ],
             },

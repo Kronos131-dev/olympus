@@ -307,39 +307,21 @@ public class DailyLogService {
      * ni repas contribue 0. N'affecte pas l'activité (extraKcalBurned, pas…).
      */
     private void recalculateTotals(DailyLog dailyLog) {
-        double kcal = 0, proteins = 0, carbs = 0, fats = 0;
+        NutrientTotals totals = new NutrientTotals();
         if (dailyLog.getEntries() != null) {
             for (LogEntry entry : dailyLog.getEntries()) {
                 if (entry.getFoodItem() != null && entry.getQuantityGrams() != null) {
-                    double ratio = entry.getQuantityGrams() / 100.0;
-                    FoodItem fi = entry.getFoodItem();
-                    kcal += nz(fi.getKcal100g()) * ratio;
-                    proteins += nz(fi.getProteins100g()) * ratio;
-                    carbs += nz(fi.getCarbs100g()) * ratio;
-                    fats += nz(fi.getFats100g()) * ratio;
+                    totals.add(entry.getFoodItem(), entry.getQuantityGrams());
                 } else if (entry.getMealPreset() != null && entry.getMealPreset().getIngredients() != null) {
                     for (MealIngredient ing : entry.getMealPreset().getIngredients()) {
-                        if (ing.getFoodItem() == null || ing.getQuantityGrams() == null) {
-                            continue;
+                        if (ing.getFoodItem() != null && ing.getQuantityGrams() != null) {
+                            totals.add(ing.getFoodItem(), ing.getQuantityGrams());
                         }
-                        double ratio = ing.getQuantityGrams() / 100.0;
-                        FoodItem fi = ing.getFoodItem();
-                        kcal += nz(fi.getKcal100g()) * ratio;
-                        proteins += nz(fi.getProteins100g()) * ratio;
-                        carbs += nz(fi.getCarbs100g()) * ratio;
-                        fats += nz(fi.getFats100g()) * ratio;
                     }
                 }
             }
         }
-        dailyLog.setTotalKcal(round(kcal));
-        dailyLog.setTotalProteins(round(proteins));
-        dailyLog.setTotalCarbs(round(carbs));
-        dailyLog.setTotalFats(round(fats));
-    }
-
-    private double nz(Double value) {
-        return value != null ? value : 0.0;
+        totals.applyTo(dailyLog);
     }
 
     private DailyLog getOrCreateDailyLog(User user, LocalDate date) {
@@ -373,7 +355,7 @@ public class DailyLogService {
         };
     }
 
-    private double round(double value) {
+    private static double round(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
 }

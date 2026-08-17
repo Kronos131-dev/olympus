@@ -8,9 +8,13 @@ import type {
   ChatResponseDto,
   ConversationSummaryDto,
   DailyLogResponse,
+  DailyMicronutrientsResponse,
   FoodItemRequest,
   FoodItemResponse,
   LogEntryRequest,
+  MealAnalysisResponse,
+  MealConfirmationRequest,
+  MealCorrectionRequest,
   MealPlanResponse,
   MealPresetRequest,
   MealPresetResponse,
@@ -24,7 +28,8 @@ import type {
 } from "@/types/api";
 
 export const authApi = {
-  login: (body: AuthRequest) => api.post<AuthResponse>("/auth/login", body, { auth: false }),
+  login: (body: AuthRequest) =>
+    api.post<AuthResponse>("/auth/login", body, { auth: false }),
   register: (body: RegisterRequest) =>
     api.post<AuthResponse>("/auth/register", body, { auth: false }),
   logout: (refreshToken: string) =>
@@ -32,16 +37,25 @@ export const authApi = {
   requestPasswordReset: (email: string) =>
     api.post<void>("/auth/forgot-password", { email }, { auth: false }),
   resetPassword: (token: string, newPassword: string) =>
-    api.post<void>("/auth/reset-password", { token, newPassword }, { auth: false }),
+    api.post<void>(
+      "/auth/reset-password",
+      { token, newPassword },
+      { auth: false },
+    ),
 };
 
 // L'échange d'un token de liaison Chiron a besoin de l'en-tête X-Integration-Token :
 // on l'appelle via un fetch dédié (hors session, sans Bearer).
-export async function exchangeChironToken(integrationToken: string): Promise<AuthResponse> {
-  const res = await fetch(`${import.meta.env.BASE_URL}api/v1/integration/chiron/session`, {
-    method: "POST",
-    headers: { "X-Integration-Token": integrationToken },
-  });
+export async function exchangeChironToken(
+  integrationToken: string,
+): Promise<AuthResponse> {
+  const res = await fetch(
+    `${import.meta.env.BASE_URL}api/v1/integration/chiron/session`,
+    {
+      method: "POST",
+      headers: { "X-Integration-Token": integrationToken },
+    },
+  );
   if (!res.ok) throw new Error(`handoff ${res.status}`);
   return (await res.json()) as AuthResponse;
 }
@@ -49,12 +63,16 @@ export async function exchangeChironToken(integrationToken: string): Promise<Aut
 export const userApi = {
   // Pas de slash final : Spring Boot 3.2 ne matche plus le trailing slash (sinon 500/404).
   profile: () => api.get<UserResponse>("/users/profile"),
-  update: (body: UpdateProfileRequest) => api.put<UserResponse>("/users/profile", body),
+  update: (body: UpdateProfileRequest) =>
+    api.put<UserResponse>("/users/profile", body),
 };
 
 export const dailyLogApi = {
   get: (date: string) => api.get<DailyLogResponse>(`/daily-logs/${date}`),
-  addEntry: (body: LogEntryRequest) => api.post<DailyLogResponse>("/daily-logs/entries", body),
+  micronutrients: (date: string) =>
+    api.get<DailyMicronutrientsResponse>(`/daily-logs/${date}/micronutrients`),
+  addEntry: (body: LogEntryRequest) =>
+    api.post<DailyLogResponse>("/daily-logs/entries", body),
   updateEntry: (entryId: number, body: UpdateLogEntryRequest) =>
     api.put<DailyLogResponse>(`/daily-logs/entries/${entryId}`, body),
   deleteEntry: (entryId: number) =>
@@ -66,7 +84,8 @@ export const dailyLogApi = {
 export const mealPresetApi = {
   list: () => api.get<MealPresetResponse[]>("/meal-presets"),
   get: (id: number) => api.get<MealPresetResponse>(`/meal-presets/${id}`),
-  create: (body: MealPresetRequest) => api.post<MealPresetResponse>("/meal-presets", body),
+  create: (body: MealPresetRequest) =>
+    api.post<MealPresetResponse>("/meal-presets", body),
   update: (id: number, body: MealPresetRequest) =>
     api.put<MealPresetResponse>(`/meal-presets/${id}`, body),
   remove: (id: number) => api.del<void>(`/meal-presets/${id}`),
@@ -82,17 +101,42 @@ export const mealPlanApi = {
 
 export const foodItemApi = {
   search: (query: string, signal?: AbortSignal) =>
-    api.get<FoodItemResponse[]>("/food-items/search", { query: { query }, signal }),
+    api.get<FoodItemResponse[]>("/food-items/search", {
+      query: { query },
+      signal,
+    }),
   searchCiqual: (query: string, signal?: AbortSignal) =>
-    api.get<FoodItemResponse[]>("/food-items/search/ciqual", { query: { query }, signal }),
+    api.get<FoodItemResponse[]>("/food-items/search/ciqual", {
+      query: { query },
+      signal,
+    }),
   byBarcode: (barcode: string) =>
-    api.get<FoodItemResponse>(`/food-items/barcode/${encodeURIComponent(barcode)}`),
+    api.get<FoodItemResponse>(
+      `/food-items/barcode/${encodeURIComponent(barcode)}`,
+    ),
   createManual: (body: FoodItemRequest) =>
     api.post<FoodItemResponse>("/food-items/manual", body),
 };
 
 export const aiApi = {
-  analyzeMeal: (body: AiMealRequest) => api.post<FoodItemResponse>("/ai/analyze-meal", body),
+  analyzeMeal: (body: AiMealRequest) =>
+    api.post<FoodItemResponse>("/ai/analyze-meal", body),
+};
+
+export const mealAnalysisApi = {
+  // Multipart : la photo voyage en pièce jointe, comme pour le chat de l'Oracle.
+  photo: (image: Blob, note?: string) => {
+    const form = new FormData();
+    form.append("image", image, "repas.jpg");
+    if (note?.trim()) form.append("note", note.trim());
+    return api.post<MealAnalysisResponse>("/meal-analysis/photo", form);
+  },
+  text: (description: string) =>
+    api.post<MealAnalysisResponse>("/meal-analysis/text", { description }),
+  correct: (body: MealCorrectionRequest) =>
+    api.post<MealAnalysisResponse>("/meal-analysis/correct", body),
+  confirm: (body: MealConfirmationRequest) =>
+    api.post<DailyLogResponse>("/meal-analysis/confirm", body),
 };
 
 export const analyticsApi = {
@@ -101,13 +145,17 @@ export const analyticsApi = {
 };
 
 export const agentApi = {
-  conversations: () => api.get<ConversationSummaryDto[]>("/agent/conversations"),
-  conversation: (id: number) => api.get<ChatMessageDto[]>(`/agent/conversations/${id}`),
-  deleteConversation: (id: number) => api.del<void>(`/agent/conversations/${id}`),
+  conversations: () =>
+    api.get<ConversationSummaryDto[]>("/agent/conversations"),
+  conversation: (id: number) =>
+    api.get<ChatMessageDto[]>(`/agent/conversations/${id}`),
+  deleteConversation: (id: number) =>
+    api.del<void>(`/agent/conversations/${id}`),
   chat: (message: string, conversationId?: number, image?: Blob) => {
     const form = new FormData();
     form.append("message", message);
-    if (conversationId != null) form.append("conversationId", String(conversationId));
+    if (conversationId != null)
+      form.append("conversationId", String(conversationId));
     if (image) form.append("image", image, "photo.jpg");
     return api.post<ChatResponseDto>("/agent/chat", form);
   },

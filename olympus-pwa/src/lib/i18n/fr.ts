@@ -16,8 +16,18 @@ export const fr = {
     micError: "La reconnaissance vocale a échoué.",
     reload: "Recharger",
     kcal: "kcal",
-    macros: { proteins: "Protéines", carbs: "Glucides", fats: "Lipides" },
-    macrosShort: { proteins: "Prot", carbs: "Gluc", fats: "Lip" },
+    macros: {
+      proteins: "Protéines",
+      carbs: "Glucides",
+      fats: "Lipides",
+      fibers: "Fibres",
+    },
+    macrosShort: {
+      proteins: "Prot",
+      carbs: "Gluc",
+      fats: "Lip",
+      fibers: "Fibres",
+    },
     units: { g: "g", tsp: "c.à.c", tbsp: "c.à.s", piece: "pièce" },
     approxGrams: (g: number) => `≈ ${g} g`,
   },
@@ -61,7 +71,8 @@ export const fr = {
     },
     forgot: {
       title: "Mot de passe oublié",
-      subtitle: "Saisis l'email associé à ton compte pour recevoir un lien de réinitialisation.",
+      subtitle:
+        "Saisis l'email associé à ton compte pour recevoir un lien de réinitialisation.",
       email: "Email",
       submit: "Envoyer le lien",
       sent: "Si un compte est associé à cet email, un lien de réinitialisation vient d'être envoyé. Pense à vérifier tes spams.",
@@ -83,7 +94,8 @@ export const fr = {
 
   dashboard: {
     title: "Résumé du jour",
-    kcalOf: (consumed: number, target: number) => `${consumed} / ${target} kcal`,
+    kcalOf: (consumed: number, target: number) =>
+      `${consumed} / ${target} kcal`,
     remaining: (n: number) => `${n} restantes`,
     over: (n: number) => `${n} en trop`,
     addFood: "Aliment",
@@ -93,6 +105,80 @@ export const fr = {
     emptyHint: "Ajoute un aliment ou un repas pour commencer.",
     deleteError: "Suppression impossible",
     updateError: "Mise à jour impossible",
+    analyze: "Analyser un repas",
+    seeMicros: "Voir tous les micronutriments",
+  },
+
+  analysis: {
+    title: "Analyser un repas",
+    overline: "Oracle",
+    takePhoto: "Prendre une photo",
+    pickPhoto: "Choisir une photo",
+    describe: "Décrire le repas",
+    describeHint: "ex. une assiette de pâtes carbonara avec 200 g de pâtes",
+    noteLabel: "Précision (facultatif)",
+    notePlaceholder: "ex. il y a aussi de l'huile d'olive",
+    analyzing: "Analyse en cours…",
+    analyzingHint: "L'Oracle identifie les aliments et estime les portions.",
+    detected: "Aliments détectés",
+    grams: "g",
+    correct: "Corriger à l'oral",
+    correcting: "Correction en cours…",
+    correctHint:
+      "Dis ce qui ne va pas : « le riz c'est plutôt 200 g, il n'y a pas de beurre ».",
+    correctPlaceholder: "Décris la correction",
+    apply: "Appliquer la correction",
+    addToJournal: "Ajouter au journal",
+    added: (n: number) =>
+      n > 1 ? `${n} aliments ajoutés au journal` : "Aliment ajouté au journal",
+    addError: "Enregistrement impossible",
+    error: "L'analyse a échoué",
+    emptyTitle: "Aucun aliment détecté",
+    emptyHint: "Réessaie avec une photo plus nette, ou décris le repas.",
+    showMicros: "Voir les micronutriments du repas",
+    hideMicros: "Masquer les micronutriments",
+    remove: "Retirer",
+    sourceCiqual: "Ciqual",
+    sourceOff: "Produit",
+    sourceAi: "Estimé",
+    sourceManual: "Manuel",
+    estimatedHint: "Estimé par l'IA : pas de micronutriments pour cet aliment.",
+  },
+
+  micros: {
+    title: "Micronutriments",
+    overline: "Journée",
+    coverage: (percent: number) =>
+      `Calculés sur ${percent} % de tes calories du jour`,
+    coverageHint:
+      "Les micronutriments ne sont connus que pour les aliments de la table Ciqual. Un produit scanné ou une estimation de l'IA n'en apporte aucun.",
+    partial: (percent: number) => `Sur ${percent} % de la journée seulement`,
+    categories: {
+      MINERAL: "Minéraux",
+      VITAMIN: "Vitamines",
+      FATTY_ACID: "Acides gras",
+    },
+    emptyTitle: "Rien à analyser",
+    emptyHint: "Ajoute des aliments à ta journée pour voir tes apports.",
+    vitaminDNote:
+      "L'alimentation seule n'atteint jamais la référence en vitamine D : une jauge basse est normale.",
+  },
+
+  nutrients: {
+    CALCIUM: "Calcium",
+    IRON: "Fer",
+    MAGNESIUM: "Magnésium",
+    POTASSIUM: "Potassium",
+    ZINC: "Zinc",
+    SELENIUM: "Sélénium",
+    IODINE: "Iode",
+    VITAMIN_A: "Vitamine A",
+    VITAMIN_C: "Vitamine C",
+    VITAMIN_D: "Vitamine D",
+    VITAMIN_B9: "Vitamine B9",
+    VITAMIN_B12: "Vitamine B12",
+    OMEGA3_ALA: "Oméga-3 ALA",
+    OMEGA3_EPA_DHA: "Oméga-3 EPA + DHA",
   },
 
   food: {
@@ -153,7 +239,8 @@ export const fr = {
     delete: "Supprimer",
     consume: "Consommer",
     deleteTitle: "Supprimer ce repas ?",
-    deleteConfirm: (name: string) => `« ${name} » sera définitivement supprimé.`,
+    deleteConfirm: (name: string) =>
+      `« ${name} » sera définitivement supprimé.`,
     consumed: (name: string) => `${name} consommé`,
     consumeError: "Impossible de consommer",
     deleted: "Repas supprimé",
@@ -195,12 +282,14 @@ export const fr = {
     noMeals: "Aucun repas enregistré.",
     addToDay: (dayLower: string) => `Ajouter au ${dayLower}`,
     genTitle: "Générer un planning",
-    genDesc: "Précise tes préférences, allergies ou objectifs ; l'Oracle compose ta semaine.",
+    genDesc:
+      "Précise tes préférences, allergies ou objectifs ; l'Oracle compose ta semaine.",
     genPlaceholder: "ex. riche en protéines, sans porc, 3 repas/jour",
     generate: "Générer",
     generated: "Planning généré par l'Oracle",
     genError: "La génération a échoué",
     saveError: "Sauvegarde du planning échouée",
+    seeDayDetail: "Voir le détail nutritionnel du jour",
   },
 
   oracle: {
@@ -209,7 +298,8 @@ export const fr = {
     clearHistory: "Effacer l'historique",
     newConv: "Nouvelle conversation",
     emptyTitle: "Interroge l'Oracle",
-    emptyHint: "« Quels sont mes macros aujourd'hui ? » · « J'ai mangé un burger, ajoute-le. »",
+    emptyHint:
+      "« Quels sont mes macros aujourd'hui ? » · « J'ai mangé un burger, ajoute-le. »",
     placeholder: "Écris à l'Oracle…",
     photo: "Photo",
     dictate: "Dicter",

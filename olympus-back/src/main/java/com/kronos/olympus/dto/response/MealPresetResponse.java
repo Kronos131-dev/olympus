@@ -20,4 +20,11 @@ public class MealPresetResponse {
     private Double totalProteins;
     private Double totalCarbs;
     private Double totalFats;
+
+    // Palier A, en miroir de DailyLogResponse : fourni par CIQUAL et Open Food Facts, donc
+    // totalisable de façon fiable même si un ingrédient vient d'un produit scanné.
+    private Double totalFibers;
+    private Double totalSugars;
+    private Double totalSaturatedFat;
+    private Double totalSalt;
 }
